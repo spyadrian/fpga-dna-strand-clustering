@@ -51,6 +51,11 @@ Compile the PDF:
 - Haskell
     - https://en.wikipedia.org/wiki/Haskell
 
+- References:
+   - Integrating FPGA Acceleration in the DNAssim Framework for Faster DNA-Based Data Storage Simulations
+      - https://www.mdpi.com/2079-9292/12/12/2621
+   - Comment préserver les données numériques sur le long terme dans le contexte des ODD
+      - https://www.unige.ch/cui/cas/application/files/6216/9835/5639/1_1_Comment_preserver_les_donnees_numeriques_sur_le_long_terme_dans_le_contexte_des_ODD_PY_Burgi.pdf
 
 # Accélération par FPGA du Regroupement de Brins d'ADN
 

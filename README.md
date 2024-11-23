@@ -19,6 +19,18 @@ The work will have to focus on two main aspects:
 This project will be carried out at the University of Geneva, in the context of the European DNAMIC project (dnamic.org).
 Client: Pierre-Yves Burgi, Deputy Director at DiSTIC, Head of the RISe Department.
 
+## How to build Typst PDF
+
+Install Typst:
+```
+    sudo apt install typst
+```
+
+Compile the PDF:
+```
+    typst compile doc.typ
+```
+
 ## Link and Reference
 
 - DNA :

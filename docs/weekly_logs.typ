@@ -176,7 +176,6 @@ I will take and adapt them to our data entries and perform my own benchmark with
 
 To improve the speed of the computation, Fujimoto Seiji, the author of Polyleven, suggest to use a specific data structure name FastSS. I didn't really understand it, but will work on it later on, when I'll optimize the code and have more informations about the in and out of the project.
 
-
 === Challenges
 
 Except the lack of documentation on FastSS, nothing.
@@ -186,14 +185,53 @@ Except the lack of documentation on FastSS, nothing.
 - #link("https://ceptord.net/index.html")[Polyleven]
 - #link("https://ceptord.net/_downloads/5b6d23d8b798b7137ef483a38895eca2/benchmark.c")[C Benchmark of Myers and W-F algorithm]
 
+
 = Week 6 : Monday 25 November
 
 === Tasks
 
+As I have an appointment with the client on Wednesday 27, I would like to have a good understanding of all the subject.
+In order to do so, this week, I'll be reading and understand the documents he give us and make or find some documents to back up my words.
+
 === Notes
 
-=== Challenges
+At first, my teacher and me, though to use slide to present something to the client, but I found it a bit to much.
+So I just took some important file that help me understand both algorithms.
 
-=== Links
+The appointment went well, I could have a bit more explaining about the context of the project and additional informations about the input and output of my task in it.
+I write note of the appointment available on the misc folder.
+
+During this appointment I clarify with the client, that I'll focus for the moment on data of DNA of segment not corrupt.
+It's an easier start and it allow me to focus and the main task of my project, segment grouping.
+
+= Week 7 : Monday 2 December
+
+=== Tasks
+
+This week I planed to work on three different thing :
+- Write about the context of the project (it will be something important during the presentation)
+- Make a benchmark of both algorithms
+- Test different entries format
+
+=== Notes
+
+Unfortunately I wasn't able to work this week due to the work load that I had from my courses.
+
+
+= Week 8 : Monday 9 December
+
+=== Tasks
+
+As I couldn't work last week, I'm going to work on the same thing as last week, focusing on making a benchmark with the data that I received from the client.
+
+=== Notes
+
+I rewrite the benchmark program from Fujimoto Seiji to be able to change the length of the string input and the number of string compared.
+Something really interesting happens, as the length of the string increase, the time taken by Myers get longer than the one by Wagner-Fischer.
+
+I show that to my teacher, and he underline that the Wagner-Fischer algorithm was faster on a larger group of string of large length than with a small group of small length string.
+Something might be wrong with my implementation of the algorithm.
+
+On top of that, I'm not sure that Myers is working properly because the length of the string compared is bigger than the word of a machine.
 
 

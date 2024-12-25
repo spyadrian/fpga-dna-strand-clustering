@@ -235,3 +235,43 @@ Something might be wrong with my implementation of the algorithm.
 On top of that, I'm not sure that Myers is working properly because the length of the string compared is bigger than the word of a machine.
 
 
+= Week 9 : Monday 16 December
+
+=== Tasks
+
+My tasks this week is to fix the implementation of the benchmark, for Wagner-Fischer and for Myers.
+I planned to improve the implementation of both algorithms, in particular, Myers.
+So I'll be reading the paper he upload to have deep understanding of his algorithm.
+
+=== Notes
+
+I started by reading Myers' paper and notice some notable thing :
+
+- the Wagner-Fischer algorithm with the Ukkonen improvement is : $Omicron (k n)$ time and $Omicron (n)$ space. Where $k$ is the max edit distance and $n$ the length of the text (DNA segment of 243).
+- the Myers algorithm is $Omicron (m sigma + n ceil.l m / w ceil.r)$ and $Omicron (sigma m / w)$. Where $m$ is the length of the query (DNA segment of 243), $w$ the number of bits in a machine words and $sigma$ the size of the alphabet.
+- a situation where $m > w$ can be resolved by modeling an $m$-bit bit-vector with $ceil.l m / w ceil.r$ words.
+- the computation of bits in bit-vectors, all of whose bits can be computed in parallel with the appropriate machine operation.
+
+The implementation didn't have a lot of problems, it was mostly the size of the variable which bloc some result and iteration.
+But in our implementation it was necessary to use integer greater than 244, so 256.
+Except that gcc 13.3 can't compile but gcc 14 can.
+So I create a quick dockerfile that use gcc-14 to be able to compile it with `uint256_t`.
+
+Here are a output of the benchmark.
+
+#align(
+  center,
+  table(
+    columns: (auto, auto, auto, auto),
+    table.header(
+      [*\#*], [*len*], [*Wagner-Fischer (s)*], [*Myers1999 (s)*],
+    ),
+    [64],    [244], [0.166],   [0.017],
+    [128],   [244], [0.448],   [0.069],
+    [256],   [244], [1.772],   [0.267],
+    [1024],  [244], [29.245],  [4.346],
+    [2048],  [244], [118.089], [17.462],
+    [4096],  [244], [465.724], [70.981],
+  )
+)
+

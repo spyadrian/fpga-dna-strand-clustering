@@ -1,0 +1,9 @@
+# Use the GCC 14 base image
+FROM gcc:14
+
+# Install any additional tools if necessary
+RUN apt-get update && apt-get install -y make && apt-get clean
+
+# Set a default working directory
+WORKDIR /app
+

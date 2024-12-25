@@ -15,4 +15,13 @@ $(TARGET): $(SRCS)
 clean:
 	rm -f $(TARGET)
 
-.PHONY: run clean
+docker-build:
+	docker build -t benchmark-docker .
+
+docker-run:
+	docker run --rm -v $(PWD):/app -w /app benchmark-docker make
+
+docker-clean:
+	docker run --rm -v $(PWD):/app -w /app benchmark-docker make clean
+
+.PHONY: run clean docker-build docker-run docker-clean

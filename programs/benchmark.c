@@ -15,6 +15,8 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+typedef unsigned _BitInt(256) uint256_t;
+
 char *dataset;
 
 
@@ -34,10 +36,11 @@ char *dataset;
  * @param len2 Length of the second string.
  * @return The edit distance between the two strings.
  */
-int8_t wagner_fischer(char *s1, int8_t len1, char *s2, int8_t len2) {
-    int8_t Mx, mx, dia, top, left;
-    int8_t i, j, m, M;
-    int8_t buf[4096];
+int32_t wagner_fischer(char *s1, int32_t len1, char *s2, int32_t len2) {
+
+    int32_t Mx, mx, dia, top, left;
+    int32_t i, j, m, M;
+    int16_t buf[4096];
     char *p1;
 
     if (len1 < len2)
@@ -115,21 +118,21 @@ int8_t wagner_fischer(char *s1, int8_t len1, char *s2, int8_t len2) {
  * @param len2 Length of the second string.
  * @return The edit distance between the two strings.
  */
-int8_t myers1999(char *s1, int8_t len1, char *s2, int8_t len2) {
+int32_t myers1999(char *s1, int32_t len1, char *s2, int32_t len2) {
 
-    uint64_t Peq[256];
-    uint64_t Eq, Xv, Xh, Ph, Mh, Pv, Mv, Last;
-    int8_t i;
-    int8_t Score = len2;
+    uint256_t Peq[256];
+    uint256_t Eq, Xv, Xh, Ph, Mh, Pv, Mv, Last;
+    int32_t i;
+    int32_t Score = len2;
 
     memset(Peq, 0, sizeof(Peq));
 
     for (i = 0; i < len2; i++)
-        Peq[(uint8_t)s2[i]] |= (uint64_t)1 << i;
+        Peq[(uint8_t)s2[i]] |= (uint256_t)1 << i;
 
     Mv = 0;
-    Pv = (uint64_t)-1;
-    Last = (uint64_t)1 << (len2 - 1);
+    Pv = (uint256_t)-1;
+    Last = (uint256_t)1 << (len2 - 1);
 
     for (i = 0; i < len1; i++) {
         Eq = Peq[(uint8_t)s1[i]];
@@ -158,12 +161,12 @@ int8_t myers1999(char *s1, int8_t len1, char *s2, int8_t len2) {
 
 // --- UTILS ---
 
-void randomhex(char *buf, int len) {
+void randomhex(char *buf, int32_t len) {
 
     static const char hex[] = "0123456789abcdef";
     srand(time(NULL));
 
-    for (int i = 0; i < len; i++)
+    for (int32_t i = 0; i < len; i++)
         buf[i] = hex[rand() & 0x0f];
 }
 
@@ -175,7 +178,7 @@ double now(void) {
     return t.tv_sec + t.tv_usec / (double)(1000000);
 }
 
-int bench_init(int size) {
+uint8_t bench_init(int32_t size) {
 
     dataset = malloc(size);
     if (dataset == NULL)
@@ -190,13 +193,13 @@ void bench_finish(void) {
     free(dataset);
 }
 
-double bench_run(int line_number, int len, int8_t(func)(char *, int8_t, char *, int8_t)) {
+double bench_run(uint32_t line_number, uint32_t len, int32_t(func)(char *, int32_t, char *, int32_t)) {
 
-    int i, j;
+    uint32_t i, j;
     double t0 = now();
 
     for (i = 0; i < line_number; i++)
-        for (j = 0; j < line_number; j++)
+        for (j = i + 1; j < line_number; j++)
             func(dataset + i * len, len, dataset + j * len, len);
 
     return now() - t0;
@@ -204,12 +207,12 @@ double bench_run(int line_number, int len, int8_t(func)(char *, int8_t, char *, 
 
 int main(void) {
 
-    int line_number[] = {2048, 8192, 32768};
-    int line_len[] = {64, 128, 256};
+    int32_t line_number[] = {64, 128, 256, 1024, 2048, 4096, 8192, 32768};
+    int32_t line_len[] = {  244, 244, 244,  244,  244,  244,  244,   244};
 
     printf("%-6s %-5s %-16s %-16s\n", "#", "len", "WAGNER_FISCHER", "MYERS1999");
 
-    for (int i = 0; i < 3; i++) {
+    for (int32_t i = 0; i < 8; i++) {
 
         if (bench_init(line_number[i] * line_len[i]))
             return -1;

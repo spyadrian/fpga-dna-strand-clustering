@@ -266,12 +266,51 @@ Here are a output of the benchmark.
     table.header(
       [*\#*], [*len*], [*Wagner-Fischer (s)*], [*Myers1999 (s)*],
     ),
-    [64],    [244], [0.166],   [0.017],
-    [128],   [244], [0.448],   [0.069],
-    [256],   [244], [1.772],   [0.267],
-    [1024],  [244], [29.245],  [4.346],
-    [2048],  [244], [118.089], [17.462],
-    [4096],  [244], [465.724], [70.981],
+    [64],    [244], [0.166],      [0.017],
+    [128],   [244], [0.448],      [0.069],
+    [256],   [244], [1.772],      [0.267],
+    [1024],  [244], [29.245],     [4.346],
+    [2048],  [244], [118.089],    [17.462],
+    [4096],  [244], [465.724],    [70.981],
+    [8192],  [244], [1'854.995],  [283.584],
+    [32768], [244], [29'101.601], [4'266.685],
   )
 )
+
+=== Links
+
+- #link("https://stackoverflow.com/questions/55802309/is-there-a-256-bit-integer-type-in-c")[Stackoverflow - Is there a `int256_t` in C ?]
+
+
+= Week 10 : Monday 23 December
+
+=== Tasks
+
+During this week, my goal is to make a diagram to explain the context of the project and the Myers algorithm finished the benchmark.
+This means to think about the entries format, to check with a predefine dictionary of words to edit distance, if the result of the algorithm are correct.
+
+I also find myself writing a Typst template that matches the BSc convention.
+
+=== Notes
+
+Something I want to notes here, is that Myers don't compute the edit distance of all substrings. Myers' algorithm is specifically designed to compute the edit distance between two complete strings.
+It means that we cannot stop the algorithm if we find, at some point, that the edit distance will be lower than the threshold.
+
+For the format of the entries, my idea is as follows.
+In our current algorithm, we check each segment of DNA with each segment of DNA.
+Sure we don't compare the segment A with the B when we already compared B with A.
+But what if the first 75% (threshold $k$) characters of a segment C is equal to the one in B ?
+If we have a lot of segment that something that could happen a lot of time.
+One idea is to sort the segment, in order to not compute irrelevant calculation.
+
+I'm not sure if it's a good idea because of :
+- the time of the sort
+- how many segment will be skip with that (is it worth ?)
+- how do to that in VHDL
+
+So for the moment I'm just gonna keep that idea in mind, and focus on the computation of edit distance.
+
+=== Links
+
+- #link("https://typst.app/docs/tutorial/making-a-template/")[Typst - Making a Template]
 

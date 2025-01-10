@@ -47,22 +47,26 @@ Here is a example of cite @shore.
 === Titre de niveau 3
 #lorem(30)
 
-```c
+#figure(
+  ```c
 #include <stdio.h>
 
-int main() {
-    int number1, number2, sum;
+  int main() {
+      int number1, number2, sum;
 
-    printf("Enter two integers: ");
-    scanf("%d %d", &number1, &number2);
+      printf("Enter two integers: ");
+      scanf("%d %d", &number1, &number2);
 
-    // calculate the sum
-    sum = number1 + number2;
+      // calculate the sum
+      sum = number1 + number2;
 
-    printf("%d + %d = %d", number1, number2, sum);
-    return 0;
-}
-```
+      printf("%d + %d = %d", number1, number2, sum);
+      return 0;
+  }
+  ```,
+
+  caption: "Example de code"
+)
 
 #lorem(20)
 

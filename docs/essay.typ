@@ -26,6 +26,8 @@
 
 #include "chapter/F_table.typ"
 
+#outline(title: "Liste des morceaux de code", target: figure.where(kind: raw))
+
 #include "chapter/G_appendix.typ"
 
 #show: apply_chapter_style

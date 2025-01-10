@@ -14,179 +14,35 @@
 
 #outline(title: "Table des matières")
 
+#include "chapter/A_acknowledgements.typ"
 
-= Remerciements
+#include "chapter/B_statement.typ"
 
-Formulez ici vos remerciements aux personnes qui vous ont aidé dans la réalisation de votre travail. Les remerciements sont rédigés dans le style "Corps de texte".
+#include "chapter/C_brief.typ"
 
-= Énoncé du sujet
-#lorem(100)
+#include "chapter/D_acronym.typ"
 
-= Résumé
-#add_brief(
-  teacher: "Spycher Adrian",
-  applicant: "Spycher Adrian",
-  entreprise: "Spycher SA",
-  internship_agreement: false,
-  confidentiality_agreement: false,
+#include "chapter/E_figure.typ"
 
-  img: image("figure/default_illustration.png", width: 45%),
-  content: [
+#include "chapter/F_table.typ"
 
-    #lorem(250)
-  ],
-)
-
-= Liste des acronymes
-#grid(
-  columns: (1fr, 4fr),
-  align: (left, left),
-
-  [URL], [Uniform Resource Locator],
-)
-
-#outline(title: "Liste des illustration", target: figure.where(kind: image))
-
-#v(5em)
-
-#block[#text(weight: "bold", "Références des URL")]
-#grid(
-  columns: (1fr, 4fr),
-  align: (left, left),
-
-  [URL01], [#link("link")[link]],
-)
-
-
-#outline(title: "Liste des tableaux", target: figure.where(kind: table))
-
-#v(5em)
-
-#block[#text(weight: "bold", "Références des URL")]
-#grid(
-  columns: (1fr, 4fr),
-  align: (left, left),
-
-  [URL01], [#link("link")[link]],
-  [URL02], [#link("link")[link]],
-  [URL03], [#link("link")[link]],
-  [URL04], [#link("link")[link]],
-)
-
-= Liste des annexes
-#grid(
-  columns: (1fr, 4fr),
-  align: (left, left),
-
-  [Annexe 1], [Helloworld.c],
-)
+#include "chapter/G_appendix.typ"
 
 #show: apply_chapter_style
 
-#[
-  #set heading(numbering: none)
-  = Introduction
-]
-#lorem(300)
+#include "chapter/00_introduction.typ"
 
+#include "chapter/01_chapter-title.typ"
 
-= Titre du chapitre
+#include "chapter/02_chapter-title.typ"
 
-#lorem(10)
+#include "chapter/03_chapter-title.typ"
 
-#lorem(30)
-
-== Titre de niveau 2
-#lorem(50)
-
-#figure(
-  image("figure/hepia_logo.png", width: 75%),
-  caption: "Hepia logo"
-)
-
-=== Titre de niveau 3
-#lorem(50)
-
-=== Titre de niveau 3
-#lorem(50)
-
-#figure(
-  table(
-    columns: (1fr, 1fr, 1fr),
-    [hahaha], [hahaha], [hahaha],
-    [hahaha], [hahaha], [hahaha],
-    [hahaha], [hahaha], [hahaha],
-  ),
-
-  caption: "it's a table !",
-)
-
-== Titre de niveau 2
-#lorem(50)
-
-=== Titre de niveau 3
-#lorem(50)
-
-=== Titre de niveau 3
-#lorem(50)
-
-== Titre de niveau 2
-#lorem(50)
-
-=== Titre de niveau 3
-#lorem(50)
-
-=== Titre de niveau 3
-#lorem(50)
-
-= Titre du chapitre
-#lorem(50)
-
-== Titre de niveau 2
-#lorem(50)
-
-= Titre du chapitre
-
-== Titre de niveau 2
-#lorem(50)
-
-= Conclusion
-#lorem(50)
+#include "chapter/04_conclusion.typ"
 
 #show: apply_annexe_style
 
-= Annexes
+#include "chapter/05_appendix.typ"
 
-== Annexe 1
+#include "chapter/06_bibliography.typ"
 
-== Annexe 2
-
-== Annexe 3
-
-= Références documentaires
-
-
-/*
-== What is my purpose ?
-#lorem(50)
-
-== Difference between DNA sequence alignment and finding the most similar sequences
-I'm talking about that because I went the wrong way at first.
-As Needleman-Wunsch algorithm or Smith-Waterman.
-
-= Algorithms
-
-== Wagner-Fischer
-#lorem(25)
-
-== Myers' Algorithm
-#lorem(25)
-
-= Optimization
-Code example:
-```
-code {
-    println("Hello World!");
-}
-```
-*/

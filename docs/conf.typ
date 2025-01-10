@@ -56,21 +56,20 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
 
-    v(weak: true, 2em)
     block[#it.body]
-    v(1.75em)
+    v(weak: true, 2.5em)
   }
 
   show heading.where(level: 2): it => {
-    v(weak: true, 2em)
+    v(weak: true, 2.5em)
     block(counter(heading).display(it.numbering) + h(2em) + it.body)
-    v(1em)
+    v(weak: true, 2em)
   }
 
   show heading.where(level: 3): it => {
     v(weak: true, 2em)
     block(h(1em) + counter(heading).display("1.1.a )").split(".").last() + h(4em) + it.body)
-    v(1em)
+    v(weak: true, 1.5em)
   }
 
 
@@ -87,6 +86,10 @@
     it.body
     it.caption
   }
+
+
+  // Math style
+  set math.equation(numbering: "(1)", supplement: [Eq.])
 
 
   // --- COVER PAGE ---
@@ -175,10 +178,9 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
 
-    v(weak: true, 2em)
     if it.numbering != none {block[Chapitre #counter(heading).display("1. ") #it.body]}
     else {block[#it.body]}
-    v(1.75em)
+    v(weak: true, 2.5em)
   }
 
   pagebreak()
@@ -192,9 +194,8 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
 
-    v(weak: true, 2em)
     block[#it.body]
-    v(1.75em)
+    v(weak: true, 2.5em)
   }
 
   doc
@@ -216,8 +217,10 @@
 
   align(center, img)
 
+  set text(size: 10pt)
+
   table(
-    columns: (2fr, 3fr),
+    columns: (2fr, 2fr),
     align: (left, left),
     stroke: none,
     gutter: 0.5em,
@@ -226,7 +229,7 @@
     let str_conf_agr = if confidentiality_agreement == true [oui] else [non],
 
     [Candidat-e :], [Professeur-e(s) responsable(s) :],
-    [#text(weight: "bold", applicant)], [#text(weight: "bold", teacher)],
+    [#text(size: 14pt, weight: "bold", applicant)], [#text(size: 14pt, weight: "bold", teacher)],
     [Filière d'études : ISC], [En collaboration avec : #entreprise],
     [], [Travail soumis à une convention de stage en entreprise : #str_inter_agr],
     [], [Travail soumis à un contrat de confidentialité : #str_conf_agr],

@@ -18,7 +18,7 @@
 
   // Default Fonts and Styles
   set text(font: "Times New Roman", size: 12pt, lang: "fr")
-  show raw: set text(font: "Courier New", size: 10pt, lang: "fr")
+  show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "fr")
 
 
   // Document style

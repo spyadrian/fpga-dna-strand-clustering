@@ -4,6 +4,8 @@
 
 #lorem(30)
 
+Here is a example of cite @shore.
+
 == Titre de niveau 2
 #lorem(50)
 

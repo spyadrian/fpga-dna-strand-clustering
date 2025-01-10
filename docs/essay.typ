@@ -44,5 +44,5 @@
 
 #include "chapter/05_appendix.typ"
 
-#include "chapter/06_bibliography.typ"
+#bibliography(style: "ieee", "main.bib")
 

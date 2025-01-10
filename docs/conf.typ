@@ -19,6 +19,8 @@
   // Default Fonts and Styles
   set text(font: "Times New Roman", size: 12pt, lang: "fr")
   show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "fr")
+  show raw: set par(justify: false, spacing: 1em, leading: 1em)
+  set raw(tab-size: 4)
 
 
   // Document style

@@ -41,10 +41,32 @@ Here is a example of cite @shore.
 #lorem(50)
 
 == Titre de niveau 2
-#lorem(50)
+#lorem(30)
+
 
 === Titre de niveau 3
-#lorem(50)
+#lorem(30)
+
+```c
+#include <stdio.h>
+
+int main() {
+    int number1, number2, sum;
+
+    printf("Enter two integers: ");
+    scanf("%d %d", &number1, &number2);
+
+    // calculate the sum
+    sum = number1 + number2;
+
+    printf("%d + %d = %d", number1, number2, sum);
+    return 0;
+}
+```
+
+#lorem(20)
+
+#lorem(30)
 
 === Titre de niveau 3
 #lorem(50)

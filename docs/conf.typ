@@ -185,9 +185,8 @@
     v(weak: true, 2.5em)
   }
 
-  pagebreak()
-  pagebreak()
   counter(page).update(1)
+  pagebreak()
 
   doc
 }

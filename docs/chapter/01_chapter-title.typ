@@ -5,13 +5,19 @@
 #lorem(30)
 
 Here is a example of cite @shore.
+#lorem(10).
+And Here a footnote. #footnote[https://typst.app]
 
 == Titre de niveau 2
 #lorem(50)
 
 #figure(
   image("../figure/hepia_logo.png", width: 75%),
-  caption: "Hepia logo"
+  caption: [
+    Hepia logo
+
+    Source : réalisé par Rama, CC BY-SA, URL01
+  ]
 )
 
 === Titre de niveau 3

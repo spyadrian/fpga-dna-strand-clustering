@@ -63,14 +63,14 @@
   }
 
   show heading.where(level: 2): it => {
-    v(weak: true, 2.5em)
-    block(counter(heading).display(it.numbering) + h(2em) + it.body)
-    v(weak: true, 2em)
+    v(weak: true, 2.25em)
+    block(counter(heading).display(it.numbering) + h(weak: true, 1.5em) + it.body)
+    v(weak: true, 1.75em)
   }
 
   show heading.where(level: 3): it => {
     v(weak: true, 2em)
-    block(h(1em) + counter(heading).display("1.1.a )").split(".").last() + h(4em) + it.body)
+    block(counter(heading).display("1.1.a )").split(".").last() + h(weak: true, 1.5em) + it.body)
     v(weak: true, 1.5em)
   }
 
@@ -86,6 +86,8 @@
   show figure: it => {
     v(1em)
     it.body
+
+    set par(spacing: 1em)
     it.caption
   }
 

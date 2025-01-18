@@ -48,9 +48,6 @@ Compile the PDF:
 - Wagner–Fischer algorithm
     - https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
 
-- Haskell
-    - https://en.wikipedia.org/wiki/Haskell
-
 - References:
    - Integrating FPGA Acceleration in the DNAssim Framework for Faster DNA-Based Data Storage Simulations
       - https://www.mdpi.com/2079-9292/12/12/2621

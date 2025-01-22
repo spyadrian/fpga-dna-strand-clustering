@@ -5,3 +5,5 @@ docs/essay.pdf
 # --- programs ---
 programs/benchmark
 programs/testbench
+programs/.venv
+programs/data.txt

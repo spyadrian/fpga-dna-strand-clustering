@@ -314,3 +314,41 @@ So for the moment I'm just gonna keep that idea in mind, and focus on the comput
 
 - #link("https://typst.app/docs/tutorial/making-a-template/")[Typst - Making a Template]
 
+
+= Week 11 - 12 : Monday 30 December
+
+Those two weeks, I decide to take a break and take some time for my future exams.
+
+
+= Week 13 : Monday 13 January
+
+=== Tasks
+
+I didn't had much time to work on my project as I was in exams.
+But the blank presentation was coming so I work a bit on it.
+Doing the slides and some notes to what to say.
+
+=== Links
+
+- #link("https://docs.google.com/presentation/d/1ZRQpWnpYoff2OyiIYAxiQV3OZDXY89P0D_7icMHpyJw/edit?usp=sharing")[Blank Presentation]
+
+
+= Week 14 : Monday 20 January
+
+=== Tasks
+
+It's been a long time since I finished the implementation of the benchmark, but I didn't make sure that the output of both algorithm was correct.
+For this week, I'll verify that my algorithm works and compute the right result.
+
+=== Notes
+
+As I didn't find any database to verify my edit distance algorithm with.
+I made a python script that can generate a text file with (`str1`, `str2`, `edit distance`) data.
+The edit distance is compute with a python library called `python-levenshtein`, so I guess the result are correct.
+This file is use in a `testbench.c` file that test the output of my algorithm.
+
+The result of the testbench prove that my implementation was correct.
+
+=== Links
+
+- #link("https://pypi.org/project/python-Levenshtein/")[python-levenshtein]

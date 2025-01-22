@@ -1,27 +1,34 @@
 # -- Compiler and flags --
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -std=c99
+CFLAGS = -O2 -Wall -Wextra -std=c99 -Ialgorithm
 LDFLAGS = 
-TARGET = benchmark
+
+# -- Docker variables --
+DOCKER_IMAGE = benchmark-docker
 
 # -- Source files --
-SRCS = benchmark.c
+SRCS = benchmark.c algorithm/algorithm.c
+TARGETS = benchmark testbench
 
 # -- Rules --
 
-$(TARGET): $(SRCS)
+run: docker-run
+
+all: $(TARGETS)
+
+benchmark: $(SRCS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+testbench: $(SRCS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGETS)
 
 docker-build:
-	docker build -t benchmark-docker .
+	docker build -t $(DOCKER_IMAGE) .
 
 docker-run:
-	docker run --rm -v $(PWD):/app -w /app benchmark-docker make
+	docker run --rm -v $(PWD):/app -w /app $(DOCKER_IMAGE) make all
 
-docker-clean:
-	docker run --rm -v $(PWD):/app -w /app benchmark-docker make clean
-
-.PHONY: run clean docker-build docker-run docker-clean
+.PHONY: run clean docker-build docker-run

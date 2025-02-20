@@ -352,3 +352,28 @@ The result of the testbench prove that my implementation was correct.
 === Links
 
 - #link("https://pypi.org/project/python-Levenshtein/")[python-levenshtein]
+
+
+= Week 15 - 17 : Monday 27 January
+
+Semester break.
+
+
+= Week 18 : Monday 17 February
+
+=== Tasks
+
+This goals week is to start to implement the Myers' algorithm in VHDL.
+I'll start by doing a schema of all the operation Myers' need with their order.
+
+=== Notes
+
+I start by set up a circuit file where only the important file of the Vivado project will be tracked.
+A makefile allow you to create, open and clean a Vivado project.
+
+// ...
+
+
+=== Links
+
+// ...

@@ -7,3 +7,9 @@ programs/benchmark
 programs/testbench
 programs/.venv
 programs/data.txt
+
+# --- circuits ---
+circuits/fpga-dna-strand-clustering
+circuits/.Xil
+circuits/*.jou
+circuits/*.log

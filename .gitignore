@@ -13,3 +13,4 @@ circuits/fpga-dna-strand-clustering
 circuits/.Xil
 circuits/*.jou
 circuits/*.log
+circuits/*.str

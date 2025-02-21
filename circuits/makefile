@@ -20,7 +20,7 @@ open-project:
 	@nohup $(VIVADO) -notrace $(PROJECT_NAME)/$(PROJECT_NAME).xpr > /dev/null 2>&1 &
 
 clean:
-	rm -rf $(PROJECT_NAME) .Xil *.jou *.log
+	rm -rf $(PROJECT_NAME) .Xil *.jou *.log *.str
 
 
 .PHONY: help create-project open-project clean

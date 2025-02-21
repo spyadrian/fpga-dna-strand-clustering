@@ -81,8 +81,8 @@ print_status "Add project sources" "OK"
 #----------------------------------------------------------------
 
 # No top-level, only simulation
-#set_property top $prj_name [current_fileset]
-#update_compile_order -fileset sources_1
+set_property top top [current_fileset]
+update_compile_order -fileset sources_1
 
 #----------------------------------------------------------------
 # Add simulation sources
@@ -107,20 +107,20 @@ print_status "Add simulation sources" "OK"
 # Set the top level simulation file
 #----------------------------------------------------------------
 
-set_property top $prj_name [get_filesets sim_1]
+set_property top tb_top [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 #----------------------------------------------------------------
 # Set the completion time
 #----------------------------------------------------------------
 
-set end_time [clock format [clock seconds] -format {%b. %d, %Y %I:%M:%S %p}]
+#set end_time [clock format [clock seconds] -format {%b. %d, %Y %I:%M:%S %p}]
 
 #----------------------------------------------------------------
 # Display the start and end time to the screen
 #----------------------------------------------------------------
 
-puts $start_time
-puts $end_time
+#puts $start_time
+#puts $end_time
 
 exit

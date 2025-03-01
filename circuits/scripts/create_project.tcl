@@ -59,6 +59,7 @@ print_status "Create project" "OK"
 # Get HDL source files directory
 set hdl_src_dir "${src_dir}/hdl"
 set sim_src_dir "${src_dir}/sim"
+set constr_src_dir "${src_dir}/constraints"
 
 # Add HDL source files
 set vhdl_src_file_list [findFiles $hdl_src_dir *.vhd]
@@ -109,6 +110,19 @@ print_status "Add simulation sources" "OK"
 
 set_property top tb_top [get_filesets sim_1]
 update_compile_order -fileset sim_1
+
+#----------------------------------------------------------------
+# Add constraint files
+#----------------------------------------------------------------
+
+set constr_file_list [findFiles $constr_src_dir *.xdc]
+
+if {$constr_file_list != ""} {
+    add_files -fileset constrs_1 -norecurse $constr_file_list
+    print_status "Added constraint files" "OK"
+} else {
+    print_status "No constraint files to be added" "WARNING"
+}
 
 #----------------------------------------------------------------
 # Set the completion time

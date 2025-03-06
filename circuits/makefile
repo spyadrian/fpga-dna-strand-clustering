@@ -17,7 +17,7 @@ create-project:
 	@$(VIVADO) -notrace -mode batch -source $(TCL_SCRIPT)
 
 open-project:
-	@nohup $(VIVADO) -notrace $(PROJECT_NAME)/$(PROJECT_NAME).xpr > /dev/null 2>&1 &
+	$(VIVADO) -notrace $(PROJECT_NAME)/$(PROJECT_NAME).xpr
 
 clean:
 	rm -rf $(PROJECT_NAME) .Xil *.jou *.log *.str

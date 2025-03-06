@@ -13,7 +13,7 @@
 # Project Name: fpga-dna-strand-clustering
 # Target Device: digilentinc.com:nexys_video:part0:1.2 xc7a200tsbg484-1
 # Tool version: 2024.1
-# Description: TCL script for re-creating Vivado project 'tb_files_uart'
+# Description: TCL script for re-creating Vivado project 'fpga-dna-strand-clustering'
 #
 # Last update: 2025-02-20
 #

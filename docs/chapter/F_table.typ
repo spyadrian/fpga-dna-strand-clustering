@@ -1,4 +1,4 @@
-#outline(title: "Liste des tableaux", target: figure.where(kind: table))
+#outline(title: "List of Tables", target: figure.where(kind: table))
 
 #v(5em)
 

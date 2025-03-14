@@ -1,15 +1,15 @@
 #import "../conf.typ": add_brief
 
-= Résumé
+= Summary
 
 #add_brief(
-  teacher: "Spycher Adrian",
+  teachers: "Laurent Gantel",
   applicant: "Spycher Adrian",
-  entreprise: "Spycher SA",
+  entreprise: "UNIGE",
   internship_agreement: false,
   confidentiality_agreement: false,
 
-  img: image("../figure/default_illustration.png", width: 45%),
+  img: image("../figure/illusatration.jpg", width: 70%),
   content: [
 
     #lorem(250)

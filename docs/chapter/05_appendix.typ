@@ -1,7 +1,7 @@
-= Annexes
+= Appendices
 
-== Annexe 1
+== Appendix 1
 
-== Annexe 2
+== Appendix 2
 
-== Annexe 3
+== Appendix 3

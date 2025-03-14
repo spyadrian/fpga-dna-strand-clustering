@@ -1,4 +1,4 @@
-= Liste des annexes
+= List of Appendices
 
 #grid(
   columns: (1fr, 4fr),

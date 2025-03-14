@@ -1,3 +1,3 @@
-= Remerciements
+= Acknowledgments
 
-Formulez ici vos remerciements aux personnes qui vous ont aidé dans la réalisation de votre travail. Les remerciements sont rédigés dans le style "Corps de texte".
+Express your thanks here to the people who helped you complete your work. Acknowledgments are written in "Body Text" style.

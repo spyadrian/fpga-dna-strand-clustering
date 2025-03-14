@@ -1,3 +1,1 @@
-= Conclusion
-
-#lorem(50)
+= Conclusion and Perspectives

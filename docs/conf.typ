@@ -17,17 +17,16 @@
   // --- GENERAL STYLE ---
 
   // Default Fonts and Styles
-  set text(font: "Times New Roman", size: 12pt, lang: "fr")
-  show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "fr")
+  set text(font: "Times New Roman", size: 12pt, lang: "en")
+  show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "en")
   show raw: set par(justify: false, spacing: 1em, leading: 1em)
   set raw(tab-size: 4)
-
 
   // Document style
   set page(
     margin: 2.5cm,
     header: text(size: 8pt, fill: color.gray,
-      authors + " – " + title + " – " + "Projet de semestre – " + date.display("[month repr:long], [year]"))
+      authors + " – " + title + " – " + "Semester project – " + date.display("[month repr:long], [year]"))
   )
 
 
@@ -77,6 +76,7 @@
 
   // Outline Styles
   set outline(depth: 3, indent: auto)
+  show outline: set heading(outlined: true)
   show outline.entry.where(level: 1): set text(weight: "bold")
 
 
@@ -115,42 +115,42 @@
     // title
     v(4em)
     text(size: 16pt, weight: "bold", title)
-    v(1em)
+    v(2.5em)
 
     // illustration
     if illustration == none {
       v(25em)
     } else {
       illustration
-      v(2em)
+      v(2.5em)
     }
 
     // authors, orientation & date
-    text(size: 14pt, "Projet de semestre présenté par")
-    v(1em)
+    text(size: 14pt, "Semester project presented by")
+    v(0em)
     text(size: 16pt, weight: "bold", authors)
-    v(2em)
-    text(size: 14pt, weight: "bold", "Informatique et systèmes de communication avec orientation en " + orientation)
-    v(1.5em)
+    v(0em)
+    text(size: 14pt, weight: "bold", "Computer science and communication systems with orientation in " + orientation)
+    v(2.5em)
     text(size: 14pt, weight: "bold", date.display("[month repr:long], [year]"))
-    v(2em)
+    v(0em)
 
     // teachers and client
     if client == none {
 
-      text("Professeur-e HES responsable \n" + teachers)
+      text("Teacher HES in charge \n" + teachers)
     } else {
 
       grid(
         columns: (1fr, 1fr),
         {
-          text(size: 12pt, "Professeur-e HES responsable")
-          v(0.5em)
+          text(size: 12pt, "Teacher HES in charge")
+          v(0em)
           text(size: 12pt, weight: "bold", teachers)
         },
         {
-          text(size: 12pt, "Mandant")
-          v(0.5em)
+          text(size: 12pt, "Client")
+          v(0em)
           text(size: 12pt, weight: "bold", client)
         }
 
@@ -182,7 +182,7 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
 
-    if it.numbering != none {block[Chapitre #counter(heading).display("1. ") #it.body]}
+    if it.numbering != none {block[Chapter #counter(heading).display("1. ") #it.body]}
     else {block[#it.body]}
     v(weak: true, 2.5em)
   }
@@ -208,7 +208,7 @@
   img: none,
   content: [],
   applicant: [],
-  teacher: [],
+  teachers: [],
   entreprise: [],
   internship_agreement: bool,
   confidentiality_agreement: bool,
@@ -228,14 +228,14 @@
     stroke: none,
     gutter: 0.5em,
 
-    let str_inter_agr = if internship_agreement == true [oui] else [non],
-    let str_conf_agr = if confidentiality_agreement == true [oui] else [non],
+    let str_inter_agr = if internship_agreement == true [yes] else [no],
+    let str_conf_agr = if confidentiality_agreement == true [yes] else [no],
 
-    [Candidat-e :], [Professeur-e(s) responsable(s) :],
-    [#text(size: 14pt, weight: "bold", applicant)], [#text(size: 14pt, weight: "bold", teacher)],
-    [Filière d'études : ISC], [En collaboration avec : #entreprise],
-    [], [Travail soumis à une convention de stage en entreprise : #str_inter_agr],
-    [], [Travail soumis à un contrat de confidentialité : #str_conf_agr],
+    [Applicant :], [Teacher in charge :],
+    [#text(size: 14pt, weight: "bold", applicant)], [#text(size: 14pt, weight: "bold", teachers)],
+    [Study area : ISC], [In collaboration with : #entreprise],
+    [], [Work subject to a company internship agreement : #str_inter_agr],
+    [], [Work subject to a confidentiality agreement : #str_conf_agr],
   )
 }
 

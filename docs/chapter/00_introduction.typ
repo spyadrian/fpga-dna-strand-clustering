@@ -4,6 +4,10 @@
   = Introduction
 ]
 
-#lorem(150)
+- main subject
 
-#lorem(150)
+- UNIGE project
+
+- DNAmic
+
+- Zoom on my parts

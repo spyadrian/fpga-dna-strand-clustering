@@ -1,5 +1,4 @@
-#outline(title: "Liste des illustration", target: figure.where(kind: image))
-
+#outline(title: "List of Figures", target: figure.where(kind: image))
 #v(5em)
 
 #block[#text(weight: "bold", "Références des URL")]

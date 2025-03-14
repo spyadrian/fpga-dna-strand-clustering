@@ -1,4 +1,4 @@
-= Liste des acronymes
+= List of Acronyms
 
 #grid(
   columns: (1fr, 4fr),

@@ -1,7 +1,5 @@
-// this variable will contains the configuration
 #let conf(
 
-  // Parameters
   title: none,
   authors: (),
   orientation: none,
@@ -9,28 +7,29 @@
   client: none,
   illustration: none,
   source_illustration: [],
-  date: datetime.today(),
+  date: (),
 
   doc,
 ) = {
 
-  // --- GENERAL STYLE ---
 
-  // Default Fonts and Styles
+  // -------------------------------------------------------------------------
+  // GENERAL DOCUMENT STYLE
+  // -------------------------------------------------------------------------
+
+  // font
   set text(font: "Times New Roman", size: 12pt, lang: "en")
   show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "en")
   show raw: set par(justify: false, spacing: 1em, leading: 1em)
   set raw(tab-size: 4)
 
-  // Document style
+  // document
   set page(
     margin: 2.5cm,
-    header: text(size: 8pt, fill: color.gray,
-      authors + " – " + title + " – " + "Semester project – " + date.display("[month repr:long], [year]"))
+    header: text(size: 8pt, fill: color.gray, [#authors – #title  – Semester project – #date])
   )
 
-
-  // Paragraph style
+  // paragraph
   set par(
     justify: true,
     leading: 1.5em,
@@ -39,15 +38,11 @@
   )
 
 
-  // Grid Styles
-  set grid(row-gutter: 1.5em)
+  // -------------------------------------------------------------------------
+  // HEADING STYLES
+  // -------------------------------------------------------------------------
 
-
-  // Heading Styles
-  show heading: {
-    set text(weight: "bold")
-    smallcaps
-  }
+  show heading: set text(weight: "bold")
 
   show heading.where(level: 1): set align(center)
   show heading.where(level: 1): set text(size: 16pt)
@@ -55,54 +50,68 @@
   show heading.where(level: 3): set text(size: 12pt)
 
   show heading.where(level: 1): it => {
-    pagebreak(weak: true)
 
-    block[#it.body]
+    pagebreak(weak: true)
+    it
     v(weak: true, 2.5em)
   }
 
   show heading.where(level: 2): it => {
+
     v(weak: true, 2.25em)
     block(counter(heading).display(it.numbering) + h(weak: true, 1.5em) + it.body)
     v(weak: true, 1.75em)
   }
 
   show heading.where(level: 3): it => {
+
     v(weak: true, 2em)
     block(counter(heading).display("1.1.a )").split(".").last() + h(weak: true, 1.5em) + it.body)
     v(weak: true, 1.5em)
   }
 
 
-  // Outline Styles
-  set outline(depth: 3, indent: auto)
+  // -------------------------------------------------------------------------
+  // OUTLINE STYLES
+  // -------------------------------------------------------------------------
+
+  set outline(depth: 3, indent: 2em)
   show outline: set heading(outlined: true)
   show outline.entry.where(level: 1): set text(weight: "bold")
 
 
-  // Figure Style
+  // -------------------------------------------------------------------------
+  // FIGURE AND OTHERS
+  // -------------------------------------------------------------------------
+
+  // figure
   set figure(gap: 1.5em)
   show figure.caption: emph
+  show figure.where(kind: image) : set figure(supplement: "Illustration")
+
   show figure: it => {
     v(1em)
     it.body
 
-    set par(spacing: 1em)
+    set align(left)
     it.caption
   }
 
-
-  // Math style
+  // grid
+  set grid(row-gutter: 1.5em)
+ 
+  // math
   set math.equation(numbering: "(1)", supplement: [Eq.])
 
 
-  // --- COVER PAGE ---
+  // -------------------------------------------------------------------------
+  // COVER PAGE
+  // -------------------------------------------------------------------------
 
   {
-    set align(center)
-    set text(font: "Arial")
     set page(numbering: none, header: none)
-    set par(justify: false, leading: 0.5em)
+    set par(leading: 0.5em)
+    set align(center)
 
     // logos
     grid(
@@ -115,47 +124,27 @@
     // title
     v(4em)
     text(size: 16pt, weight: "bold", title)
-    v(2.5em)
 
     // illustration
-    if illustration == none {
-      v(25em)
-    } else {
-      illustration
-      v(2.5em)
-    }
+    v(1fr)
+    if illustration != none [#illustration #v(1fr)]
 
     // authors, orientation & date
-    text(size: 14pt, "Semester project presented by")
+    text(size: 14pt, [Semester project presented by])
     v(0em)
     text(size: 16pt, weight: "bold", authors)
+    v(1.5em)
+    text(size: 14pt, weight: "bold", [Computer science and communication systems with orientation in #orientation])
     v(0em)
-    text(size: 14pt, weight: "bold", "Computer science and communication systems with orientation in " + orientation)
-    v(2.5em)
-    text(size: 14pt, weight: "bold", date.display("[month repr:long], [year]"))
-    v(0em)
+    text(size: 14pt, weight: "bold", date)
+    v(1.5em)
 
     // teachers and client
-    if client == none {
-
-      text("Teacher HES in charge \n" + teachers)
-    } else {
-
-      grid(
-        columns: (1fr, 1fr),
-        {
-          text(size: 12pt, "Teacher HES in charge")
-          v(0em)
-          text(size: 12pt, weight: "bold", teachers)
-        },
-        {
-          text(size: 12pt, "Client")
-          v(0em)
-          text(size: 12pt, weight: "bold", client)
-        }
-
-      )
-    }
+    grid(
+      columns: (1fr, 1fr),
+      [Teacher HES in charge #v(0em) *#teachers*],
+      if client != none [Client #v(0em) *#client*]
+    )
 
     pagebreak()
 
@@ -165,51 +154,92 @@
     text(style: "italic", source_illustration)
   }
 
-  // --- DOCUMENT ---
+  // document
   doc
 }
 
-#let apply_intro_style(doc) = {
+
+// -------------------------------------------------------------------------
+// NEW COMPONENTS
+// -------------------------------------------------------------------------
+
+#let sourced_figure(source: [], fig: figure) = {
+  set par(first-line-indent: 0em)
+  fig
+
+  emph[_Source_ : #source]
+}
+
+
+// -------------------------------------------------------------------------
+// INTRODUCTION STYLE
+// -------------------------------------------------------------------------
+
+#let introduction(body) = {
   set page(numbering: "I")
+  set heading(numbering: none)
 
-  doc
+  body
 }
 
-#let apply_chapter_style(doc) = {
+
+// -------------------------------------------------------------------------
+// CHAPTER STYLE
+// -------------------------------------------------------------------------
+
+#let chapter(body) = {
   set page(numbering: "1")
-  set heading(numbering: "1.1.a")
 
-  show heading.where(level: 1): it => {
-    pagebreak(weak: true)
-
-    if it.numbering != none {block[Chapter #counter(heading).display("1. ") #it.body]}
-    else {block[#it.body]}
-    v(weak: true, 2.5em)
-  }
+  show heading: set heading(numbering: "1.1.a")
+  let chapter_num(.., last) = "Chapter " + str(last) + " : "
+  show heading.where(level: 1): set heading(numbering: chapter_num)
 
   counter(page).update(1)
+  counter(heading).update(0)
+
   pagebreak()
-
-  doc
+  body
 }
 
-#let apply_annexe_style(doc) = {
-  show heading.where(level: 1): it => {
-    pagebreak(weak: true)
 
-    block[#it.body]
-    v(weak: true, 2.5em)
-  }
+// -------------------------------------------------------------------------
+// APPENDIX STYLE
+// -------------------------------------------------------------------------
 
-  doc
+#let appendix(body) = {
+  set heading(supplement: [Appendix])
+
+  let appendix_num(.., last) = "Appendix " + str(last) + " : "
+  show heading.where(level: 1): set heading(numbering: appendix_num)
+
+  counter(heading).update(0)
+
+  body
 }
 
-#let add_brief(
+
+// -------------------------------------------------------------------------
+// BIBLIOGRAPHY STYLE
+// -------------------------------------------------------------------------
+
+#let bibli(body) = {
+  set heading(supplement: [heading])
+  show heading: set heading(numbering: none)
+
+  body
+}
+
+
+// -------------------------------------------------------------------------
+// SUMMARY
+// -------------------------------------------------------------------------
+
+#let summary(
   img: none,
   content: [],
-  applicant: [],
-  teachers: [],
-  entreprise: [],
+  appliant: [],
+  teacher: [],
+  company: [],
   internship_agreement: bool,
   confidentiality_agreement: bool,
 
@@ -218,7 +248,9 @@
 
   content
 
+  v(1fr)
   align(center, img)
+  v(1fr)
 
   set text(size: 10pt)
 
@@ -226,14 +258,14 @@
     columns: (2fr, 2fr),
     align: (left, left),
     stroke: none,
-    gutter: 0.5em,
+    gutter: 0.1em,
 
     let str_inter_agr = if internship_agreement == true [yes] else [no],
     let str_conf_agr = if confidentiality_agreement == true [yes] else [no],
 
     [Applicant :], [Teacher in charge :],
-    [#text(size: 14pt, weight: "bold", applicant)], [#text(size: 14pt, weight: "bold", teachers)],
-    [Study area : ISC], [In collaboration with : #entreprise],
+    [#text(size: 12pt, weight: "bold", appliant)], [#text(size: 12pt, weight: "bold", teacher)],
+    [Study area : ISC], [In collaboration with : #company],
     [], [Work subject to a company internship agreement : #str_inter_agr],
     [], [Work subject to a confidentiality agreement : #str_conf_agr],
   )

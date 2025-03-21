@@ -1,8 +1,10 @@
-#outline(title: "List of Tables", target: figure.where(kind: table))
+#outline(title: "List of tables", target: figure.where(kind: table))
 
 #v(5em)
 
-#block[#text(weight: "bold", "Références des URL")]
+==== URL References
+#v(1em)
+
 #grid(
   columns: (1fr, 4fr),
   align: (left, left),

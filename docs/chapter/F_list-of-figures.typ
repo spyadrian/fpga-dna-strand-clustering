@@ -1,4 +1,4 @@
-#outline(title: "List of Figures", target: figure.where(kind: image))
+#outline(title: "List of Figures", target: figure.where(kind: image).or(figure.where(kind: raw)))
 
 #v(5em)
 

@@ -5,4 +5,5 @@
   align: (left, left),
 
   [URL], [Uniform Resource Locator],
+  [PCR], [Polymerase chain reaction],
 )

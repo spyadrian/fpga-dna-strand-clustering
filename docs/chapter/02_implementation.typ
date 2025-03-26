@@ -24,7 +24,7 @@ The Wagner-Fischer implementation includes several optimizations.
 The first is a simple optimization of the space that use the algorithm.
 Indeed, in this algorithm, the task is to calculate an $n times m$ matrix, more specifically, the cell located at the bottom right of the matrix.
 However, since only the column preceding the one being calculated is required to advance through the matrix, it is not necessary to store the entire matrix.
-With this technique, the algorithm goes from a using a memory space of $n times m$ to a size of $n$.
+With this technique, the algorithm goes from using a memory space of $n times m$ to a size of $n$.
 
 A second optimization is the Ukkonen optimization.
 It reduces the complexity from $Omicron(n times m)$ to $Omicron(n times k)$, where $k$ is the maximum tolerated distance.
@@ -36,7 +36,7 @@ This is well illustrated in the @fig_grid_ukkonen.
 #sourced_figure(
   source: link("https://ceptord.net/wagner-fischer/index.html", [Can We Optimize the Wagner-Fischer Algorithm ?, Polyleven, February 2025]),
   fig: [#figure(
-    caption: [Wagner-Fischer matrix between with Ukkonen optimization],
+    caption: [Wagner-Fischer matrix with Ukkonen optimization],
     grid(
       fill: (x, y) => rgb(
         if x == 0 or y == 0 { "#E0E0E0" }
@@ -65,9 +65,9 @@ The implementation with both optimizations is available in #todo[appendix].
 === Myers' Bit-parallel Algorithm
 
 Myers' algorithm has remained unchanged, so there isn't much to add.
-In its implementation, available in #todo[appendix entry], we can still notice the use of variables of type `uint256_t`.
+In its implementation, available in #todo[appendix], we can still notice the use of variables of type `uint256_t`.
 Indeed, the DNA strands used are character strings of more than 200 characters and must be represented by bit vectors of the same length, i.e., `uint256_t`.
-These posed a problem because, given that a machine word generally does not exceed 64 bits, it is difficult for the _gcc-13_ compiler to handle them.
+These caused a problem because, given that a machine word generally does not exceed 64 bits, it is difficult for the _gcc-13_ compiler to handle them.
 However, _gcc-14_ offers an extension to the C standard that provides greater flexibility in handling custom-sized integers.
 This extension allows the representation of integers of arbitrary width.
 The creation of `uint256_t` was therefore possible using the @fig_code_uint256.
@@ -79,8 +79,8 @@ typedef unsigned _BitInt(256) uint256_t;
   ```,
 ) <fig_code_uint256>
 
-Since the machine used doesn't run _gcc-14_ out of the box, it was necessary to create a Docker container.
-This approach only simplifies the setup process.
+Since the machine used doesn't run _gcc-14_ by default, it was necessary to create a Docker container.
+This approach simplifies the setup process.
 Its Dockerfile is available in the #todo[appendix].
 
 
@@ -89,6 +89,7 @@ Its Dockerfile is available in the #todo[appendix].
 // - present and explain the benchmark results, including graphs and tables
 
 In order to test the two C implementations, a database containing words and their Levenshtein distance is, unfortunately, as necessary as it is difficult to find.
+So creating one was more convenient.
 To populate the database, a Python script was developed to generate synthetic data.
 This script creates two random character strings and calculates their corresponding Levenshtein distance, providing the necessary data for the database.
 The first part of this database is filled with the Faker library, which provides random words from a chosen language.
@@ -99,6 +100,7 @@ An example of the data in @fig_tab_data_test.
 
 #figure(
   caption: [Example of synthetic data generated for testing C implementations],
+
   table(
     columns: (1fr, 1fr, auto),
     align: (left, left, center),
@@ -110,22 +112,29 @@ An example of the data in @fig_tab_data_test.
   )
 ) <fig_tab_data_test>
 
-The test program is very naive C code.
+The test program is a very naive C code.
 It retrieves the data and prepares it so it can be used by the two algorithms.
 It then feeds it to the algorithm, testing its results against the results contained in the data.
 If an error occurs, it reports it.
-With more then 1'000 database entries, the programs didn't notice even one errors.
+With more then 1'000 database entries, the programs didn't notice even one error.
 *Both implementation was correct*.
 
-The benchmark is a simple C code that calculates the time it takes for the Myers algorithm or the Wagner-Fischer algorithm to compare $n$ data points.
+The benchmark is a simple C code that calculates the time it takes for the Myers algorithm and the Wagner-Fischer algorithm to compare $n$ data points.
 The data it compares are fixed-length strings containing random characters from the following list: "0123456789abcdef".
 #todo[a test should be done with only "ACGT" to be close to the real situation. Shouldn't change anything]
-The first benchmark launched tested the time it took the algorithms to compare eight data sets of different sizes.
-This benchmark was enough to know which algorithm was the most efficient, #todo[the data are on the graph ...].
+The first benchmark launched tested the time it took the algorithms to compare eight data sets of different sizes : 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
+This benchmark was clearly enough to know which algorithm was the most efficient, the data are regrouped on the @fig_img_graph_benchmark.
 
-#todo[add graph data]
+#figure(
+  caption: [Example of synthetic data generated for testing C implementations],
 
-#todo[comment graph here or in comparison and insights ?]
+  image("../figure/graph_benchmark.png")
+) <fig_img_graph_benchmark>
+
+The graph in Figure X shows the execution time in seconds of the two algorithms to compare a given number of inputs.
+Although the spacing between the Wagner-Fischer and Myers bars appears identical across groups of inputs, the scale is actually logarithmic.
+This means that for a number of 32,768, there is a factor of $6.82$ between Wagner-Fischer and Myers.
+This places Myers far ahead of Wagner-Fischer in terms of speed, which was expected given their time complexity.
 
 
 == Comparison and Insights

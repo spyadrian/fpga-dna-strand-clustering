@@ -20,7 +20,7 @@
   // font
   set text(font: "Times New Roman", size: 12pt, lang: "en")
   show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "en")
-  show raw: set par(justify: false, spacing: 1em, leading: 1em)
+  show raw.where(block: true): set par(justify: false, spacing: 1em, leading: 1em)
   set raw(tab-size: 4)
 
   // document
@@ -87,7 +87,8 @@
   // figure
   set figure(gap: 1.5em)
   show figure.caption: emph
-  show figure.where(kind: image) : set figure(supplement: "Illustration")
+  show figure.where(kind: image) : set figure(supplement: "Figure")
+  show figure.where(kind: raw) : set figure(supplement: "Code")
 
   show figure: it => {
     v(1em)
@@ -102,7 +103,11 @@
  
   // math
   set math.equation(numbering: "(1)", supplement: [Eq.])
+  set math.cases(gap: 0.5em)
 
+  // table
+  set list(marker: [--], indent: 1.5em)
+  set enum(indent: 1.5em)
 
   // -------------------------------------------------------------------------
   // COVER PAGE
@@ -170,6 +175,11 @@
   emph[_Source_ : #source]
 }
 
+#let todo(body) = {
+  set text(fill: red, weight: "bold", style: "italic")
+
+  highlight(body)
+}
 
 // -------------------------------------------------------------------------
 // INTRODUCTION STYLE

@@ -11,13 +11,28 @@ In recent years, the amount of data has continued to increase to the point where
 These infrastructures are the cause of enormous energy waste.
 However, it's difficult to eliminate them given that sectors such as education, medicine, and others depend on them.
 With today's technology, we are now capable to store data in synthetic DNA.
-This methods overcome many of the problem that come with traditional data storing.
+This methods overcome many of the problem that come with traditional data storing, especially knowing that all terrestrial data can be stored in a small test tube.
 
 An European project called DNAMIC aims to replace these infrastructures by a mobile, self-contained, future-proof microfactory for DNA data archiving.
 This microfactory would only be finished after implementing the six steps that constitute it, that is, encoding, synthesis, amplification, storage, sequencing and, finally, decoding.
+
+#sourced_figure(
+  source: link("https://www.youtube.com/watch?app=desktop&v=gNv72a1ugiA", [State of the Art DNA Data Storage | DigNA Webinar Series (Webinar 1), PEARL-DNA, Youtube, March 2025]),
+  fig : figure(
+    caption: [Schema of the six steps constituting the micro-factory of DNAMIC],
+
+    image("../figure/micro-factory_steps.png")
+  )
+)
+
 One of many difficulty that have this project is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
-In fact, after reading a DNA strand, it's easy to see that there are reading errors due to the precision of the reader or the mutation that the strands may suffer.
-To address this issue, engineers at #todo[insert company] have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
+After storing the synthetic DNA for the necessary time, it must be read.
+This is done using a Nanoport, a technology that can read 100 to 200 strands of DNA simultaneously at a cost of 10 percent error.
+After storing the synthetic DNA for the necessary time, it must be read.
+In addition to read errors, DNA can also undergo mutations.
+These errors must then be corrected to maintain data integrity.
+
+To address this issue, engineers at Genomika, a biotechnology company, have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
 At this stage of the project, sequence assembly becomes essential.
 This seemingly small but crucial step is responsible for clustering strands originating from the same initial sequence.
 
@@ -41,8 +56,7 @@ This project aims to support DNAMIC by exploring hardware acceleration technique
 // - increase the number of strands handled
 
 To accomplish this goal, the first step is to make an initial research phase.
-This phase will focus on investigating and analyzing various algorithms to determine which one is the most suitable for calculating the Levenshtein distance.
-Taking into account the compatibility of the algorithm with hardware acceleration
+This phase will focus on investigating and analyzing various algorithms to determine which one is the most suitable for calculating the Levenshtein distance, taking into account the compatibility of the algorithm with hardware acceleration.
 
 The second step involves parallelizing the DNA strand clustering process as much as possible on an FPGA in order to efficiently manage large volumes.
 Increasing the number of DNA strands managed by a factor of 100 (between 300 and 500 million) while ensuring reasonable computation times of around a few hours.

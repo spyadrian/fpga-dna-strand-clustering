@@ -198,11 +198,24 @@
 // -------------------------------------------------------------------------
 
 #let chapter(body) = {
-  set page(numbering: "1")
 
+  set page(numbering: "1")
   show heading: set heading(numbering: "1.1.a")
-  let chapter_num(.., last) = "Chapter " + str(last) + " : "
-  show heading.where(level: 1): set heading(numbering: chapter_num)
+
+  show heading.where(level: 1): set heading(
+    numbering: num => "Chapter " + numbering("1 : ", num),
+    supplement: "Chapter"
+  )
+
+  show ref: it => {
+    let el = it.element
+    if el == none or el.func() != heading or el.level != 1 { return it }
+
+    let heading-levels = counter(heading).at(el.location())
+    let body = numbering(n => [#el.supplement #n], ..heading-levels)
+
+    link(el.location(), body)
+  }
 
   counter(page).update(1)
   counter(heading).update(0)
@@ -217,10 +230,21 @@
 // -------------------------------------------------------------------------
 
 #let appendix(body) = {
-  set heading(supplement: [Appendix])
 
-  let appendix_num(.., last) = "Appendix " + str(last) + " : "
-  show heading.where(level: 1): set heading(numbering: appendix_num)
+  show heading.where(level: 1): set heading(
+    numbering: num => "Appendix " + numbering("1 :", num),
+    supplement: "Appendix",
+  )
+
+  show ref: it => {
+    let el = it.element
+    if el == none or el.func() != heading or el.level != 1 { return it }
+
+    let heading-levels = counter(heading).at(el.location())
+    let body = numbering(n => [#el.supplement #n], ..heading-levels)
+
+    link(el.location(), body)
+  }
 
   counter(heading).update(0)
 

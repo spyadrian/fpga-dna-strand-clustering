@@ -40,12 +40,32 @@ The architecture was also designed to ensure a good scalability, as it might be 
 The file loader is responsible for reading the input file.
 This file contains all the DNA strands to be sorted.
 In other words, the ones to be used to calculate the Levenshtein distance.
-In the received file, each line corresponds to a DNA strand, as represented in #todo[image X].
+In the received file, each line corresponds to a DNA strand, as represented in @fig_txt_DNA.
 
-#todo[add text entry]
+#sourced_figure(
+  source: link("", []),
+  fig: [
+    #figure(
+      caption: [],
+      kind: "File",
+      supplement: "File",
 
-This module is possible in VHDL using file management libraries such as #todo[insert library].
+      ```txt
+ATCTGATGTTACGCGCGACATAATCGCCGAGAAGTGC [...] CAGTCCAAGGCACCGGTAATAGCGAGATGACTGGAG
+ATCTGATGTTACGCGCGATAGTAGACACCGCGCCGTT [...] TAGAGAGTACTGAGCGACATAGCGAGATGACTGGAG
+ATCTGATGTTACGCGCGACGACTACGTAGATCTATGT [...] TACCTGTATCTGGAGATCATAGCGAGATGACTGGAG
+ATCTGATGTTACGCGCGACTCAGACTGCGTTCGGTAA [...] CACCGTAGACAGATCTGTATAGCGAGATGACTGGAG
+ATCTGATGTTACGCGCGAGCTCGAGCGACGTCTGCTA [...] CGTCCTCGTTGCTGCAACATAGCGAGATGACTGGAG
+                                       ...
+      ```
+    ) <fig_txt_DNA>
+  ]
+)
+
+This module is possible in VHDL using file management libraries such as `std` or `ieee`.
 As output, this module provides the inputs to the encoder as an array of text.
+It's important to note that this module can only be used in simulation.
+In a real-life scenario, the data connection would be made using a PCI connection, but this only appears later in the project.
 
 
 === Encoder and Decoder
@@ -73,9 +93,22 @@ It is used to reduce data complexity by assigning a unique code to each active e
 
 Working with bits allows for faster computations and, more importantly, reduces the amount of memory used to store bits.
 With a four-character alphabet let each character to be represented by two bits as show in the encoding in the @fig_tab_alphabet_encoding.
-A conversion example is available in #todo[figure X].
+A conversion example is available in @fig_img_DNA_to_binary.
 
-#todo[add example conversion]
+#sourced_figure(
+  source: link("", []),
+  fig: [
+    #figure(
+      caption: [],
+
+      image("../figure/conversion_ACGT-BIN.png")
+    ) <fig_img_DNA_to_binary>
+  ]
+)
+
+DNAMIC uses a different encoding called CODEC.
+It is not used in this case because it is designed to maintain data integrity.
+In our case, the two-bit encoding is designed for hardware use.
 
 
 === Myers Controller
@@ -113,8 +146,28 @@ When all the groups have been evaluated, it will provide the sorted strands to t
 // - go through the critical parts of the VHDL code, explaining how you mapped the algorithm to hardware
 // - highlight key optimizations, such as reducing computation cycles or leveraging FPGA-specific features
 // - explain how you verified the correctness of the core component through simulations and testbenches
-//(- present performance results compared to the C implementation)
 
-// ...
+#todo[talk about FPGA characteristique, isolate better the problem and what we are resolving and chaining bloc]
 
+As stated previously, the Myers core component plays a very important role in the system.
+It handles the core calculation of the Myers algorithm.
+This consists of managing the evolution of the bit vectors as the algorithm progresses until the final score is obtained, i.e., the Levenshtein distance between two strands.
+To achieve this, the Myers core is composed of two separate blocks: one for updating the bit vectors, while the other for updating the score.
+The reason for separating the component into two blocks is due to the fact that there is a dependency between the calculation of the score and two of the bit vectors.
+Those bits vectors must be stable in order to ensure that the score is correctly computed.
+To ensure this and maintain a clock frequency as high as possible, a pipelined architecture was developed.
 
+#todo[add schema pipelining]
+
+#todo[explain schema]
+
+To manage the two separate blocks, the VHDL code manages them on two separate processes, respectively, `proc_core` and `proc_score` available in the @app_vhdl_myers.
+
+In normal operation, this process updates the vectors according to the current index `idx_i`, which is used to traverse the sequence.
+If `idx_i` is not equal to one, shift operations are applied to `ph` and `mh` to simulate progress in the alignment.
+Then, the new vectors `pv` and `mv` are calculated based on the previous states and the results of the `peq_i` operation, which stores information about the character matches between the sequences `s1_i` and `s2_i`.
+Finally, the `ph_o` and `mh_o` values are updated to reflect the new vector states, and the score update signals (`add_score_o`, `sub_score_o`) are calculated based on the last element of the `ph_o` and `mh_o` vector.
+
+The `proc_score` process is responsible for managing the evolution of the edit score based on the operations performed by the `proc_core` process. Each clock cycle, this process checks whether either the `add_score_i` or `sub_score_i` signals are active.
+If `add_score_i` is 1, then `score_o` is incremented by 1.
+Conversely, if `sub_score_i` is active, score_o is decremented by 1.

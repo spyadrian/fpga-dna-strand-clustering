@@ -5,7 +5,7 @@
   authors: [Adrian Spycher],
   orientation: [embedded computer systems],
   teachers: [Laurent Gantel],
-  client: [DNAMIC; UNIGE, Pierre-Yves Burgi, \n Deputy Director at DiSTIC, Head of the RISe Department],
+  client: [UNIGE, Pierre-Yves Burgi, \ Deputy Director at DiSTIC, Head of the RISe Department],
   date: [Mars, 2025],
   illustration: image("figure/illusatration.jpg", width: 80%),
   source_illustration: link("https://www.the-scientist.com/making-dna-data-storage-a-reality-30218", "Making DNA Data Storage a Reality, Catherine Offord, Oct 1, 2017"))

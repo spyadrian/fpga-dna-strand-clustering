@@ -1,1 +1,1 @@
-#bibliography(title: "Documentary References", style: "iso-690-author-date", "../main.bib")
+#bibliography(title: "Documentary References", style: "../iso690-author-date-fr-no-abstract.csl", full: true, "../main.bib")

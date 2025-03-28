@@ -9,7 +9,7 @@
 In computer science, the edit distance is a metric that measures the difference between two strings.
 This is done by counting the minimum number of operations needed to transform one string $a$ into another string $b$.
 This metric is commonly applied in spelling correction tools, where it helps identify and suggest the closest correct word when a misspelling is detected.
-Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different RNA sequences.
+Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different RNA or DNA sequences.
 By doing so, it enables researchers to detect, analyze and study mutations.
 
 There are several types of editing distance that can be categorized according to the operations they support and allow.
@@ -36,12 +36,12 @@ On this table, you can see different types on the @fig_tab_edit_distance_types.
   ]
 )
 
-As mentioned in the introduction, DNA is subject to three types of operation: insertion, deletion and substitution.
+As mentioned in the introduction, DNA is subject to three types of operations: insertion, deletion and substitution.
 These are due to the variability introduced throughout the DNA processing pipeline.
-Only two of these last edit distance achieve the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
-These two differs by the fact that the Damerau-Levenshtein include transpositions in addition to the classical edit operations.
+Only two of these last edit distances achieve the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
+These two differ by the fact that the Damerau-Levenshtein include transpositions in addition to the classical edit operations.
 An operation that does not appear in the modifications that DNA strands can suffer.
-Thus, it goes without saying, that Levenshtein distance is the most appropriate for our project.
+Thus, it goes without saying that Levenshtein distance is the most appropriate for our project.
 
 The naive recursive approach to compute the Levenshtein distance is given by the @eq_lev_naive.
 
@@ -61,7 +61,7 @@ $
 $ <eq_lev_naive>
 
 Knowing that $n$ and $m$ are respectively the length of the strings $a$ and $b$.
-That the $op("head")$ function return the first character of a string and that the $op("tail")$ function return the remaining part of a string after removing the first character.
+That the $op("head")$ function return the first character of a string, and that the $op("tail")$ function return the remaining part of a string after removing the first character.
 
 As an example, let's consider the following task : correct the word "kitten" to form the word "sitting".
 One can easily notice that the Levenshtein distance between these two words is three, meaning it takes three operations to convert one word into the other.
@@ -80,9 +80,9 @@ In total, three operations (two substitutions and one insertion) are required to
 === Wagner-Fischer
 
 The Wagner-Fischer algorithm builds upon the naive approach by incorporating dynamic programming.
-It works by breaking the problem into smaller sub-problems, solving them one after the other to retrieve the solution from the original problem.
+It works by breaking the problem into smaller sub-problems and solving them one after the other to retrieve the solution from the original problem.
 In the case of the Wagner-Fischer algorithm, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full string.
-The code below show a naive pseudo of the Wagner-Fischer algorithm.
+The code below shows a naive pseudo of the Wagner-Fischer algorithm.
 An improved one is explained on the @chap_wagner-fischer_imp.
 
 #align(center)[
@@ -113,7 +113,7 @@ function wagner_fischer(char a[1..n], char b[1..m]):
 
 The matrix in the @fig_grid_wagner-fischer represents the matrix filled by the Wagner-Fischer algorithm between the words "sitting" and "kitten".
 The highlighted path shows the most optimized path for moving from one string to the other.
-If we want to correct the word "sitting" to "kitten", we can think of a diagonal movement as a substitution (or no operation if the letters are identical), movements to the right as an insertion and downward as a deletion.
+If we want to correct the word "sitting" to "kitten", we can think of a diagonal movement as a substitution (or no operation if the letters are identical), movements to the right as an insertion, and movements downward as a deletion.
 
 #let path_color = rgb("#C6DBEF");
 #sourced_figure(
@@ -148,7 +148,7 @@ If we want to correct the word "sitting" to "kitten", we can think of a diagonal
 
 One of the key strengths of the Wagner-Fischer algorithm lies in its simplicity.
 But, unfortunately, when dealing with long strings, this algorithm is not very efficient.
-With some optimization, Wagner-Fischer have a time complexity of $Omicron(n times k)$, $n$ being the length of the query and $k$ the maximum tolerated distance.
+With some optimization, Wagner-Fischer has a time complexity of $Omicron(n times k)$, $n$ being the length of the query (string $a$) and $k$ the maximum tolerated distance.
 Another drawback is the memory requirement, as the algorithm needs to store a matrix of size $Omicron(n times m)$.
 This can be optimized to $Omicron(n)$ by storing only the current and previous rows of the matrix.
 Note that the memory will, in any case, become significant when comparing a lot of data simultaneously.
@@ -157,34 +157,34 @@ Note that the memory will, in any case, become significant when comparing a lot 
 === Bitap
 
 The Bitap algorithm is one of the most widely used algorithms in search tools, partly because it is the underlying algorithm for the Unix utility _agrep_.
-Originally, the Bitap algorithm allows you to find an exact pattern $P$ of length $n$ in a text $T$ of length $m$.
-It does this efficiently by using bitwise operations to maintain bit-vectors that tracks matches of $P$ as it scans $T$.
+Originally, the Bitap algorithm allowed finding an exact pattern $P$ of length $n$ in a text $T$ of length $m$.
+It does this efficiently by using bitwise operations to maintain bit vectors that track matches of $P$ as it scans $T$.
 With some optimization, it can also perform fuzzy searching, meaning it can find approximate matches of $P$ within $T$ according to a threshold $k$.
 
-This is done by maintaining multiple bit-vectors, each representing the state of the search while allowing a different number of errors.
+This is done by maintaining multiple bit vectors, each representing the state of the search, while allowing a different number of errors.
 Instead of tracking a single match state, we define $k+1$ bit vectors, $R_0$ through $R_k$, where $R_e$ represents matches with up to $e$ errors.
 
 To efficiently track character matches, the algorithm precomputes a bitmask table, often referred to as the $T$ table.
-This table stores, for each character in the alphabet $sigma$, a bit-vector indicating its positions in the pattern $P$.
+This table stores, for each character in the alphabet $sigma$, a bit vector indicating its positions in the pattern $P$.
 Instead of scanning $P$ for each character in the text, the algorithm can quickly determine matches using bitwise operations with these precomputed masks.
 
-If we take a pattern $P$ of `ababc` to be searched in `abdabababc`, the alphabet would be $sigma = {a, b, c, d}$ and the $T$ bitmask table would look like the table in the @fig_img_bitap_table.
+If we take a pattern $P$ of `ababc` to be searched in `abdabababc`, the alphabet would be $sigma = {a, b, c, d}$ and the $T$ bit mask table would look like the table in the @fig_img_bitap_table.
 
 #sourced_figure(
   source: link("https://medium.com/data-science-in-your-pocket/fuzzy-matching-algorithms-explained-e0ff30cc00ca", [from medium.com, ref. URL06]),
   fig: [
     #figure(
-      caption: [Example of the bitmask table $T$ of the Bitap algorithm],
+      caption: [Example of the bit mask table $T$ of the Bitap algorithm],
 
       image("../figure/bitap_table.png", width: 25%)
     ) <fig_img_bitap_table>
   ],
 )
 
-By processing the text from left to right and updating these bit-vectors at each step, the algorithm efficiently finds approximate matches where the last bit of any $R_e$ vector indicates whether a match with at most $e$ errors has been found.
-Despite its worst-case complexity of $Omicron(k times n)$, Bitap with errors remains practical for small $k$ due to the efficiency of bitwise operations, making it widely used in search utilities like agrep and modern fuzzy search tools.
+By processing the text from left to right and updating these bit vectors at each step, the algorithm efficiently finds approximate matches, where the last bit of any $R_e$ vector indicates whether a match with at most $e$ errors has been found.
+Despite its worst-case complexity of $Omicron(k times n)$, Bitap with errors remains practical for small $k$ due to the efficiency of bitwise operations, making it widely used in search utilities like _agrep_ and modern fuzzy search tools.
 It has a total space complexity of $Omicron(k times m + sigma)$.
-Bitap delivers excellent practical performance as it manage to do most of the work with bitwise operations, which are extremely fast.
+Bitap delivers excellent practical performance, as it manages to do most of the work with bitwise operations, which are extremely fast.
 It goes without saying that using binary operations is a major advantage when it comes to implementing the algorithm on FPGAs.
 
 
@@ -198,12 +198,12 @@ Once matches are found, BLAST extends them in both directions to determine the l
 If the extended alignment surpasses a predetermined score threshold $k$, it is reported as a match.
 
 One of the key components of BLAST’s efficiency is its use of a hash table.
-It stores all possible sub-sequences of letters called words.
+It stores all possible sub-sequences of letters, called words.
 A word is of a specific length $w$ typically between three or eleven letters.
 The size of the hash table depends on the alphabet used: for nucleotide sequences, there are $4^w$ possible words, while for protein sequences, there are $20^w$ possible words.
 This table significantly speeds up the search process, as it allows for efficient lookups of potential matches in the database.
 For example, suppose that the DNA sequence contains the following stretch of nucleotides: `AGTCCG`.
-If a BLAST search is conducted under normal conditions with a word size of 3 nucleotides, the words in the hash table would be `AGT`, `GTC`, `TCC`, and `CCG`.
+If a BLAST search is conducted under normal conditions with a word size of three nucleotides, the words in the hash table would be `AGT`, `GTC`, `TCC`, and `CCG`.
 
 #sourced_figure(
   source: link("https://bio.libretexts.org/Bookshelves/Computational_Biology/Book%3A_Computational_Biology_-_Genomes_Networks_and_Evolution_(Kellis_et_al.)/03%3A_Rapid_Sequence_Alignment_and_Database_Search/3.05%3A_The_BLAST_algorithm_(Basic_Local_Alignment_Search_Tool)", [from bio.libretexts.org, ref. URL07]),
@@ -217,26 +217,26 @@ If a BLAST search is conducted under normal conditions with a word size of 3 nuc
 )
 
 The time complexity of BLAST is generally $Omicron(D)$, where $D$ is the size of the database.
-This makes BLAST much faster than exact string matching algorithms, as it does not compare every possible alignment but instead quickly identifies regions likely to be similar.
+This makes BLAST much faster than exact string matching algorithms, as it does not compare every possible alignment, but instead quickly identifies regions likely to be similar.
 However, it adds the risk that some optimal alignments may be missed.
 
 In terms of space complexity, BLAST requires memory for the hash table, which contains $4^w$ entries for nucleotide sequences, as well as for the alignments that are extended during the search.
 The total space complexity is thus $O(4^w + D)$, which is slightly higher than other alignment algorithms, but still efficient compared to more computationally expensive methods like dynamic programming.
 
 BLAST comes in several variations, each using specific types of data.
-The most suitable algorithm for this project is BLASTN, which compares nucleotide sequences.
+The most suitable algorithm for this project is  Basic Local Alignment Search Tool Nucleotide (BLASTn), which compares nucleotide sequences.
 Despite its efficiency, the complex memory requirements make its implementation on FPGAs challenging.
 
 
 === Smith-Waterman & Needleman-Wunsch
 
 Unlike BLAST, Smith-Waterman is not heuristic, which makes it more interesting depending on the context of the project, as in our case.
-A bit like Wagner-Fischer, it works by using matrix where each cell contains a score representing the best possible alignment between prefixes of the two sequences.
+A bit like Wagner-Fischer, it works by using a matrix where each cell contains a score representing the best possible alignment between prefixes of the two sequences.
 The scoring is based on matches, mismatches, and gaps (insertions or deletions).
 
-It works by filling a matrix comparing characters from both sequences and choosing the optimal score at each step.
+It works by filling a matrix, comparing characters from both sequences, and choosing the optimal score at each step.
 The score represents the probability of a good alignment.
-The higher the score, the better the alignment of the two substrings.
+The higher the score, the better the alignment of the two sub-strings.
 Smith-Waterman fills the matrix iteratively using a substitution matrix, often described as an $s$ function.
 A trivial $s$ function could be as described in @eq_smith-waterman_s.
 $
@@ -266,7 +266,7 @@ After filling the matrix, the algorithm traces back from the highest scoring cel
 
 With Gotoh and Altschul's optimizations, the Smith-Waterman algorithm has a time complexity of $Omicron(n times m)$.
 The cost of this greater complexity than BLAST is due to the fact that this algorithm is not heuristic.
-However, it poses some problems in our context, the algorithm performs local alignment when a global one is needed.
+However, there is a problem for our context; the algorithm performs local alignment when a global one is needed.
 But there's a trick to fix this: the Needleman-Wunsch algorithm.
 
 The Needleman-Wunsch algorithm is very similar to the Smith-Waterman algorithm.
@@ -282,14 +282,14 @@ It is therefore possible but difficult to achieve hardware acceleration on this 
 
 Myers' Bit-parallel algorithm is a highly efficient method for edit-distance-based string matching.
 Unlike traditional dynamic programming approaches (e.g., Wagner-Fischer), which rely on filling a two-dimensional matrix, Myers’ algorithm optimizes this process using bit-parallelism (a bit like Bitap).
-Myers’ algorithm represents the state of the computation using bit vectors.
+Myers’ bit-parallel algorithm represents the state of the computation using bit vectors.
 Each bit vector compactly encodes whether a match, substitution, insertion, or deletion is needed at each position in the pattern.
 By leveraging bitwise operations, the algorithm efficiently simulates the dynamic programming table updates.
 
-To better understand this concept, let's look at how Myers went from computing an n-times-m matrix to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$.
-To do this, we need to understand several key principles derived from the traditional n-by-m matrix.
+To better understand this concept, let's look at how Myers went from computing an $n times m$ matrix to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$.
+To do this, we need to understand several key principles derived from the traditional $n$ by $m$ matrix.
 In the Wagner-Fischer algorithm, when optimizing memory space, we note that a column $C_j$ of the matrix can be computed using only the column $C_(j-1)$ that precedes it.
-A related observation is that the difference between adjacent entries in any row or column is either $+1$, $0$, or $-1$. There is a more general way to present this, found in the 4-Russians algorithm for string comparison. Formally, we have: _horizontal delta_ $Delta h[i, j]$ as $C[i, j] - C[i, j - 1]$ and _the vertical delta_ $Delta v[i, j]$ as $C[i, j] - C[i - 1, j]$ for all $(i, j) in [1, m] times [1, n]$.
+A related observation is that the difference between adjacent entries in any row or column is either $+1$, $0$, or $-1$. There is a more general way to present this, found in the 4-Russians algorithm for string comparison. Formally, we have the _horizontal delta_ $Delta h[i, j]$ as $C[i, j] - C[i, j - 1]$ and the _vertical delta_ $Delta v[i, j]$ as $C[i, j] - C[i - 1, j]$ for all $(i, j) in [1, m] times [1, n]$.
 $Delta v$ and $Delta h$ are matrices that represent the traditional Wagner-Fischer matrix, but relative to the preceding cells, vertically or horizontally.
 Using several theorems, Myers manages to transform the problem of calculating the Wagner-Fischer matrix into the calculation of the matrix $Delta v$ except for the last step where $Delta h$ is necessary.
 But this can be calculated using a simple product on a part of $Delta v$.
@@ -298,7 +298,7 @@ But this can be calculated using a simple product on a part of $Delta v$.
   source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [from gersteinlab.org, ref. URL09]),
   fig : [
     #figure(
-      caption: [Myers' dynamic programming (d.p.) matrices],
+      caption: [Myers' bit-parallel algorithm dynamic programming (d.p.) matrices],
 
       image("../figure/myers_matrices.png"),
     ) <fig_img_myers_matrices>
@@ -307,11 +307,11 @@ But this can be calculated using a simple product on a part of $Delta v$.
 
 The @fig_img_myers_matrices shows, on the left, the traditional matrix found in Wagner-Fischer and, on the right, the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
 The illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$.
-They represent whether or not an addition (P) or subtraction (M) of $1$ occurs on a cell.
-They cannot both be true (be equal to 1) at the same time.
+They represent whether an addition (P) or subtraction (M) of $1$ occurs on a cell.
+They cannot both be true (be equal to $1$) at the same time.
 To represent a row, simply create a bit vector, hence the bit vectors $\Pv$, $\Ph$, $\Mv$, and $\Mh$, where $v$ and $h$ represent the axes where the operation is performed (vertical or horizontal).
 To correctly calculate these bit vectors, it is necessary to know whether the current characters are similar or not.
-$\Eq$, a bit vector, is responsible of doing so.
+$\Eq$, a bit vector, is responsible for doing so.
 It represents equality between the characters.
 $\Eq$ can be calculated with a simple comparison, but to save time on the computation of a column of $Omicron(1)$, it is clever to precompile it into a matrix named $P\eq[sigma]$, with $sigma$ being the alphabet over which the two strings originate.
 
@@ -337,7 +337,7 @@ for j from 1 to n:
 ```
 ]
 
-Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n)$ and a space complexity of $Omicron(n)$.
+Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n + m/w)$, with $w$ being the length of a machine word, and a space complexity of $Omicron(n)$.
 The use of binary operations helps in several ways.
 It significantly speeds up computations since these operations can generally be performed in a single clock cycle.
 Furthermore, it greatly simplifies the hardware acceleration.
@@ -373,12 +373,13 @@ To make the following easier, @fig_tab_algo_recap summarizes their main features
   ]
 )
 
-A very important eliminatory criterion for this project is the algorithm's range.
+A very important eliminatory criteria in the context of this project is the algorithm's range.
 Indeed, algorithms with a local range are not suitable for this project, as they do not allow for the evaluation of overall similarity between sequences.
 They focus only on identifying the most similar subsequences, which can lead to fragmented results that are not representative of the entire sequence.
 Therefore, the BLAST and Smith-Waterman algorithms cannot be used for this project.
 
-Regarding the second most important criterion, time complexity, Myers wins hands down with a theoretical speed of $Omicron(n)$.
+Regarding the second most important criteria, time complexity, Myers' bit-parallel algorithm wins hands down with a theoretical speed of $Omicron(n + m/w)$, as $w$ can be chosen as the same value of $m$ in FPGA.
 In order to compare this speed with another algorithm, it was necessary to choose another algorithm to implement.
 Among the remaining algorithms, although Needleman-Wunsch and Bitap were good candidates, Wagner-Fischer was implemented. This is because it was the project's original proposed algorithm.
-And in order to see how Myers's algorithm optimized the original proposed algorithm, it was chosen.
+And in order to see how Myers' bit-parallel algorithm optimized the original proposed algorithm, it was chosen.
+

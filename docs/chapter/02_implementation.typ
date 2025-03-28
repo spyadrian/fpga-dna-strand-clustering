@@ -3,10 +3,10 @@
 = Implementation and Benchmarking in C <chap_implementation_c>
 // - explain the purpose of implementing the algorithms in C as a precursor to hardware implementation
 
-It is important to start by understanding and seeing a C implementation of the Wagner-Fischer and Myers algorithm.
+It is important to start by understanding and seeing a C implementation of the Wagner-Fischer and Myers' bit-parallel algorithm.
 First, it allows familiarization with the implemented algorithm, while also providing a better understanding of the data dependencies and linked operations that are important during the VHDL implementation.
-This also allows to compare the speed of these two algorithms on the DNA inputs available in the project.
-These implementations also created a database allowing for future testing of the VHDL implementation.
+This also allows comparing the speed of these two algorithms on the DNA inputs available in the project.
+These implementations also created a database, allowing for future testing of the VHDL implementation.
 
 
 == Implementation Details
@@ -14,21 +14,21 @@ These implementations also created a database allowing for future testing of the
 // - highlight key design decisions, optimizations, and data structures used
 // - talk about uint256_t and dockerfile
 
-The Wagner-Fischer and Myers implementations are taken from a study by Fujimoto Seiji, author of Polyleven, a Python library used to calculate the Levenshtein distance.
+The Wagner-Fischer and Myers' bit-parallel algorithm implementations are taken from a study by Fujimoto Seiji, author of Polyleven, a Python library used to calculate the Levenshtein distance.
 In this 2020 study, Fujimoto Seiji implements both algorithms in order to compare them, as in this project.
 The implementations below are therefore based on these implementations.
 
 === Wagner-Fischer <chap_wagner-fischer_imp>
 
 The Wagner-Fischer implementation includes several optimizations.
-The first is a simple optimization of the space that use the algorithm.
+The first is a simple optimization of the space that uses the algorithm.
 Indeed, in this algorithm, the task is to calculate an $n times m$ matrix, more specifically, the cell located at the bottom right of the matrix.
 However, since only the column preceding the one being calculated is required to advance through the matrix, it is not necessary to store the entire matrix.
 With this technique, the algorithm goes from using a memory space of $n times m$ to a size of $n$.
 
 A second optimization is the Ukkonen optimization.
 It reduces the complexity from $Omicron(n times m)$ to $Omicron(n times k)$, where $k$ is the maximum tolerated distance.
-It works by excluding certain cells from the table which are sure to be above $k$.
+It works by excluding certain cells from the table that are sure to be above $k$.
 Normally, cells in the upper-right or lower-left corner.
 Making the algorithm compute at most $n(2k + 1)$ cells.
 This is well illustrated in the @fig_grid_ukkonen.
@@ -60,14 +60,14 @@ This is well illustrated in the @fig_grid_ukkonen.
   ]
 )
 
-On the example between "abdc" and "pqrs" in @fig_grid_ukkonen, we can see that the Ukkonen optimization remove the computation of 12 cells.
-So we only need to fill the remaining 13 cells to compute the distance of Levenshtein of the two strings.
+On the example between "abdc" and "pqrs" in @fig_grid_ukkonen, we can see that the Ukkonen optimization removes the computation of 12 cells.
+So we only need to fill the remaining 13 cells to compute the distance of Levenshtein between the two strings.
 The implementation with both optimizations is available in @app_wagner-fischer.
 
 
 === Myers' Bit-parallel Algorithm
 
-Myers' algorithm has remained unchanged, so there isn't much to add.
+Myers' bit-parallel algorithm has remained unchanged, so there isn't much to add.
 In its implementation, available in @app_myers, we can still notice the use of variables of type `uint256_t`.
 Indeed, the DNA strands used are character strings of more than 200 characters and must be represented by bit vectors of the same length, i.e., `uint256_t`.
 These caused a problem because, given that a machine word generally does not exceed 64 bits, it is difficult for the _gcc-13_ compiler to handle them.
@@ -122,19 +122,19 @@ The test program is a very naive C code.
 It retrieves the data and prepares it so it can be used by the two algorithms.
 It then feeds it to the algorithm, testing its results against the results contained in the data.
 If an error occurs, it reports it.
-With more then 1'000 database entries, the programs didn't notice even one error.
-*Both implementation were correct*.
+With more than 1'000 database entries, the programs didn't notice even one error.
+Both implementation were correct.
 
-The benchmark is a simple C code that calculates the time it takes for the Myers algorithm and the Wagner-Fischer algorithm to compare $n$ data points.
-The data it compares are fixed-length strings containing random characters from the following list: "0123456789abcdef". #footnote[A text with only "ACGT" shouldn't change anything.]
-The first benchmark launched tested the time it took the algorithms to compare eight datasets of different sizes : 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
-This benchmark was clearly enough to know which algorithm was the most efficient, the data are regrouped on the @fig_img_graph_benchmark.
+The benchmark is a simple C code that calculates the time it takes for the Myers' bit-parallel algorithm and the Wagner-Fischer algorithm to compare $n$ data points.
+The data it compares are fixed-length strings containing random characters from the following list: "0123456789abcdef". #footnote[A text with only "ACGT" does not change the result.]
+The first benchmark launched tested the time it took the algorithms to compare eight datasets of different sizes: 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
+This benchmark was clearly enough to know which algorithm was the most efficient; the data are regrouped on the @fig_img_graph_benchmark.
 
 #sourced_figure(
   source: [by Adrian Spycher],
   fig: [
     #figure(
-      caption: [Benchmark between the Wagner Fischer and Myers algorithms implemented in C],
+      caption: [Benchmark between the Wagner-Fischer and Myers' bit-parallel algorithm implemented in C],
 
       image("../figure/graph_benchmark.png")
     ) <fig_img_graph_benchmark>

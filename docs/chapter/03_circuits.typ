@@ -4,7 +4,7 @@
 // - introduce the challenges of implementing string-matching algorithms on FPGAs
 // - state the motivation for hardware acceleration and its potential benefits
 
-Implementing a Levenshtein distance calculation algorithm presents several challenges.
+Implementing a Levenshtein distance calculation algorithm in VHDL presents several challenges.
 Indeed, these types of algorithms are very resource-intensive.
 In an FPGA, this translates into a limited number of LUTs.
 Even after thoroughly understanding the algorithm and implementing it in C, translating it into VHDL remains a challenging task, as C and VHDL are two very different languages, where certain methods and logic do not work in both.
@@ -34,8 +34,8 @@ A general diagram can be found in @fig_img_block_diagram.
 )
 
 Each module communicates via well-defined interfaces, allowing for efficient and parallel execution of different tasks.
-Some modules operate in a pipeline, allowing for continuous data processing and better overall throughput.
-The architecture was also designed to ensure a good scalability, as it might be change during the bachelor's project.
+Some modules operate in a pipelining mode, allowing for continuous data processing and better overall throughput.
+The architecture was also designed to ensure good scalability, as it might be changed during the bachelor's project.
 
 
 == Module Description
@@ -101,7 +101,7 @@ It is used to reduce data complexity by assigning a unique code to each active e
 )
 
 Working with bits allows for faster computations and, more importantly, reduces the memory space needed.
-A four-character alphabet let each character to be represented by two bits as show in the encoding in the @fig_tab_alphabet_encoding.
+A four-character alphabet lets each character be represented by two bits, as shown in the encoding in the @fig_tab_alphabet_encoding.
 A conversion example is available in @fig_img_DNA_to_binary.
 
 #sourced_figure(
@@ -123,7 +123,7 @@ In our case, the two-bit encoding is designed for hardware use.
 === Myers Controller
 
 The Myers controller is only used to manage the Myers Core module.
-It manages the inputs and outputs provided to Myers core component, as well as the various timings that must be respected.
+It manages the inputs and outputs provided to the Myers core component, as well as the various timings that must be respected.
 In the second part of this project, it will also handle the parallelization of the Myers core module.
 
 
@@ -137,7 +137,7 @@ It is detailed in the @chap_core_component.
 === Clustering
 
 The Clustering module assembles DNA strands based on their Levenshtein distance.
-It groups together the strands closest to each other, this creates groups in which we assume that each strand comes from the same original strand.
+It groups together the strands closest to each other; this creates groups in which we assume that each strand comes from the same original strand.
 To store these groups, it uses BRAM, which offers fast dual-port access.
 When all the groups have been evaluated, it will provide the sorted strands to the decoder.
 
@@ -155,7 +155,7 @@ It handles the core calculation of the Myers algorithm.
 This consists of managing the evolution of the bit vectors as the algorithm progresses until the final score is obtained, i.e., the Levenshtein distance between two strands.
 To achieve this, the Myers core is composed of two separate blocks: one for updating the bit vectors, while the other for updating the score.
 The reason for separating the component into two blocks is due to the fact that there is a dependency between the calculation of the score and two of the bit vectors.
-Those bits vectors must be stable in order to ensure that the score is correctly computed.
+Those bit vectors must be stable in order to ensure that the score is correctly computed.
 To ensure this and maintain a clock frequency as high as possible, a pipelined architecture was developed.
 
 #sourced_figure(
@@ -174,10 +174,10 @@ The $\BV_i$ cells represent the bit vector processing part, while those with $S_
 Cells with the same color work for the same cycle of the Myers algorithm.
 As demonstrated in this figure, the Myers Core components are chained together to obtain the Levenshtein distance at the last cell.
 Thus, after the first $m$ cycles, we begin to retrieve the Levenshtein distance from the data at each cycle, allowing us to process iteratively.
-To manage the two separate blocks, the VHDL separate them in two processes, respectively, `proc_core` and `proc_score` available in the @app_vhdl_myers.
+To manage the two separate blocks, the VHDL separates them in two processes, respectively, `proc_core` and `proc_score` available in the @app_vhdl_myers.
 
 In normal operation, this process updates the vectors according to the current index `idx_i`, which is used to traverse the sequence.
-If `idx_i` is not equal to one, shift operations are applied to `ph` and `mh` to simulate progress in the alignment.
+If `idx_i` is not equal to 1, shift operations are applied to `ph` and `mh` to simulate progress in the alignment.
 Then, the new vectors `pv` and `mv` are calculated based on the previous states and the results of the `peq_i` operation, which stores information about the character matches between the sequences `s1_i` and `s2_i`.
 Finally, the `ph_o` and `mh_o` values are updated to reflect the new vector states, and the score update signals (`add_score_o`, `sub_score_o`) are calculated based on the last element of the `ph_o` and `mh_o` vector.
 

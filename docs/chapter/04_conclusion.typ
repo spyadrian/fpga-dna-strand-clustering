@@ -7,7 +7,7 @@
 This project involved hardware acceleration of a Levenshtein distance calculation algorithm between two strings, in this case DNA strands.
 After researching and gaining a thorough understanding of the different existing algorithms, the algorithms were compared.
 The most suitable algorithm for this project was the Myers algorithm.
-It is one of the fastest Levenshtein distance calculation algorithms and, more importantly, it is very well-suited for FPGAs.
+It is one of the fastest Levenshtein distance calculation algorithms, and, more importantly, it is very well-suited for FPGAs.
 For testing purposes, it was implemented in C alongside one of its competitors, the Wagner-Fischer algorithm.
 Their tests concluded that the Myers algorithm was indeed the most suitable for this project.
 Following this, a review and initial VHDL implementation were undertaken.
@@ -20,7 +20,7 @@ This expected behavior was explained in the last section of this document.
 
 During this project, there were many challenges to overcome.
 One of them, which was certainly the most challenging, was the research on alignment algorithms and Levenshtein distance calculations.
-Indeed, algorithms are often not well defined; they are rather a base upon which many scientists add their own grain of sand.
+Indeed, algorithms are often not well-defined; they are rather a base upon which many scientists add their own grain of sand.
 Whether optimizations for time complexity, space complexity, or modifications to adapt the algorithm to other purposes, it is difficult at first glance to obtain clear and precise information.
 This information is often subject to change during the research.
 Even during the writing of these last chapters, new optimizations were found on some of the algorithms.
@@ -38,7 +38,7 @@ This was a necessary step that ensures the project is moving in the best possibl
 // - suggest potential improvements
 
 The VHDL implementation of the Myers algorithm remains a prototype for the time being, and will be used for the bachelor's project.
-This approach provides a good start to the problem, but does not take into account certain issues that will arise when scaling the system.
+This approach provides a good start to the problem but does not take into account certain issues that will arise when scaling the system.
 Such as managing synchronization between different processing units, optimizing software and hardware resources, and improving error handling at large scales.
 Furthermore, aspects related to computational parallelization and efficient memory usage will need to be considered to ensure optimal performance in more complex environments.
 

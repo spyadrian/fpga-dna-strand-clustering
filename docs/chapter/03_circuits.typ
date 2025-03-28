@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= VHDL Implementation and hardware Optimization
+= VHDL Implementation and hardware Optimization <chap_implementation_vhdl>
 // - introduce the challenges of implementing string-matching algorithms on FPGAs
 // - state the motivation for hardware acceleration and its potential benefits
 
@@ -20,9 +20,18 @@ Furthermore, the use of pipelining allows processing steps to be chained togethe
 // - describe the data flow, pipelining strategies, and parallelization techniques used.
 
 The project architecture is divided into seven modules, each with its own responsibilities.
-A very general diagram can be found in Figure X.
+A general diagram can be found in @fig_img_block_diagram.
 
-#todo[add diagram]
+#sourced_figure(
+  source: link("", []),
+  fig: [
+    #figure(
+      caption: [],
+
+      image("../figure/block_diagram.png", width: 70%)
+    ) <fig_img_block_diagram>
+  ]
+)
 
 Each module communicates via well-defined interfaces, allowing for efficient and parallel execution of different tasks.
 Some modules operate in a pipeline, allowing for continuous data processing and better overall throughput.
@@ -34,8 +43,6 @@ The architecture was also designed to ensure a good scalability, as it might be 
 // - include key components such as distance calculation, input handling, and output processing
 
 === File Loader
-
-#todo[add schema]
 
 The file loader is responsible for reading the input file.
 This file contains all the DNA strands to be sorted.
@@ -70,8 +77,6 @@ In a real-life scenario, the data connection would be made using a PCI connectio
 
 === Encoder and Decoder
 
-#todo[add schema]
-
 This encoder is a combinational circuit that converts an array containing all text entries representing DNA strands into an array with the same strands but encoded using two bits.
 It is used to reduce data complexity by assigning a unique code to each active entry.
 
@@ -91,8 +96,8 @@ It is used to reduce data complexity by assigning a unique code to each active e
   )
 ) <fig_tab_alphabet_encoding>
 
-Working with bits allows for faster computations and, more importantly, reduces the amount of memory used to store bits.
-With a four-character alphabet let each character to be represented by two bits as show in the encoding in the @fig_tab_alphabet_encoding.
+Working with bits allows for faster computations and, more importantly, reduces the memory space needed.
+A four-character alphabet let each character to be represented by two bits as show in the encoding in the @fig_tab_alphabet_encoding.
 A conversion example is available in @fig_img_DNA_to_binary.
 
 #sourced_figure(
@@ -113,8 +118,6 @@ In our case, the two-bit encoding is designed for hardware use.
 
 === Myers Controller
 
-#todo[add schema]
-
 The Myers controller is only used to manage the Myers Core module.
 It manages the inputs and outputs provided to Myers core component, as well as the various timings that must be respected.
 In the second part of this project, it will also handle the parallelization of the Myers core module.
@@ -122,16 +125,12 @@ In the second part of this project, it will also handle the parallelization of t
 
 === Myers Core
 
-#todo[add schema]
-
 Myers Core is the heart of the Myers algorithm.
 It handles the fundamental Myers calculations, those included in the algorithm loop seen in the @fig_code_myers.
 It is detailed in the @chap_core_component.
 
 
 === Clustering
-
-#todo[add schema]
 
 The Clustering module assembles DNA strands based on their Levenshtein distance.
 It groups together the strands closest to each other, this creates groups in which we assume that each strand comes from the same original strand.
@@ -147,8 +146,6 @@ When all the groups have been evaluated, it will provide the sorted strands to t
 // - highlight key optimizations, such as reducing computation cycles or leveraging FPGA-specific features
 // - explain how you verified the correctness of the core component through simulations and testbenches
 
-#todo[talk about FPGA characteristique, isolate better the problem and what we are resolving and chaining bloc]
-
 As stated previously, the Myers core component plays a very important role in the system.
 It handles the core calculation of the Myers algorithm.
 This consists of managing the evolution of the bit vectors as the algorithm progresses until the final score is obtained, i.e., the Levenshtein distance between two strands.
@@ -157,11 +154,23 @@ The reason for separating the component into two blocks is due to the fact that 
 Those bits vectors must be stable in order to ensure that the score is correctly computed.
 To ensure this and maintain a clock frequency as high as possible, a pipelined architecture was developed.
 
-#todo[add schema pipelining]
+#sourced_figure(
+  source: link("", []),
+  fig: [
+    #figure(
+      caption: [],
 
-#todo[explain schema]
+      image("../figure/myers_pipeline.png")
+    ) <fig_img_myers_pipepline>
+  ]
+)
 
-To manage the two separate blocks, the VHDL code manages them on two separate processes, respectively, `proc_core` and `proc_score` available in the @app_vhdl_myers.
+The diagram in @fig_img_myers_pipepline shows the Myers Core component pipeline.
+The $\BV_i$ cells represent the bit vector processing part, while those with $S_i$ cells handle the score.
+Cells with the same color work for the same cycle of the Myers algorithm.
+As demonstrated in this figure, the Myers Core components are chained together to obtain the Levenshtein distance at the last cell.
+Thus, after the first $m$ cycles, we begin to retrieve the Levenshtein distance from the data at each cycle, allowing us to process iteratively.
+To manage the two separate blocks, the VHDL separate them in two processes, respectively, `proc_core` and `proc_score` available in the @app_vhdl_myers.
 
 In normal operation, this process updates the vectors according to the current index `idx_i`, which is used to traverse the sequence.
 If `idx_i` is not equal to one, shift operations are applied to `ph` and `mh` to simulate progress in the alignment.

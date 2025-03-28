@@ -1,11 +1,11 @@
 #import "../conf.typ": *
 
-= Implementation and Benchmarking in C
+= Implementation and Benchmarking in C <chap_implementation_c>
 // - explain the purpose of implementing the algorithms in C as a precursor to hardware implementation
 
 It is important to start by understanding and seeing a C implementation of the Wagner-Fischer and Myers algorithm.
-First, it allows familiarization with the implemented algorithm, while also providing a better understanding of the data dependencies and links operations that are important during the VHDL implementation.
-This also allowed us to compare the speed of these two algorithms on the DNA inputs available in the project.
+First, it allows familiarization with the implemented algorithm, while also providing a better understanding of the data dependencies and linked operations that are important during the VHDL implementation.
+This also allows to compare the speed of these two algorithms on the DNA inputs available in the project.
 These implementations also created a database allowing for future testing of the VHDL implementation.
 
 
@@ -92,7 +92,7 @@ So creating one was more convenient.
 To populate the database, a Python script was developed to generate synthetic data.
 This script creates two random character strings and calculates their corresponding Levenshtein distance, providing the necessary data for the database.
 The first part of this database is filled with the Faker library, which provides random words from a chosen language.
-The second part is filled with false strands DNA (_ACGT_) of variable length.
+The second part is filled with false DNA strands (_ACGT_) of variable length.
 To calculate their Levenshtein distances, the Python library "Levenshtein" was used.
 This reliable library is open-source and used by over 11,000 users.
 An example of the data in @fig_tab_data_test.
@@ -120,7 +120,7 @@ With more then 1'000 database entries, the programs didn't notice even one error
 
 The benchmark is a simple C code that calculates the time it takes for the Myers algorithm and the Wagner-Fischer algorithm to compare $n$ data points.
 The data it compares are fixed-length strings containing random characters from the following list: "0123456789abcdef". #footnote[A text with only "ACGT" shouldn't change anything.]
-The first benchmark launched tested the time it took the algorithms to compare eight data sets of different sizes : 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
+The first benchmark launched tested the time it took the algorithms to compare eight datasets of different sizes : 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
 This benchmark was clearly enough to know which algorithm was the most efficient, the data are regrouped on the @fig_img_graph_benchmark.
 
 #figure(
@@ -133,8 +133,6 @@ The graph in @fig_img_graph_benchmark shows the execution time in seconds of the
 Although the spacing between the Wagner-Fischer and Myers bars appears identical across groups of inputs, the scale is actually logarithmic.
 This means that for a number of 32,768, there is a factor of $6.82$ between Wagner-Fischer and Myers.
 This places Myers far ahead of Wagner-Fischer in terms of speed, which was expected given their time complexity.
-
-#todo[add more]
 
 // - analyze the results to compare the algorithms in terms of performance and resource usage
 // - discuss how these results influenced your choice for FPGA implementation

@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Algorithm Selection and Theoretical Analysis
+= Algorithm Selection and Theoretical Analysis <chap_algorithm_selection>
 
 == Introduction to Levenshtein Distance
 // - briefly explain what the Levenshtein distance is and why it’s necessary for DNA strand clustering
@@ -36,7 +36,7 @@ On this table, you can see different types of edit distances :
 )
 
 As mentioned in the introduction, DNA is subject to three types of operation: insertion, deletion and substitution.
-These are due to the variability introduce throughout the DNA processing pipeline.
+These are due to the variability introduced throughout the DNA processing pipeline.
 Only two of these last edit distance achieve the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
 These two differs by the fact that the Damerau-Levenshtein include transpositions in addition to the classical edit operations.
 An operation that does not appear in the modifications that DNA strands can suffer.
@@ -62,7 +62,7 @@ $ <eq_lev_naive>
 Knowing that $n$ and $m$ are respectively the length of the strings $a$ and $b$.
 That the $op("head")$ function return the first character of a string and that the $op("tail")$ function return the remaining part of a string after removing the first character.
 
-As an example, let's consider the task of correct the word "kitten" to form the word "sitting".
+As an example, let's consider the following task : correct the word "kitten" to form the word "sitting".
 One can easily notice that the Levenshtein distance between these two words is three, meaning it takes three operations to convert one word into the other.
 Here's a breakdown :
  - The first operation is substituting the "k" in "kitten" with an “s”, changing "kitten" to "sitten".
@@ -79,9 +79,10 @@ In total, three operations (two substitutions and one insertion) are required to
 === Wagner-Fischer
 
 The Wagner-Fischer algorithm builds upon the naive approach by incorporating dynamic programming.
-It works by breaking the problem into smaller sub-problems, solving one after the other to retrieve the solution from the original problem.
+It works by breaking the problem into smaller sub-problems, solving them one after the other to retrieve the solution from the original problem.
 In the case of the Wagner-Fischer algorithm, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full string.
-In @fig_code_naive_wagner-fischer is a naive pseudo of the Wagner-Fischer algorithm, an better one is explained on the @chap_wagner-fischer_imp.
+In @fig_code_naive_wagner-fischer is a naive pseudo of the Wagner-Fischer algorithm.
+An improved one is explained on the @chap_wagner-fischer_imp.
 
 #sourced_figure(
   source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [Wagner-Fischer algorithm, Wikipedia, March 2025]),
@@ -157,44 +158,75 @@ Note that the memory will, in any case, become significant when comparing a lot 
 === Bitap
 
 The Bitap algorithm is one of the most widely used algorithms in search tools, partly because it is the underlying algorithm for the Unix utility _agrep_.
-This algorithm does not directly calculate the Levenshtein distance, but it can indicate when a given string is sufficiently similar to another.
-This similarity is said to be true if and only if the two strings have a Levenshtein distance less than $k$, a given threshold.
+Originally, the Bitap algorithm allows you to find an exact pattern $P$ of length $n$ in a text $T$ of length $m$.
+It does this efficiently by using bitwise operations to maintain bit-vectors that tracks matches of $P$ as it scans $T$.
+With some optimization, it can also perform fuzzy searching, meaning it can find approximate matches of $P$ within $T$ according to a threshold $k$.
 
-The Bitap algorithm works by pre-computing bitmasks where each bit corresponds to a letter in the search string.
-It then proceeds by performing binary operations to efficiently compare patterns and text segments.
-Originally, the Bitap algorithm allows you to find an exact pattern in a text, it is simple to implement.
-But finding a pattern similar to a given threshold $k$, called Fuzzy searching, is much more complex.
+This is done by maintaining multiple bit-vectors, each representing the state of the search while allowing a different number of errors.
+Instead of tracking a single match state, we define $k+1$ bit vectors, $R_0$ through $R_k$, where $R_e$ represents matches with up to $e$ errors.
 
-The Bitap algorithm does not surpass the *$Omicron(m times n)$* time complexity of the naive Wagner-Fischer algorithm, but it delivers excellent practical performance as it manage to do most of the work with bitwise operations, which are extremely fast.
+To efficiently track character matches, the algorithm precomputes a bitmask table, often referred to as the $T$ table.
+This table stores, for each character in the alphabet $sigma$, a bit-vector indicating its positions in the pattern $P$.
+Instead of scanning $P$ for each character in the text, the algorithm can quickly determine matches using bitwise operations with these precomputed masks.
+
+If we take a pattern $P$ of `ababc` to be searched in `abdabababc`, the alphabet would be $sigma = {a, b, c, d}$ and the $T$ bitmask table would look like the table in the @fig_img_bitap_table.
+
+#sourced_figure(
+  source: link("", []),
+  fig: [
+    #figure(
+      caption: [],
+
+      image("../figure/bitap_table.png", width: 25%)
+    ) <fig_img_bitap_table>
+  ],
+)
+
+By processing the text from left to right and updating these bit-vectors at each step, the algorithm efficiently finds approximate matches where the last bit of any $R_e$ vector indicates whether a match with at most $e$ errors has been found.
+Despite its worst-case complexity of $Omicron(k times n)$, Bitap with errors remains practical for small $k$ due to the efficiency of bitwise operations, making it widely used in search utilities like agrep and modern fuzzy search tools.
+It has a total space complexity of $Omicron(k times m + sigma)$.
+Bitap delivers excellent practical performance as it manage to do most of the work with bitwise operations, which are extremely fast.
 It goes without saying that using binary operations is a major advantage when it comes to implementing the algorithm on FPGAs.
+
 
 === BLAST
 
-#todo[correct thatt !! (there is two sources giving different info) and add image]
-
 The Basic Local Alignment Search Tool (BLAST) is one of the most popular algorithms for comparing biological sequences, particularly DNA, RNA, and protein sequences.
 It is a local sequence alignment, meaning it finds the most similar sub-sequences between two strings rather than aligning the entire sequences.
-BLAST works by breaking down a query sequence into small sub-sequences known as words, typically with a size between three to twenty.
+BLAST works by breaking down a query sequence into small sub-sequences known as words.
 It then searches in a database for exact or near-exact matches to these words.
 Once matches are found, BLAST extends them in both directions to determine the length and quality of the alignment.
 If the extended alignment surpasses a predetermined score threshold $k$, it is reported as a match.
 
 One of the key components of BLAST’s efficiency is its use of a hash table.
-In this process, each word of the query sequence is mapped to a hash table where the locations of all possible matching words in the database are stored.
-The hash table stores all possible words of a specific length $w$, where each word is a sequence of letters.
+It stores all possible sub-sequences of letters called words.
+A word is of a specific length $w$ typically between three or eleven letters.
 The size of the hash table depends on the alphabet used: for nucleotide sequences, there are $4^w$ possible words, while for protein sequences, there are $20^w$ possible words.
 This table significantly speeds up the search process, as it allows for efficient lookups of potential matches in the database.
+For example, suppose that the DNA sequence contains the following stretch of nucleotides: `AGTCCG`.
+If a BLAST search is conducted under normal conditions with a word size of 3 nucleotides, the words in the hash table would be `AGT`, `GTC`, `TCC`, and `CCG`.
+
+#sourced_figure(
+  source: link("https://bio.libretexts.org/Bookshelves/Computational_Biology/Book%3A_Computational_Biology_-_Genomes_Networks_and_Evolution_(Kellis_et_al.)/03%3A_Rapid_Sequence_Alignment_and_Database_Search/3.05%3A_The_BLAST_algorithm_(Basic_Local_Alignment_Search_Tool)", [The BLAST algorithm (Basic Local Alignment Search Tool), LibreTexts, March 2025]),
+  fig: [
+    #figure(
+      caption: [],
+
+      image("../figure/BLAST_illustration.png")
+    ) <fig_img_BLAST>
+  ]
+)
 
 The time complexity of BLAST is generally $Omicron(D)$, where $D$ is the size of the database.
 This makes BLAST much faster than exact string matching algorithms, as it does not compare every possible alignment but instead quickly identifies regions likely to be similar.
-However, it add the risk that some optimal alignments may be missed.
+However, it adds the risk that some optimal alignments may be missed.
 
 In terms of space complexity, BLAST requires memory for the hash table, which contains $4^w$ entries for nucleotide sequences, as well as for the alignments that are extended during the search.
-The total space complexity is thus $O(4^w + D)$ for protein sequences, which is slightly higher than other alignment algorithms, but still efficient compared to more computationally expensive methods like dynamic programming.
+The total space complexity is thus $O(4^w + D)$, which is slightly higher than other alignment algorithms, but still efficient compared to more computationally expensive methods like dynamic programming.
 
 BLAST comes in several variations, each using specific types of data.
 The most suitable algorithm for this project is BLASTN, which compares nucleotide sequences.
-Despite its efficiency, the complex memory requirements and the inherent tradeoff between speed and sensitivity make its implementation on FPGAs challenging.
+Despite its efficiency, the complex memory requirements make its implementation on FPGAs challenging.
 
 
 === Smith-Waterman & Needleman-Wunsch
@@ -204,7 +236,7 @@ A bit like Wagner-Fischer, it works by using matrix where each cell contains a s
 The scoring is based on matches, mismatches, and gaps (insertions or deletions).
 
 It works by filling a matrix comparing characters from both sequences and choosing the optimal score at each step.
-The score representing the probability of a good alignment.
+The score represents the probability of a good alignment.
 The higher the score, the better the alignment of the two substrings.
 Smith-Waterman fills the matrix iteratively using a substitution matrix, often described as an $s$ function.
 A trivial $s$ function could be as described in @eq_smith-waterman_s.
@@ -232,7 +264,7 @@ After filling the matrix, the algorithm traces back from the highest scoring cel
   )
 )
 
-With Gotoh and Altschul's optimizations, the Smith-Waterman algorithm has a time complexity of $Omicron(n times m)$
+With Gotoh and Altschul's optimizations, the Smith-Waterman algorithm has a time complexity of $Omicron(n times m)$.
 The cost of this greater complexity than BLAST is due to the fact that this algorithm is not heuristic.
 However, it poses some problems in our context, the algorithm performs local alignment when a global one is needed.
 But there's a trick to fix this: the Needleman-Wunsch algorithm.
@@ -333,12 +365,12 @@ To make the following easier, @fig_tab_algo_recap summarizes their main features
 
     table.header(align(center)[*Algorithms*], par(leading: 0.5em)[*Time \ Complexity*],
                  par(leading: 0.5em)[*Space \ complexity*], [*Range*], [*Suitability*]),
-    [Wagner-Fischer],      [$Omicron(n times m)$], [$Omicron(n)$],                    [global], [good],
-    [Bitap],               [$Omicron(n times m)$], [$Omicron(n)$],                    [global], [high],
-    [BLAST],               [$Omicron(D)$],         [$Omicron(2^(256) + n times m)$], [local],  [bad],
+    [Wagner-Fischer],      [$Omicron(k times n)$], [$Omicron(n)$],                    [global], [good],
+    [Bitap],               [$Omicron(k times n)$], [$Omicron(k times m + sigma)$],                    [global], [high],
+    [BLAST],               [$Omicron(D)$],         [$Omicron(4^w + n times m)$], [local],  [bad],
     [Smith-Waterman],      [$Omicron(n times m)$], [$Omicron(n)$],                    [local],  [bad],
     [Needleman-Wunsch],    [$Omicron(n times m)$], [$Omicron(n)$],                    [global], [bad],
-    [Myers' Bit-parallel], [$Omicron(n)$],         [$Omicron(n)$],                    [global], [high],
+    [Myers' Bit-parallel], [$Omicron(n times m/w)$],         [$Omicron(n)$],                    [global], [high],
   )
 ) <fig_tab_algo_recap>
 

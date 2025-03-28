@@ -1,16 +1,15 @@
-#outline(title: "List of tables", target: figure.where(kind: table))
+#outline(title: "List of Tables", target: figure.where(kind: table))
 
-#v(5em)
+#v(3em)
 
 ==== URL References
 #v(1em)
+
+#set par(leading: 0.5em)
 
 #grid(
   columns: (1fr, 4fr),
   align: (left, left),
 
-  [URL01], [#link("link")[link]],
-  [URL02], [#link("link")[link]],
-  [URL03], [#link("link")[link]],
-  [URL04], [#link("link")[link]],
+  [URL04], link("https://en.wikipedia.org/wiki/Edit_distance")[https://en.wikipedia.org/wiki/Edit_distance],
 )

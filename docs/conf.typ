@@ -258,7 +258,7 @@
 
 #let bibli(body) = {
   set heading(supplement: [heading])
-  show heading: set heading(numbering: none)
+  show heading: set heading(numbering: none, supplement: [Chapter])
 
   body
 }

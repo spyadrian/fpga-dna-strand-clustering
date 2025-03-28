@@ -34,27 +34,30 @@ Making the algorithm compute at most $n(2k + 1)$ cells.
 This is well illustrated in the @fig_grid_ukkonen.
 
 #sourced_figure(
-  source: link("https://ceptord.net/wagner-fischer/index.html", [Can We Optimize the Wagner-Fischer Algorithm ?, Polyleven, February 2025]),
-  fig: [#figure(
-    caption: [Wagner-Fischer matrix with Ukkonen optimization],
-    grid(
-      fill: (x, y) => rgb(
-        if x == 0 or y == 0 { "#E0E0E0" }
-        else { "#FFFFFF" }
-      ),
-      columns: (1.3em, ) * 6,
-      rows: 1.3em,
-      row-gutter: 0em,
-      align: center + horizon,
+  source: link("https://ceptord.net/wagner-fischer/index.html", [from ceptord.net, ref. URL10]),
+  fig: [
+    #figure(
+      caption: [Wagner-Fischer matrix with Ukkonen optimization],
 
-      [],  [],       [*p*],      [*q*],      [*r*],      [*s*],
-      [],  [0],      [1],      $ast.op$, $ast.op$, $ast.op$,
-      [*a*], [1],      [1],      [2],      $ast.op$, $ast.op$,
-      [*b*], $ast.op$, [2],      [2],      [3],      $ast.op$,
-      [*c*], $ast.op$, $ast.op$, [3],      [3],      [4],
-      [*d*], $ast.op$, $ast.op$, $ast.op$, [4],      [4],
-    )
-  ) <fig_grid_ukkonen>]
+      grid(
+        fill: (x, y) => rgb(
+          if x == 0 or y == 0 { "#E0E0E0" }
+          else { "#FFFFFF" }
+        ),
+        columns: (1.3em, ) * 6,
+        rows: 1.3em,
+        row-gutter: 0em,
+        align: center + horizon,
+
+        [],  [],       [*p*],      [*q*],      [*r*],      [*s*],
+        [],  [0],      [1],      $ast.op$, $ast.op$, $ast.op$,
+        [*a*], [1],      [1],      [2],      $ast.op$, $ast.op$,
+        [*b*], $ast.op$, [2],      [2],      [3],      $ast.op$,
+        [*c*], $ast.op$, $ast.op$, [3],      [3],      [4],
+        [*d*], $ast.op$, $ast.op$, $ast.op$, [4],      [4],
+      )
+    ) <fig_grid_ukkonen>
+  ]
 )
 
 On the example between "abdc" and "pqrs" in @fig_grid_ukkonen, we can see that the Ukkonen optimization remove the computation of 12 cells.
@@ -70,14 +73,13 @@ Indeed, the DNA strands used are character strings of more than 200 characters a
 These caused a problem because, given that a machine word generally does not exceed 64 bits, it is difficult for the _gcc-13_ compiler to handle them.
 However, _gcc-14_ offers an extension to the C standard that provides greater flexibility in handling custom-sized integers.
 This extension allows the representation of integers of arbitrary width.
-The creation of `uint256_t` was therefore possible using the @fig_code_uint256.
+The creation of `uint256_t` was therefore possible using the code below.
 
-#figure(
-  caption: [Definition of a 256-bit unsigned integer type using the `_BitInt` keyword.],
-  ```C
+#align(center)[
+```C
 typedef unsigned _BitInt(256) uint256_t;
-  ```,
-) <fig_code_uint256>
+```
+]
 
 Since the machine used doesn't run _gcc-14_ by default, it was necessary to create a Docker container.
 This approach simplifies the setup process.
@@ -97,19 +99,24 @@ To calculate their Levenshtein distances, the Python library "Levenshtein" was u
 This reliable library is open-source and used by over 11,000 users.
 An example of the data in @fig_tab_data_test.
 
-#figure(
-  caption: [Example of synthetic data generated for testing C implementations],
+#sourced_figure(
+  source: [by Adrian Spycher],
+  fig: [
+    #figure(
+      caption: [Example of synthetic data generated for testing C implementations],
 
-  table(
-    columns: (1fr, 1fr, auto),
-    align: (left, left, center),
-    table.header(align(center)[*Text*], align(center)[*Pattern*], [*Levenshtein Distance*]),
-    [sometimes], [she], [7],
-    [kelm], [hello], [3],
-    [CTGACCAG ... ATACGTTG], [GTTAGCCG ... GCGGACCT], [153],
-    [TCATTTGC ... CCGTTAGA], [CAGACGGA ... AAGCGACT], [93],
-  )
-) <fig_tab_data_test>
+      table(
+        columns: (1fr, 1fr, auto),
+        align: (left, left, center),
+        table.header(align(center)[*Text*], align(center)[*Pattern*], [*Levenshtein Distance*]),
+        [sometimes], [she], [7],
+        [kelm], [hello], [3],
+        [CTGACCAG ... ATACGTTG], [GTTAGCCG ... GCGGACCT], [153],
+        [TCATTTGC ... CCGTTAGA], [CAGACGGA ... AAGCGACT], [93],
+      )
+    ) <fig_tab_data_test>
+  ]
+)
 
 The test program is a very naive C code.
 It retrieves the data and prepares it so it can be used by the two algorithms.
@@ -123,11 +130,16 @@ The data it compares are fixed-length strings containing random characters from 
 The first benchmark launched tested the time it took the algorithms to compare eight datasets of different sizes : 64, 128, 256, 1024, 2048, 4096, 8192 and 32728.
 This benchmark was clearly enough to know which algorithm was the most efficient, the data are regrouped on the @fig_img_graph_benchmark.
 
-#figure(
-  caption: [Example of synthetic data generated for testing C implementations],
+#sourced_figure(
+  source: [by Adrian Spycher],
+  fig: [
+    #figure(
+      caption: [Benchmark between the Wagner Fischer and Myers algorithms implemented in C],
 
-  image("../figure/graph_benchmark.png")
-) <fig_img_graph_benchmark>
+      image("../figure/graph_benchmark.png")
+    ) <fig_img_graph_benchmark>
+  ]
+)
 
 The graph in @fig_img_graph_benchmark shows the execution time in seconds of the two algorithms to compare a given number of inputs.
 Although the spacing between the Wagner-Fischer and Myers bars appears identical across groups of inputs, the scale is actually logarithmic.

@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= VHDL Implementation and hardware Optimization <chap_implementation_vhdl>
+= VHDL Implementation and Hardware Optimization <chap_implementation_vhdl>
 // - introduce the challenges of implementing string-matching algorithms on FPGAs
 // - state the motivation for hardware acceleration and its potential benefits
 
@@ -23,10 +23,10 @@ The project architecture is divided into seven modules, each with its own respon
 A general diagram can be found in @fig_img_block_diagram.
 
 #sourced_figure(
-  source: link("", []),
+  source: [by Adrian Spycher],
   fig: [
     #figure(
-      caption: [],
+      caption: [Block diagram of FPGA architecture],
 
       image("../figure/block_diagram.png", width: 70%)
     ) <fig_img_block_diagram>
@@ -50,12 +50,11 @@ In other words, the ones to be used to calculate the Levenshtein distance.
 In the received file, each line corresponds to a DNA strand, as represented in @fig_txt_DNA.
 
 #sourced_figure(
-  source: link("", []),
+  source: [by Adrian Spycher],
   fig: [
     #figure(
-      caption: [],
-      kind: "File",
-      supplement: "File",
+      caption: [Example of DNA strands provided in a text file],
+      kind: image,
 
       ```txt
 ATCTGATGTTACGCGCGACATAATCGCCGAGAAGTGC [...] CAGTCCAAGGCACCGGTAATAGCGAGATGACTGGAG
@@ -80,31 +79,36 @@ In a real-life scenario, the data connection would be made using a PCI connectio
 This encoder is a combinational circuit that converts an array containing all text entries representing DNA strands into an array with the same strands but encoded using two bits.
 It is used to reduce data complexity by assigning a unique code to each active entry.
 
-#figure(
-  caption: [Binary encoding of nucleotides for FPGA processing],
+#sourced_figure(
+  source: [by Adrian Spycher],
+  fig: [
+    #figure(
+      caption: [Binary encoding of nucleotides for FPGA processing],
 
-  table(
-    columns: (auto, auto),
-    align: (center, center),
-    inset: (x: 1em),
-    table.header([*Nucleotide*], [*Encoding*]),
+      table(
+        columns: (auto, auto),
+        align: (center, center),
+        inset: (x: 1em),
+        table.header([*Nucleotide*], [*Encoding*]),
 
-    [A], [$00$],
-    [C], [$01$],
-    [G], [$10$],
-    [T], [$11$],
-  )
-) <fig_tab_alphabet_encoding>
+        [A], [$00$],
+        [C], [$01$],
+        [G], [$10$],
+        [T], [$11$],
+      )
+    ) <fig_tab_alphabet_encoding>
+  ]
+)
 
 Working with bits allows for faster computations and, more importantly, reduces the memory space needed.
 A four-character alphabet let each character to be represented by two bits as show in the encoding in the @fig_tab_alphabet_encoding.
 A conversion example is available in @fig_img_DNA_to_binary.
 
 #sourced_figure(
-  source: link("", []),
+  source: [by Adrian Spycher],
   fig: [
     #figure(
-      caption: [],
+      caption: [Example of DNA strand encoding],
 
       image("../figure/conversion_ACGT-BIN.png")
     ) <fig_img_DNA_to_binary>
@@ -126,7 +130,7 @@ In the second part of this project, it will also handle the parallelization of t
 === Myers Core
 
 Myers Core is the heart of the Myers algorithm.
-It handles the fundamental Myers calculations, those included in the algorithm loop seen in the @fig_code_myers.
+It handles the fundamental Myers calculations, those included in the algorithm loop seen in the @chap_myers_algo.
 It is detailed in the @chap_core_component.
 
 
@@ -155,10 +159,10 @@ Those bits vectors must be stable in order to ensure that the score is correctly
 To ensure this and maintain a clock frequency as high as possible, a pipelined architecture was developed.
 
 #sourced_figure(
-  source: link("", []),
+  source: [by Adrian Spycher],
   fig: [
     #figure(
-      caption: [],
+      caption: [Pipeline architecture of the Myers core component],
 
       image("../figure/myers_pipeline.png")
     ) <fig_img_myers_pipepline>

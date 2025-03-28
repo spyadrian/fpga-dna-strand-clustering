@@ -17,7 +17,7 @@ An European project called DNAMIC aims to replace these infrastructures by a mob
 This microfactory would only be finished after implementing the six steps that constitute it, that is, encoding, synthesis, amplification, storage, sequencing and, finally, decoding.
 
 #sourced_figure(
-  source: link("https://www.youtube.com/watch?app=desktop&v=gNv72a1ugiA", [State of the Art DNA Data Storage | DigNA Webinar Series (Webinar 1), PEARL-DNA, Youtube, March 2025]),
+  source: link("https://www.youtube.com/watch?app=desktop&v=gNv72a1ugiA", [from youtube.com, ref. URL02]),
   fig : figure(
     caption: [Schema of the six steps constituting the micro-factory of the DNAMIC project],
 
@@ -32,7 +32,7 @@ In addition to read errors, DNA can also undergo mutations.
 These errors must then be corrected to maintain data integrity.
 
 #sourced_figure(
-  source: link("https://nanoporetech.com/products/sequence/minion", [Oxford Nanopore Technology, MinION]),
+  source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),
   fig : figure(
     caption: [The MinION nanopore sequencer by Oxford Nanopore Technology],
 

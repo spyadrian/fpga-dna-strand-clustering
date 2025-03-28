@@ -13,12 +13,14 @@ Above all, the edit distance plays an important role in bioinformatics, where it
 By doing so, it enables researchers to detect, analyze and study mutations.
 
 There are several types of editing distance that can be categorized according to the operations they support and allow.
-On this table, you can see different types of edit distances :
+On this table, you can see different types on the @fig_tab_edit_distance_types.
 
 #sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Edit_distance", [Edit distance, Wikipedia, March 2025]),
-  fig: {
-    figure(
+  source: link("https://en.wikipedia.org/wiki/Edit_distance", [from en.wikipedia.org, ref. URL04]),
+  fig: [
+    #figure(
+      caption: [Different types of edit distance and which operations they allowed],
+
       table(
         columns: (1fr, auto, auto, auto, auto),
         align: (left, center, center, center, center),
@@ -30,9 +32,8 @@ On this table, you can see different types of edit distances :
         [Damerau-Levenshtein Distance], [✓], [✓], [✓], [✓],
         [Jaro Distance],                [],  [],  [],  [✓],
       ),
-      caption: [Different types of edit distance and which operations they allowed],
-    )
-  }
+    ) <fig_tab_edit_distance_types>
+  ]
 )
 
 As mentioned in the introduction, DNA is subject to three types of operation: insertion, deletion and substitution.
@@ -81,15 +82,11 @@ In total, three operations (two substitutions and one insertion) are required to
 The Wagner-Fischer algorithm builds upon the naive approach by incorporating dynamic programming.
 It works by breaking the problem into smaller sub-problems, solving them one after the other to retrieve the solution from the original problem.
 In the case of the Wagner-Fischer algorithm, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full string.
-In @fig_code_naive_wagner-fischer is a naive pseudo of the Wagner-Fischer algorithm.
+The code below show a naive pseudo of the Wagner-Fischer algorithm.
 An improved one is explained on the @chap_wagner-fischer_imp.
 
-#sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [Wagner-Fischer algorithm, Wikipedia, March 2025]),
-  fig : [ #figure(
-    caption: [Pseudo code of the naive Wagner-Fischer algorithm],
-
-    ```js
+#align(center)[
+```js
 function wagner_fischer(char a[1..n], char b[1..m]):
   declare int d[0..n, 0..m]
  
@@ -111,9 +108,8 @@ function wagner_fischer(char a[1..n], char b[1..m]):
                              d[i-1, j-1] + substitutionCost)  // substitution
  
   return d[n, m]
-    ```
-  ) <fig_code_naive_wagner-fischer> ]
-)
+```
+]
 
 The matrix in the @fig_grid_wagner-fischer represents the matrix filled by the Wagner-Fischer algorithm between the words "sitting" and "kitten".
 The highlighted path shows the most optimized path for moving from one string to the other.
@@ -121,30 +117,33 @@ If we want to correct the word "sitting" to "kitten", we can think of a diagonal
 
 #let path_color = rgb("#C6DBEF");
 #sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [Wagner-Fischer Algorithm, Wikipedia, March 2025]),
-  fig: [#figure(
-    caption: [Wagner-Fischer matrix between "sitting" and "kitten"],
-    grid(
-      fill: (x, y) => rgb(
-        if x == 0 or y == 0 { "#E0E0E0" }
-        else { "#FFFFFF" }
-      ),
-      columns: (1.3em, ) * 8,
-      rows: 1.3em,
-      row-gutter: 0em,
-      align: center + horizon,
+  source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [from en.wikipedia.org, ref. URL05]),
+  fig: [
+    #figure(
+      caption: [Wagner-Fischer matrix between "sitting" and "kitten"],
 
-      [], [], [*k*], [*i*], [*t*], [*t*], [*e*], [*n*],
-      [], [0], [1], [2], [3], [4], [5], [6],
-      [*s*], [1], grid.cell(fill: path_color)[1], [2], [3], [4], [5], [6],
-      [*i*], [2], [2], grid.cell(fill: path_color)[1], [2], [3], [4], [5],
-      [*t*], [3], [3], [2], grid.cell(fill: path_color)[1], [2], [3], [4],
-      [*t*], [4], [4], [3], [2], grid.cell(fill: path_color)[1], [2], [3],
-      [*i*], [5], [5], [4], [3], [2], grid.cell(fill: path_color)[2], [3],
-      [*n*], [6], [6], [5], [4], [3], [3], grid.cell(fill: path_color)[2],
-      [*g*], [7], [7], [6], [5], [4], [4], grid.cell(fill: path_color)[3],
-    )
-  ) <fig_grid_wagner-fischer>]
+      grid(
+        fill: (x, y) => rgb(
+          if x == 0 or y == 0 { "#E0E0E0" }
+          else { "#FFFFFF" }
+        ),
+        columns: (1.3em, ) * 8,
+        rows: 1.3em,
+        row-gutter: 0em,
+        align: center + horizon,
+
+        [], [], [*k*], [*i*], [*t*], [*t*], [*e*], [*n*],
+        [], [0], [1], [2], [3], [4], [5], [6],
+        [*s*], [1], grid.cell(fill: path_color)[1], [2], [3], [4], [5], [6],
+        [*i*], [2], [2], grid.cell(fill: path_color)[1], [2], [3], [4], [5],
+        [*t*], [3], [3], [2], grid.cell(fill: path_color)[1], [2], [3], [4],
+        [*t*], [4], [4], [3], [2], grid.cell(fill: path_color)[1], [2], [3],
+        [*i*], [5], [5], [4], [3], [2], grid.cell(fill: path_color)[2], [3],
+        [*n*], [6], [6], [5], [4], [3], [3], grid.cell(fill: path_color)[2],
+        [*g*], [7], [7], [6], [5], [4], [4], grid.cell(fill: path_color)[3],
+      )
+    ) <fig_grid_wagner-fischer>
+  ]
 )
 
 One of the key strengths of the Wagner-Fischer algorithm lies in its simplicity.
@@ -172,10 +171,10 @@ Instead of scanning $P$ for each character in the text, the algorithm can quickl
 If we take a pattern $P$ of `ababc` to be searched in `abdabababc`, the alphabet would be $sigma = {a, b, c, d}$ and the $T$ bitmask table would look like the table in the @fig_img_bitap_table.
 
 #sourced_figure(
-  source: link("", []),
+  source: link("https://medium.com/data-science-in-your-pocket/fuzzy-matching-algorithms-explained-e0ff30cc00ca", [from medium.com, ref. URL06]),
   fig: [
     #figure(
-      caption: [],
+      caption: [Example of the bitmask table $T$ of the Bitap algorithm],
 
       image("../figure/bitap_table.png", width: 25%)
     ) <fig_img_bitap_table>
@@ -207,10 +206,10 @@ For example, suppose that the DNA sequence contains the following stretch of nuc
 If a BLAST search is conducted under normal conditions with a word size of 3 nucleotides, the words in the hash table would be `AGT`, `GTC`, `TCC`, and `CCG`.
 
 #sourced_figure(
-  source: link("https://bio.libretexts.org/Bookshelves/Computational_Biology/Book%3A_Computational_Biology_-_Genomes_Networks_and_Evolution_(Kellis_et_al.)/03%3A_Rapid_Sequence_Alignment_and_Database_Search/3.05%3A_The_BLAST_algorithm_(Basic_Local_Alignment_Search_Tool)", [The BLAST algorithm (Basic Local Alignment Search Tool), LibreTexts, March 2025]),
+  source: link("https://bio.libretexts.org/Bookshelves/Computational_Biology/Book%3A_Computational_Biology_-_Genomes_Networks_and_Evolution_(Kellis_et_al.)/03%3A_Rapid_Sequence_Alignment_and_Database_Search/3.05%3A_The_BLAST_algorithm_(Basic_Local_Alignment_Search_Tool)", [from bio.libretexts.org, ref. URL07]),
   fig: [
     #figure(
-      caption: [],
+      caption: [Representation of the BLAST algorithm],
 
       image("../figure/BLAST_illustration.png")
     ) <fig_img_BLAST>
@@ -257,9 +256,10 @@ The cell being processed takes the best score between:
 After filling the matrix, the algorithm traces back from the highest scoring cell to reconstruct the optimal local alignment.
 
 #sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm", [Smith-Waterman Algorithm, Wikipedia, March 2025]),
+  source: link("https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm", [from en.wikipedia.org, ref. URL08]),
   fig: figure(
     caption: [Scoring method of the Smith–Waterman algorithm],
+
     image("../figure/smith-waterman_scoring.png", width: 45%)
   )
 )
@@ -278,7 +278,7 @@ Tracing back this algorithm is not a simple matter in VHDL.
 It is therefore possible but difficult to achieve hardware acceleration on this algorithm.
 
 
-=== Myers' Bit-parallel Algorithm
+=== Myers' Bit-parallel Algorithm <chap_myers_algo>
 
 Myers' Bit-parallel algorithm is a highly efficient method for edit-distance-based string matching.
 Unlike traditional dynamic programming approaches (e.g., Wagner-Fischer), which rely on filling a two-dimensional matrix, Myers’ algorithm optimizes this process using bit-parallelism (a bit like Bitap).
@@ -295,8 +295,7 @@ Using several theorems, Myers manages to transform the problem of calculating th
 But this can be calculated using a simple product on a part of $Delta v$.
 
 #sourced_figure(
-  source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [A Fast Bit-Vector Algorithm for Approximate String
-Matching Based on Dynamic Programming, Gene Myers, January 2025]),
+  source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [from gersteinlab.org, ref. URL09]),
   fig : [
     #figure(
       caption: [Myers' dynamic programming (d.p.) matrices],
@@ -316,33 +315,27 @@ $\Eq$, a bit vector, is responsible of doing so.
 It represents equality between the characters.
 $\Eq$ can be calculated with a simple comparison, but to save time on the computation of a column of $Omicron(1)$, it is clever to precompile it into a matrix named $P\eq[sigma]$, with $sigma$ being the alphabet over which the two strings originate.
 
-#sourced_figure(
-  source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [A Fast Bit-Vector Algorithm for Approximate String Matching Based on Dynamic Programming, Gene Myers, January 2025]),
-  fig : [
-    #figure(
-      caption: [Basic pseudo code of the Myers algorithm],
+#align(center)[
+```js
+precompute Peq
+Pv = 1^m
+Mv = 0
+score = m
+for j from 1 to n:
 
-      ```js
-  precompute Peq
-  Pv = 1^m
-  Mv = 0
-  score = m
-  for j from 1 to n:
+    Eq = Peq[j]
+    Xv = Eq | Mv
+    Xh = (((Xv & Pv) + Pv) ^ Pv) | Xv
 
-      Eq = Peq[j]
-      Xv = Eq | Mv
-      Xh = (((Xv & Pv) + Pv) ^ Pv) | Xv
+    if lsb(Ph) then score++
+    if lsb(Mh) then score--
 
-      if lsb(Ph) then score++
-      if lsb(Mh) then score--
-
-      Ph = Pv & Xh
-      Mh = Mv | ~(Pv | Xh)
-      Pv = (Mh << 1) | ~0
-      Mv = (Ph << 1)
-      ```
-  ) <fig_code_myers>]
-)
+    Ph = Pv & Xh
+    Mh = Mv | ~(Pv | Xh)
+    Pv = (Mh << 1) | ~0
+    Mv = (Ph << 1)
+```
+]
 
 Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n)$ and a space complexity of $Omicron(n)$.
 The use of binary operations helps in several ways.
@@ -357,22 +350,28 @@ Furthermore, it greatly simplifies the hardware acceleration.
 The algorithms presented in the previous section are all interesting, but they each come with their own strengths and weaknesses.
 To make the following easier, @fig_tab_algo_recap summarizes their main features.
 
-#figure(
-  caption: [Comparison of sequence alignment and edit distance algorithms],
-  table(
-    columns: (10fr, auto, auto, 3fr, 4fr),
-    align: (left + horizon, center + horizon, center + horizon, center + horizon, center + horizon),
+#sourced_figure(
+  source: [by Adrian Spycher],
+  fig: [
+    #figure(
+      caption: [Comparison of sequence alignment and edit distance algorithms],
 
-    table.header(align(center)[*Algorithms*], par(leading: 0.5em)[*Time \ Complexity*],
-                 par(leading: 0.5em)[*Space \ complexity*], [*Range*], [*Suitability*]),
-    [Wagner-Fischer],      [$Omicron(k times n)$], [$Omicron(n)$],                    [global], [good],
-    [Bitap],               [$Omicron(k times n)$], [$Omicron(k times m + sigma)$],                    [global], [high],
-    [BLAST],               [$Omicron(D)$],         [$Omicron(4^w + n times m)$], [local],  [bad],
-    [Smith-Waterman],      [$Omicron(n times m)$], [$Omicron(n)$],                    [local],  [bad],
-    [Needleman-Wunsch],    [$Omicron(n times m)$], [$Omicron(n)$],                    [global], [bad],
-    [Myers' Bit-parallel], [$Omicron(n times m/w)$],         [$Omicron(n)$],                    [global], [high],
-  )
-) <fig_tab_algo_recap>
+      table(
+        columns: (10fr, auto, auto, 3fr, 4fr),
+        align: (left + horizon, center + horizon, center + horizon, center + horizon, center + horizon),
+
+        table.header(align(center)[*Algorithms*], par(leading: 0.5em)[*Time \ Complexity*],
+                    par(leading: 0.5em)[*Space \ complexity*], [*Range*], [*Suitability*]),
+        [Wagner-Fischer],      [$Omicron(k times n)$], [$Omicron(n)$],                    [global], [good],
+        [Bitap],               [$Omicron(k times n)$], [$Omicron(k times m + sigma)$],                    [global], [high],
+        [BLAST],               [$Omicron(D)$],         [$Omicron(4^w + n times m)$], [local],  [bad],
+        [Smith-Waterman],      [$Omicron(n times m)$], [$Omicron(n)$],                    [local],  [bad],
+        [Needleman-Wunsch],    [$Omicron(n times m)$], [$Omicron(n)$],                    [global], [bad],
+        [Myers' Bit-parallel], [$Omicron(n times m/w)$],         [$Omicron(n)$],                    [global], [high],
+      )
+    ) <fig_tab_algo_recap>
+  ]
+)
 
 A very important eliminatory criterion for this project is the algorithm's range.
 Indeed, algorithms with a local range are not suitable for this project, as they do not allow for the evaluation of overall similarity between sequences.

@@ -378,7 +378,7 @@ Indeed, algorithms with a local range are not suitable for this project, as they
 They focus only on identifying the most similar subsequences, which can lead to fragmented results that are not representative of the entire sequence.
 Therefore, the BLAST and Smith-Waterman algorithms cannot be used for this project.
 
-Regarding the second most important criteria, time complexity, Myers' bit-parallel algorithm wins hands down with a theoretical speed of $Omicron(n + m/w)$, as $w$ can be chosen as the same value of $m$ in FPGA.
+Regarding the second most important criteria, time complexity, Myers' bit-parallel algorithm wins hands down with a theoretical speed of $Omicron(n times m/w)$, as $w$ can be chosen as the same value of $m$ in FPGA.
 In order to compare this speed with another algorithm, it was necessary to choose another algorithm to implement.
 Among the remaining algorithms, although Needleman-Wunsch and Bitap were good candidates, Wagner-Fischer was implemented. This is because it was the project's original proposed algorithm.
 And in order to see how Myers' bit-parallel algorithm optimized the original proposed algorithm, it was chosen.

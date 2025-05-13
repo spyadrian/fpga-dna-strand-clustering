@@ -16,7 +16,7 @@
 
 // #include "chapter/B_dedication.typ"
 
-#include "chapter/C_acknowledgements.typ"
+// #include "chapter/C_acknowledgements.typ"
 
 #include "chapter/D_summary.typ"
 

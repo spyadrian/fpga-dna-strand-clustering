@@ -34,11 +34,11 @@ Une fois tous les kernels validés, rien n’empêche de basculer vers le Accele
 
 Le planning du projet serait le suivant:
 - S1: [12.05 - 23.05]:
-  – Analyse détaillé de l’algorithme OneJoin
-  – Familiarisation avec les outils OneAPI de Intel et du langage SYCL
+  * Analyse détaillé de l’algorithme OneJoin
+  * Familiarisation avec les outils OneAPI de Intel et du langage SYCL
 - S2: [19.05 - 23.05]:
-  – Schéma dataflow de l’algorithme OneJoin
-  – Tutoriaux et tests de parallélisation d’un cœur de calcul (Myers par exemple)
+  * Schéma dataflow de l’algorithme OneJoin
+  * Tutoriaux et tests de parallélisation d’un cœur de calcul (Myers par exemple)
 - S3: [26.05 - 30.05]: Implémentation et évaluation des différents blocs
 - S4: [02.06 - 06.06]: Implémentation et évaluation des différents blocs
 - S5: [09.06 - 13.06]: Implémentation et évaluation des différents blocs

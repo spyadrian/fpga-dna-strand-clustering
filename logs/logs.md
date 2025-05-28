@@ -4,7 +4,7 @@
 1. [Week 1](#week1)
     1. [Monday 26 May](#26may)
     2. [Tuesday 27 May](#27may)
-
+    3. [Wednesday 28 May](#28may)
 
 <!--- BODY --->
 
@@ -23,8 +23,6 @@
 
 
 ## Monday : 26 May <a name="26may"></a>
-
-### Notes
 
 After installing the *Intel oneAPI Base Toolkit*, I launched the `intel-oneapi-base-toolkit-2025.1.3.7_offline.sh` and installed these components :
 - DPC++ Compatibility Tool (mendatory)
@@ -49,9 +47,9 @@ And start reading and exercising.
 
 ## Tuesday : 27 May <a name="27may"></a>
 
-### Notes
+Doing SYCL Academy today.
 
-#### 1. What is SYCL
+### 1. What is SYCL
 
 "SYCL is a single source, high-level, standard C++ programming model, that can target a range of heterogeneous platforms"
 
@@ -60,7 +58,7 @@ Command to compile a `.cpp` file using SYCL :
 icpx -fsycl solution.cpp -o solution
 ```
 
-#### 2. Enqueueing a Kernel
+### 2. Enqueueing a Kernel
 
 In SYCL all work is submitted via commands to a queue.
 The queue has an associated device that any commands enqueued to it will target.
@@ -83,7 +81,7 @@ I could use a docker for the GPU, but "j'ai d'autre chat à fouetter".
 
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Enqueueing_a_Kernel/solution.cpp)
 
-#### 3. Managing Data
+### 3. Managing Data
 
 In SYCL there are two models for managing data:
 

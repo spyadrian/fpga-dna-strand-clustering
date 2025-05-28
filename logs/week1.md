@@ -1,10 +1,11 @@
 <!--- TOC --->
 
 # Table of contents
-1. [Week 1](#week1)
-    1. [Monday 26 May](#26may)
-    2. [Tuesday 27 May](#27may)
-    3. [Wednesday 28 May](#28may)
+
+1. [Monday 26 May](#26may)
+2. [Tuesday 27 May](#27may)
+3. [Wednesday 28 May](#28may)
+
 
 <!--- BODY --->
 

@@ -2,8 +2,8 @@
 
 # Table of contents
 1. [Week 1](#week1)
-  1. [Monday 26 May](#26may)
-  2. [Tuesday 27 May](#27may)
+    1. [Monday 26 May](#26may)
+    2. [Tuesday 27 May](#27may)
 
 
 <!--- BODY --->
@@ -17,9 +17,9 @@
 
 ### Links
 
-- [SYCL]("https://sycl.tech/")
-- [SYCL Academy]("https://sycl.tech/getting-started/academy")
-- [Get the Intel oneAPI Base Toolkit]("https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline")
+- [SYCL](https://sycl.tech/)
+- [SYCL Academy](https://sycl.tech/getting-started/academy)
+- [Get the Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
 
 
 ## Monday : 26 May <a name="26may"></a>
@@ -72,7 +72,7 @@ The seconds doesn't appear because it used CUDA that is not supported.
 [opencl:gpu][opencl:1] rusticl, Mesa Intel(R) Iris(R) Plus Graphics (ICL GT2) OpenCL 3.0  [25.1.0-cachyos1.4]
 ```
 
-I only managed to compile the exercise with the CPU because I don't have the right backend to use it.
+I only managed to compile the exercise with the CPU because I don't have the right backend to use the GPU.
 ```
 🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:cpu ./solution
 Hello World!
@@ -81,67 +81,33 @@ Hello World!
 
 I could use a docker for the GPU, but "j'ai d'autre chat à fouetter".
 
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Enqueueing_a_Kernel/solution.cpp)
+
 #### 3. Managing Data
 
 In SYCL there are two models for managing data:
 
 - The `buffer`/`accessor` model: `buffer` are shared memory between host and device, you handle them via `accessor`
-
-  ```c
-  void test_buffer() {
-    int a = 18, b = 24, r = 0;
-
-    auto defaultQueue = sycl::queue{};
-
-    {
-      auto bufA = sycl::buffer{&a, sycl::range{1}};
-      auto bufB = sycl::buffer{&b, sycl::range{1}};
-      auto bufR = sycl::buffer{&r, sycl::range{1}};
-
-      defaultQueue.submit([&](sycl::handler& cgh) {
-        auto accA = sycl::accessor{bufA, cgh, sycl::read_only};
-        auto accB = sycl::accessor{bufB, cgh, sycl::read_only};
-        auto accR = sycl::accessor{bufR, cgh, sycl::write_only};
-
-        cgh.single_task<scalar_add_buff_acc>(
-            [=] { accR[0] = accA[0] + accB[0]; });
-      });
-    }
-
-    SYCLACADEMY_ASSERT_EQUAL(r, 42);
-  }
-  ```
-
 - The USM (unified shared memory) model: allows three type of memory: `device`, `host` and `shared`.
   `malloc_device` allows memory on the device, you need then to copy value on it from the host.
   Memory allows with `malloc_shared` is accessible from the host and device (performance might be poor).
 
-  ```c
-  void test_usm() {
-    int a = 18, b = 24, r = 0;
+For the GPU, it's seems like mine don't even support USM.
 
-    auto defaultQueue = sycl::queue{};
+```
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:gpu ./solution
+terminate called after throwing an instance of 'sycl::_V1::exception'
+  what():  Device does not support USM device allocations!
+[1]    8973 IOT instruction (core dumped)  ONEAPI_DEVICE_SELECTOR=opencl:gpu ./solution
+```
 
-    auto dev_A = sycl::malloc_device<int>(1, defaultQueue);
-    auto dev_B = sycl::malloc_device<int>(1, defaultQueue);
-    auto dev_R = sycl::malloc_device<int>(1, defaultQueue);
+For the CPU it worked easily :
 
-    defaultQueue.memcpy(dev_A, &a, 1 * sizeof(int)).wait();
-    defaultQueue.memcpy(dev_B, &b, 1 * sizeof(int)).wait();
+```
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:cpu ./solution
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+```
 
-    defaultQueue.submit([&](sycl::handler& cgh) {
-      cgh.single_task<scalar_add_usm>([=] { dev_R[0] = dev_A[0] + dev_B[0]; });
-    });
-    defaultQueue.wait();
-
-    defaultQueue.memcpy(&r, dev_R, 1 * sizeof(int)).wait();
-
-    sycl::free(dev_A, defaultQueue);
-    sycl::free(dev_B, defaultQueue);
-    sycl::free(dev_R, defaultQueue);
-
-    SYCLACADEMY_ASSERT_EQUAL(r, 42);
-  }
-  ```
-
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Managing_Data/solution.cpp)
 

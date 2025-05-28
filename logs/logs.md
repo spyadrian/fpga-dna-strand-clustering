@@ -19,6 +19,7 @@
 
 - [SYCL](https://sycl.tech/)
 - [SYCL Academy](https://sycl.tech/getting-started/academy)
+- [Git SYCL Academy](https://github.com/codeplaysoftware/syclacademy)
 - [Get the Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
 
 
@@ -96,7 +97,6 @@ For the GPU, it's seems like mine don't even support USM.
 🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:gpu ./solution
 terminate called after throwing an instance of 'sycl::_V1::exception'
   what():  Device does not support USM device allocations!
-[1]    8973 IOT instruction (core dumped)  ONEAPI_DEVICE_SELECTOR=opencl:gpu ./solution
 ```
 
 For the CPU it worked easily :
@@ -108,4 +108,177 @@ For the CPU it worked easily :
 ```
 
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Managing_Data/solution.cpp)
+
+
+## Monday : 26 May <a name="26may"></a>
+
+SYCL Academy loading...
+
+### 4. Handling Errors and Debugging
+
+In SYCL errors are handled by throwing exceptions.
+There are two kinds of error:
+
+- Synchronous errors (thrown in user thread from host).
+- Asynchronous errors (thrown by the SYCL scheduler from device).
+
+They can be catch with a `try catch` statement and an async handler.
+Any SYCL application can be debugged on the host device by switching the queue for a host queue.
+
+The solution worked on both CPU and GPU which is surprising but cool.
+
+```
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:gpu ./solution
+Exception caught: accessor with requested offset and range would exceed the bounds of the buffer
+[SUCCESS] Test passed
+
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:cpu ./solution
+Exception caught: accessor with requested offset and range would exceed the bounds of the buffer
+[SUCCESS] Test passed
+```
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Handling_Errors/solution.cpp)
+
+### 5. Device Discovery
+
+The SYCL runtime will discover a set of platforms in the system and also all devices that are available for each of those platforms.
+
+A device selector is is a callable C++ object which defines a heuristic for scoring devices.
+Used to query all devices and return the one with the highest "score".
+A device with a negative score will never be chosen.
+
+On the solution, they choose the device with a custom device selector getting a GPU or nothing.
+Launching the solution via `./solution` worked well and choose my first GPU.
+
+```
+🎗️ ❯ ./solution
+Chosen device: Mesa Intel(R) Iris(R) Plus Graphics (ICL GT2)
+[SUCCESS] Test passed
+```
+
+Forcing the GPU worked too, but forcing the CPU with `ONEAPI_DEVICE_SELECTOR=opencl:cpu` resulted in an error.
+
+```
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:cpu ./solution
+Exception caught: No device of requested type available. Please check https://software.intel.com/content/www/us/en/develop/articles/intel-oneapi-dpcpp-system-requirements.html
+[FAILURE] SYCLAcademy::equal(r, 42) failed in solution.cpp:71:main
+Exiting
+```
+
+When trying with the `sycl::gpu_selector_v` and `sycl::cpu_selector_v` it worked well, if we don't force the wrong device.
+
+[See solution](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Device_Discovery/solution.cpp)
+
+### 6. Data Parallelism
+
+**Task parallelism** is where you have several, possibly distinct tasks executing in parallel.
+In task parallelism you optimize for latency.
+**Data parallelism** is where you have the same task being performed on multiple elements of data.
+In data parallelism you optimize for throughput.
+
+**SPMD** (Single Program, Multiple Data) is a parallel programming paradigm where multiple processors execute the same program, but on different data.
+
+In SYCL kernel functions are executed by work- items.
+You can think of a work-item as a thread of execution.
+Each work-item will execute a SYCL kernel function from start to end.
+A work-item can run on CPU threads, SIMD lanes, GPU threads, or any other kind of processing element.
+
+SYCL kernel functions are invoked within an nd-range.
+An nd-range has a number of work-groups and subsequently a number of work-items.
+
+Worked on CPU !
+
+```
+🎗️ ❯ ONEAPI_DEVICE_SELECTOR=opencl:cpu ./solution
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+```
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Data_Parallelism/solution.cpp)
+
+### 7. Introduction to USM
+
+Unified shared memory (USM) provides an alternative pointer-based data management model to the accessor-buffer model
+
+- Unified virtual address space
+- Pointer-based structures
+- Explicit memory management
+- Shared memory allocations
+
+So when should you use the accessor/buffer mode and when should you use the USM model?
+
+- The buffer/accessor provides guaranteed consistency and automatically manages dependencies
+   - Recommended when you need to iterate over or prototype your application
+   - Recommended for maximum performance portability
+   - Provides a lot of information to the SYCL runtime which can perform many optimizations automatically
+- The USM model provides a lower-level pointer-based solution with fine grained control
+   - Recommended when porting existing C++ applications or using pointer-based structures
+   - User has responsibility for certain aspects relevant for performance (e.g. data transfers or data prefetches)
+
+Easy-peasy, only my CPU handle USM.
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Introduction_to_USM/solution.cpp)
+
+### 8. Using USM
+
+Here is a function using all of the tools to manipulate USM :
+
+```c
+int square_number(int x){
+
+  auto myQueue = queue{usm_selector{}};
+
+  auto devicePtr = malloc_device<int>(1, myQueue);
+
+  myQueue.memcpy(devicePtr, &x, sizeof(int)).wait();
+
+  myQueue.single_task<square>([=](){
+    *devicePtr = (*devicePtr) * (*devicePtr);
+  }).wait();
+
+  myQueue.memcpy(&x, devicePtr, sizeof(int)).wait();
+
+  free(devicePtr, myQueue);
+
+  return x;
+}
+```
+
+It's like regular memory in C.
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Using_USM/solution.cpp)
+
+### 9. Asynchronous Execution
+
+All command submitted to a queue are done so asynchronously.
+The functions return immediately and the command is run in a background thread.
+This includes individual commands like `memcpy` and collections of commands derived from a command group.
+This means you have to synchronize with those commands.
+
+Calling `wait` or `wait_and_throw` on a queue will wait for all commands enqueued to it to complete.
+
+- When using the USM data management model you can synchronize the same way you would for kernel functions, calling wait on an event or the queue.
+- When using the buffer/access data management model command groups don't automatically copy data back so there are other ways to synchronize with the data.
+   - Creating a `host\_accessor`
+   - Destroying `the buffer`
+
+A `host\_accessor` gives immediate access to the data managed by a buffer in the host application.
+This will wait for any kernel functions accessing the buffer to complete.
+
+The solution propose a lot of different ways of access memory.
+For `buffer` and `usm` it's mostly about putting a `wait` at the right spot.
+For the `host\_buffer`, it wait automatically to be updated before to compute what you ask it to do.
+They all worked with my CPU :
+
+```
+🎗️ ❯ ./solution
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+[SUCCESS] Test passed
+```
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Asynchronous_Execution/solution.cpp)
 

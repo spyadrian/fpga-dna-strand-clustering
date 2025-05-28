@@ -262,7 +262,7 @@ Calling `wait` or `wait_and_throw` on a queue will wait for all commands enqueue
    - Creating a `host_accessor`
    - Destroying `the buffer`
 
-A `host\_accessor` gives immediate access to the data managed by a buffer in the host application.
+A `host_accessor` gives immediate access to the data managed by a buffer in the host application.
 This will wait for any kernel functions accessing the buffer to complete.
 
 The solution propose a lot of different ways of access memory.

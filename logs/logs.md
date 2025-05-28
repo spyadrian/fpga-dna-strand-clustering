@@ -259,7 +259,7 @@ Calling `wait` or `wait_and_throw` on a queue will wait for all commands enqueue
 
 - When using the USM data management model you can synchronize the same way you would for kernel functions, calling wait on an event or the queue.
 - When using the buffer/access data management model command groups don't automatically copy data back so there are other ways to synchronize with the data.
-   - Creating a `host\_accessor`
+   - Creating a `host_accessor`
    - Destroying `the buffer`
 
 A `host\_accessor` gives immediate access to the data managed by a buffer in the host application.
@@ -267,7 +267,7 @@ This will wait for any kernel functions accessing the buffer to complete.
 
 The solution propose a lot of different ways of access memory.
 For `buffer` and `usm` it's mostly about putting a `wait` at the right spot.
-For the `host\_buffer`, it wait automatically to be updated before to compute what you ask it to do.
+For the `host_buffer`, it wait automatically to be updated before to compute what you ask it to do.
 They all worked with my CPU :
 
 ```

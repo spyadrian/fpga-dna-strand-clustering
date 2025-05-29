@@ -5,7 +5,8 @@
 1. [Monday 26 May](#26may)
 2. [Tuesday 27 May](#27may)
 3. [Wednesday 28 May](#28may)
-
+4. [Thursday 29 May](#29may)
+5. [Friday 30 May](#30may)
 
 <!--- BODY --->
 
@@ -14,7 +15,8 @@
 ### Tasks
 
 - [x] Set up and install SYCL tools
-- [ ] Get started with SYCL (SYCL Academy)
+- [x] Get started with SYCL (SYCL Academy)
+- [ ] Analyse OneJoin Algorithm Implementation
 
 ### Links
 
@@ -111,7 +113,7 @@ For the CPU it worked easily :
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Managing_Data/solution.cpp)
 
 
-## Monday : 26 May <a name="26may"></a>
+## Wednesday : 28 May <a name="28may"></a>
 
 SYCL Academy loading...
 
@@ -283,6 +285,11 @@ They all worked with my CPU :
 
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Asynchronous_Execution/solution.cpp)
 
+
+## Thursday : 29 May <a name="29may"></a>
+
+Keep doing SYCL Academy !
+
 ### 10. Data and Dependencies
 
 There are two ways to move data and create dependencies between kernel functions in SYCL :
@@ -363,3 +370,7 @@ Here we have an example of using these techniques:
 For the rest of SYCL Academy I'm gonna let it for another moment as they are really specific and complex topic and some of them are not useful for me right now.
 I might read about vectors and matrix topics later.
 
+
+## Friday : 30 May <a name="30may"></a>
+
+...

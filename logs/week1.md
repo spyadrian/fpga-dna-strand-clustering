@@ -283,3 +283,83 @@ They all worked with my CPU :
 
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Asynchronous_Execution/solution.cpp)
 
+### 10. Data and Dependencies
+
+There are two ways to move data and create dependencies between kernel functions in SYCL :
+
+- Buffer/accessor data movement model
+    - Data dependencies analysis
+    - Implicit data movement
+- USM data movement model
+    - Manual chaining of dependencies
+    - Explicit data movement
+
+For data flow with buffers and accessors.
+An `accessor` describes what data a kernel function is accessing and how it is accessing it.
+The buffer object uses this information to create infer dependencies and data movement.
+
+```c
+sycl::buffer buf {data, sycl::range{1024}};
+
+gpuQueue.submit([&](sycl::handler &cgh) {
+  sycl::accessor acc {buf, cgh};
+
+  // [...]
+});
+```
+
+The USM data management model data model is prescriptive.
+Dependencies are defined explicitly by passing around `event` objects.
+Passing those `event` objects when enqueueing other commands creates dependencies.
+The user is responsible for ensuring data dependencies and consistency are maintained
+
+```c
+auto e1 = gpuQueue.memcpy(devicePtrA, dataA, sizeof(int));
+
+auto e3 = gpuQueue.parallel_for<kernel_a>(sycl::range{1024}, e1, [=](sycl::id<1> idx) {
+  devicePtrA[idx] = /* some computation */ 
+});
+```
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Data_and_Dependencies/solution.cpp)
+
+### 11. In Order Queue
+
+SYCL `queues` are by default out-of-order.
+This means commands are allowed to be overlapped, re-ordered, and executed concurrently, providing dependencies are honoured to ensure consistency.
+
+SYCL `queues` can be configured to be in-order.
+This mean commands must execute strictly in the order they were enqueued.
+
+With USM, to handle dependencies you need to define an ordering manually (error prone) with `cgh.depends_on(event)`.
+Buffer/accessors models automatically handle dependencies for you.
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/In_Order_Queue/solution_vector_add.cpp)
+
+### 12. Advanced Data Flow
+
+When using the buffer/accessor model a `buffer` can manage already allocated memory or have the SYCL runtime allocate it.
+To prevent the runtime allocation memory you can provide the `property::buffer::use_host_ptr` property when constructing the `buffer`.
+They can also be constructed without initial data like so : `auto buf = sycl::buffer<T>{sycl::range{size}}`.
+
+A `buffer` will synchronize the latest modified copy of the data it manages back to the initial pointer on destruction.
+To change the destination that a buffer will synchronize to on destruction you can call `set_final_data` with another.
+Alternatively to prevent the `buffer` from synchronizing back to the initial data entirely you can call `set_final_data` with `nullptr`.
+
+```c
+auto buf = sycl::buffer{initialData, sycl::range{size}};
+buf.set_final_data(finalData);
+buf.set_final_data(nullptr);
+```
+
+Here we have an example of using these techniques:
+
+- **Input** data is initialized with initial data but doesn't need to be copied back so it can use `set_final_data(nullptr)`.
+- **Temporary** is only used on the device so can be an uninitialized `buffer`.
+- **Output** data is initialized on the device and needs to be copied back so it can be an uninitialized buffer and use `set_final_data` to provide the final data address.
+
+[_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Advanced_Data_Flow/solution.cpp)
+
+For the rest of SYCL Academy I'm gonna let it for another moment as they are really specific and complex topic and some of them are not useful for me right now.
+I might read about vectors and matrix topics later.
+

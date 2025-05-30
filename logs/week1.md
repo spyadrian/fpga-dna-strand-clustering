@@ -24,6 +24,7 @@
 - [SYCL Academy](https://sycl.tech/getting-started/academy)
 - [Git SYCL Academy](https://github.com/codeplaysoftware/syclacademy)
 - [Get the Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
+- [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 
 
 ## Monday : 26 May <a name="26may"></a>
@@ -373,4 +374,18 @@ I might read about vectors and matrix topics later.
 
 ## Friday : 30 May <a name="30may"></a>
 
-...
+I start the day cloning the building the C++/SYCL implementation of the OneJoin algorithm.
+Doing so I had a bit of trouble with my configuration of Nvim on CachyOS because of the LSP.
+The LSP was notifying some errors that was due to the linking of the file.
+So I install `bear` and create a `compile_commands.json` that fix most of it.
+Some of them are still here but I think I can work with them without to much problems.
+
+I start analysing the general structure of the code, brief on this table :
+
+| Level                         | Files                                                            | Main Role                                                                                                                                                                                         |
+| ---------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **I. Interface & Constants** | `onejoin.hpp`, `constants.hpp/.cpp`                              | Exposes constants (hash sizes, *K* threshold, etc.) and type aliases, declares all core OneJoin functions.                                                                                       |
+| **II. OneJoin Pipeline**     | `onejoin_dpcpp.cpp`, `verification.cpp`, `utils.cpp`, `Time.cpp` | Implements the parallel join: LSH generation, SYCL embedding, bucketing, candidate generation/filtering, edit distance verification, performance measurement, and utilities.                    |
+| **III. Application**         | `main.cpp`, `DBSCAN.cpp`                                         | Parses the command line, orchestrates either the simple join or the full *OneCluster* chain (join + DBSCAN + consensus).                                                                         |
+
+

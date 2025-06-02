@@ -13,7 +13,7 @@
 
 # Index
 
-Analyse OneJoin Algorithm Implementation – [Week 1](week1.md#30may)
+Analyse OneJoin Algorithm Implementation – [Week 1](week1.md#30may), [Week 2](week2.md#02jun)
 
 Get started with SYCL (SYCL Academy) – [Week 1](week1.md#27may)
 

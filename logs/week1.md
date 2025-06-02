@@ -389,3 +389,11 @@ I start analysing the general structure of the code, brief on this table :
 | **III. Application**         | `main.cpp`, `DBSCAN.cpp`                                         | Parses the command line, orchestrates either the simple join or the full *OneCluster* chain (join + DBSCAN + consensus).                                                                         |
 
 
+## Saturday : 31 May
+
+I start reading another time the OneJoin paper focusing on the "Design and Implementation" part, because it is hard to understand well their code when there is no comments on it.
+I'm still struggling with some point, but I managed to understand the overall idea of the OneJoin algorithm.
+I still need to understand the code in detail.
+
+I've done a little schema of the general steps of the algorithm, it's still a draft.
+When it's complete and more detailed, I'll do it in digital format.

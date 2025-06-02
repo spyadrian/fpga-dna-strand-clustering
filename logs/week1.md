@@ -1,6 +1,6 @@
-<!--- TOC --->
+# Week 1 <a name="week1"></a>
 
-# Table of contents
+### Table of contents
 
 1. [Monday 26 May](#26may)
 2. [Tuesday 27 May](#27may)
@@ -8,10 +8,6 @@
 4. [Thursday 29 May](#29may)
 5. [Friday 30 May](#30may)
 6. [Saturday 31 May](#31may)
-
-<!--- BODY --->
-
-# Week 1 <a name="week1"></a>
 
 ### Tasks
 

@@ -1,12 +1,8 @@
-<!--- TOC --->
+# Week 2 <a name="week2"></a>
 
-# Table of contents
+### Table of contents
 
 1. [Monday 02 Jun](#02jun)
-
-<!--- BODY --->
-
-# Week 2 <a name="week2"></a>
 
 ### Tasks
 

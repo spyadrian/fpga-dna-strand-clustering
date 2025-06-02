@@ -7,6 +7,9 @@
     3. [Wednesday 28 May](week1.md#28may)
     4. [Thursday 29 May](week1.md#29may)
     5. [Friday 30 May](week1.md#30may)
+    6. [Saturday 31 May](week1.md#31may)
+2. [Week 2 - 02 Jun](week2.md#week2)
+    1. [Monday 02 Jun](week2.md#02jun)
 
 # Index
 

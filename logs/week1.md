@@ -7,6 +7,7 @@
 3. [Wednesday 28 May](#28may)
 4. [Thursday 29 May](#29may)
 5. [Friday 30 May](#30may)
+6. [Saturday 31 May](#31may)
 
 <!--- BODY --->
 
@@ -24,6 +25,7 @@
 - [SYCL Academy](https://sycl.tech/getting-started/academy)
 - [Git SYCL Academy](https://github.com/codeplaysoftware/syclacademy)
 - [Get the Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
+- [OneJoin Paper](https://adms-conf.org/2021-camera-ready/marinelli_adms21.pdf)
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 
 
@@ -389,7 +391,7 @@ I start analysing the general structure of the code, brief on this table :
 | **III. Application**         | `main.cpp`, `DBSCAN.cpp`                                         | Parses the command line, orchestrates either the simple join or the full *OneCluster* chain (join + DBSCAN + consensus).                                                                         |
 
 
-## Saturday : 31 May
+## Saturday : 31 May <a name="31may"></a>
 
 I start reading another time the OneJoin paper focusing on the "Design and Implementation" part, because it is hard to understand well their code when there is no comments on it.
 I'm still struggling with some point, but I managed to understand the overall idea of the OneJoin algorithm.

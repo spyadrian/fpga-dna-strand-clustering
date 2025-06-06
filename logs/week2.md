@@ -12,15 +12,18 @@
 - [x] Generate a new dataset
 - [x] Make the Nvidia GPU work
 - [x] Create a Docker container for the GPU
+- [x] Create a Docker container for the FPGA
 - [ ] Test the FPGA simulator of SYCL
-- [ ] Create a Docker container for the FPGA
 - [ ] Analyse OneJoin algorithm implementation
 - [ ] Getting started with VTune profiler
 
 ### Links
 
 - [SYCL](https://sycl.tech/)
-- [OneJoin Paper](https://adms-conf.org/2021-camera-ready/marinelli_adms21.pdf)
+- [OneAPI download](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
+- [OneAPI for Nvidia GPU](https://developer.codeplay.com/products/oneapi/nvidia/2025.1.1/guides/)
+- [Download Codeplay plugin](https://developer.codeplay.com/products/oneapi/nvidia/download)
+- [OneJoin paper](https://adms-conf.org/2021-camera-ready/marinelli_adms21.pdf)
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 - [Michaël's dataset-generator](https://gitlab.unige.ch/Michael.ElKharroubi/dataset-generator)
 

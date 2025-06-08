@@ -1,13 +1,13 @@
-# Week 1 <a name="week1"></a>
+# Week 1
 
 ### Table of contents
 
-1. [Monday 26 May](#26may)
-2. [Tuesday 27 May](#27may)
-3. [Wednesday 28 May](#28may)
-4. [Thursday 29 May](#29may)
-5. [Friday 30 May](#30may)
-6. [Saturday 31 May](#31may)
+1. [Monday 26 May](#monday--26-may)
+2. [Tuesday 27 May](#tuesday--27-may)
+3. [Wednesday 28 May](#wednesday--28-may)
+4. [Thursday 29 May](#thursday--29-may)
+5. [Friday 30 May](#friday--30-may)
+6. [Saturday 31 May](#saturday--31-may)
 
 ### Tasks
 
@@ -25,7 +25,7 @@
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 
 
-## Monday : 26 May <a name="26may"></a>
+## Monday : 26 May
 
 After installing the *Intel oneAPI Base Toolkit*, I launched the `intel-oneapi-base-toolkit-2025.1.3.7_offline.sh` and installed these components :
 - DPC++ Compatibility Tool (mendatory)
@@ -48,7 +48,7 @@ git clone --recursive https://github.com/codeplaysoftware/syclacademy.git
 And start reading and exercising.
 
 
-## Tuesday : 27 May <a name="27may"></a>
+## Tuesday : 27 May
 
 Doing SYCL Academy today.
 
@@ -112,7 +112,7 @@ For the CPU it worked easily :
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Managing_Data/solution.cpp)
 
 
-## Wednesday : 28 May <a name="28may"></a>
+## Wednesday : 28 May
 
 SYCL Academy loading...
 
@@ -285,7 +285,7 @@ They all worked with my CPU :
 [_See solution_](https://github.com/codeplaysoftware/syclacademy/blob/main/Code_Exercises/Asynchronous_Execution/solution.cpp)
 
 
-## Thursday : 29 May <a name="29may"></a>
+## Thursday : 29 May
 
 Keep doing SYCL Academy !
 
@@ -370,7 +370,7 @@ For the rest of SYCL Academy I'm gonna let it for another moment as they are rea
 I might read about vectors and matrix topics later.
 
 
-## Friday : 30 May <a name="30may"></a>
+## Friday : 30 May
 
 I start the day cloning the building the C++/SYCL implementation of the OneJoin algorithm.
 Doing so I had a bit of trouble with my configuration of Nvim on CachyOS because of the LSP.
@@ -387,7 +387,7 @@ I start analysing the general structure of the code, brief on this table :
 | **III. Application**         | `main.cpp`, `DBSCAN.cpp`                                         | Parses the command line, orchestrates either the simple join or the full *OneCluster* chain (join + DBSCAN + consensus).                                                                         |
 
 
-## Saturday : 31 May <a name="31may"></a>
+## Saturday : 31 May
 
 I start reading another time the OneJoin paper focusing on the "Design and Implementation" part, because it is hard to understand well their code when there is no comments on it.
 I'm still struggling with some point, but I managed to understand the overall idea of the OneJoin algorithm.

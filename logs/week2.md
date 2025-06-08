@@ -1,14 +1,14 @@
-# Week 2 <a name="week2"></a>
+# Week 2
 
 ### Table of contents
 
-1. [Monday 02 June](#02june)
-2. [Tuesday 03 June](#03june)
-3. [Wednesday 04 June](#04june)
-4. [Thursday 05 June](#05june)
-5. [Friday 06 June](#06june)
-6. [Saturday 07 June](#07june)
-7. [Sunday 08 June](#sunday--08-june-)
+1. [Monday 02 June](#monday--02-june)
+2. [Tuesday 03 June](#tuesday--03-june)
+3. [Wednesday 04 June](#wednesday--04-june)
+4. [Thursday 05 June](#thursday--05-june)
+5. [Friday 06 June](#friday--06-june)
+6. [Saturday 07 June](#saturday--07-june)
+7. [Sunday 08 June](#sunday--08-june)
 
 ### Tasks
 
@@ -35,14 +35,14 @@
 - [Altera University Program Teaching Materials](https://www.intel.com/content/www/us/en/developer/topic-technology/fpga-academic/materials.html)
 
 
-## Monday : 02 June <a name="02june"></a>
+## Monday : 02 June
 
 I kept reading about the OneJoin algorithm and analyse the implementation.
 Whenever I have to check a function in detail, it take time to understand well the mechanism of it.
 For the moment I'm just gonna make a pipeline of the algorithm to know the data flow of it.
 
 
-## Tuesday : 03 June <a name="03june"></a>
+## Tuesday : 03 June
 
 In the morning I had a rendezvous with Laurent and Michaël.
 We talk about the general algorithm and how I should look at it.
@@ -74,7 +74,7 @@ I tried all day to enable my Nvidia GPU, but I failed.
 I'll try from zero tomorrow.
 
 
-## Wednesday : 04 June <a name="04june"></a>
+## Wednesday : 04 June
 
 I try all day long to have a setup that work on CPU, GPU and FPGA but didn't managed to.
 Whether it was on my own laptop or on a docker, it didn't go well.
@@ -84,7 +84,7 @@ Even if it didn't work I managed to correct some problem and understand the main
 I'll keep in mind what I have done and will brief it when I'm done with those task, maybe on Thursday.
 
 
-## Thursday : 05 June <a name="05june"></a>
+## Thursday : 05 June
 
 I start the day by trying the python script that Michaël add on the dataset-generator.
 It allow to fix the length of the strands by a certain number, the default number being the median of the size.
@@ -136,7 +136,7 @@ I managed to create two different Dockerfile that allows to do so.
 I'll run test on them tomorrow before to push them on the git.
 
 
-## Friday : 06 June <a name="06june"></a>
+## Friday : 06 June
 
 I started the day by doing some test on my host setup.
 The goal here was to make sure that the GPU is used, prepare the FPGA setup and to understand how the Vtune profiler works.
@@ -156,7 +156,7 @@ The ideas was to wait for the Agliex 7 to be delivered and see at that moment.
 But, waiting, I already ask for the student licence just in case (it might be useless, cause a forum told that only professor can make them).
 
 
-## Saturday : 07 June <a name="07june"></a> 
+## Saturday : 07 June
 
 The Vtune profiler works well.
 I saw that there were many diverse type of diagnostic.
@@ -165,7 +165,7 @@ I tried them on the OneJoin algorithm but I didn't see much cause I have some pr
 I tried with multiple parameters but I either get zero output or to much candidates resulting in a `out of memory`.
 I'll try to get more in the algorithm to be sure that I making no mistake with the parameters.
 
-## Sunday : 08 June <a name="08june"></a>
+## Sunday : 08 June
 
 ...
 

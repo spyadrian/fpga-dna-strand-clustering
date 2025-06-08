@@ -6,6 +6,9 @@
 2. [Tuesday 03 June](#03june)
 3. [Wednesday 04 June](#04june)
 4. [Thursday 05 June](#05june)
+5. [Friday 06 June](#06june)
+6. [Saturday 07 June](#07june)
+7. [Sunday 08 June](#sunday--08-june-)
 
 ### Tasks
 
@@ -13,19 +16,23 @@
 - [x] Make the Nvidia GPU work
 - [x] Create a Docker container for the GPU
 - [x] Create a Docker container for the FPGA
+- [x] Getting started with VTune profiler
 - [ ] Test the FPGA simulator of SYCL
 - [ ] Analyse OneJoin algorithm implementation
-- [ ] Getting started with VTune profiler
 
 ### Links
 
 - [SYCL](https://sycl.tech/)
 - [OneAPI download](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?packages=oneapi-toolkit&oneapi-toolkit-os=linux&oneapi-lin=offline)
 - [OneAPI for Nvidia GPU](https://developer.codeplay.com/products/oneapi/nvidia/2025.1.1/guides/)
+- [FPGA Support Package for the Intel](https://www.intel.com/content/www/us/en/developer/articles/release-notes/intel-oneapi-compiler-fpga-add-on-release-notes.html)
+- [Compare version Quartus](https://www.intel.com/content/dam/www/central-libraries/us/en/documents/quartus-prime-compare-editions-guide.pdf)
+- [Download Quartus Prime Pro 24.2](https://www.intel.fr/content/www/fr/fr/software-kit/826843/intel-quartus-prime-pro-edition-design-software-version-24-2-for-linux.html)
 - [Download Codeplay plugin](https://developer.codeplay.com/products/oneapi/nvidia/download)
 - [OneJoin paper](https://adms-conf.org/2021-camera-ready/marinelli_adms21.pdf)
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 - [Michaël's dataset-generator](https://gitlab.unige.ch/Michael.ElKharroubi/dataset-generator)
+- [Altera University Program Teaching Materials](https://www.intel.com/content/www/us/en/developer/topic-technology/fpga-academic/materials.html)
 
 
 ## Monday : 02 June <a name="02june"></a>
@@ -127,4 +134,38 @@ It's likely that it will be possible to download the Codeplay 2025.0 plugin dire
 
 I managed to create two different Dockerfile that allows to do so.
 I'll run test on them tomorrow before to push them on the git.
+
+
+## Friday : 06 June <a name="06june"></a>
+
+I started the day by doing some test on my host setup.
+The goal here was to make sure that the GPU is used, prepare the FPGA setup and to understand how the Vtune profiler works.
+
+For the GPU I struggle a bit but in short, I forget to put the `-fsycl-targets=nvptx64-nvidia-cuda` flag at the build.
+I need to figure out a way to add this line to the Makefile if I run it on the Docker container.
+
+Preparing the FPGA setup and installing Quartus Prime, I saw that we need to get the Quartus Prime Pro 24.2 version (a pay version) to use the Agilex 7.
+The standard one doesn't have the support for Agilex.
+The get it there is two possibilities :
+
+- one "voucher" version come with the Agliex 7 we've already ordered
+- we get the student licence
+- (we paid it, we don't want to do that)
+
+The ideas was to wait for the Agliex 7 to be delivered and see at that moment.
+But, waiting, I already ask for the student licence just in case (it might be useless, cause a forum told that only professor can make them).
+
+
+## Saturday : 07 June <a name="07june"></a> 
+
+The Vtune profiler works well.
+I saw that there were many diverse type of diagnostic.
+I tried them on the OneJoin algorithm but I didn't see much cause I have some problems having the right value for each parameters of the algorithm.
+
+I tried with multiple parameters but I either get zero output or to much candidates resulting in a `out of memory`.
+I'll try to get more in the algorithm to be sure that I making no mistake with the parameters.
+
+## Sunday : 08 June <a name="08june"></a>
+
+...
 

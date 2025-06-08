@@ -13,6 +13,9 @@
     2. [Tuesday 03 June](week2.md#03june)
     3. [Wednesday 04 June](week2.md#04june)
     4. [Thursday 05 June](week2.md#05june)
+    5. [Friday 06 June](week2.md#06june)
+    6. [Saturday 07 June](week2.md#07june)
+    7. [Sunday 08 June](week2.md#sunday--08-june-)
 
 # Index
 
@@ -25,6 +28,8 @@ Create a Docker container for the GPU – [Week 2](week2.md#05june)
 Generate a new dataset – [Week 2](week2.md#03june)
 
 Get started with SYCL (SYCL Academy) – [Week 1](week1.md#27may)
+
+Getting started with VTune profiler – [Week 2](week2.md#07june)
 
 Make the Nvidia GPU work – [Week 2](week2.md#05june)
 

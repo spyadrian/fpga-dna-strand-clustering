@@ -8,7 +8,6 @@
 4. [Thursday 05 June](#thursday--05-june)
 5. [Friday 06 June](#friday--06-june)
 6. [Saturday 07 June](#saturday--07-june)
-7. [Sunday 08 June](#sunday--08-june)
 
 ### Tasks
 
@@ -164,8 +163,4 @@ I tried them on the OneJoin algorithm but I didn't see much cause I have some pr
 
 I tried with multiple parameters but I either get zero output or to much candidates resulting in a `out of memory`.
 I'll try to get more in the algorithm to be sure that I making no mistake with the parameters.
-
-## Sunday : 08 June
-
-...
 

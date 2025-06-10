@@ -14,7 +14,6 @@
     4. [Thursday 05 June](week2.md#thursday--05-june)
     5. [Friday 06 June](week2.md#friday--06-june)
     6. [Saturday 07 June](week2.md#saturday--07-june)
-    7. [Sunday 08 June](week2.md#sunday--08-june)
 
 # Index
 

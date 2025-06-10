@@ -14,6 +14,9 @@
     4. [Thursday 05 June](week2.md#thursday--05-june)
     5. [Friday 06 June](week2.md#friday--06-june)
     6. [Saturday 07 June](week2.md#saturday--07-june)
+3. [Week 3 - 09 June](week3.md)
+    1. [Tuesday 10 June](week3.md#tuesday--10-june)
+
 
 # Index
 
@@ -32,6 +35,8 @@ Getting started with VTune profiler – [Week 2](week2.md#saturday--07-june)
 Make the Nvidia GPU work – [Week 2](week2.md#thursday--05-june)
 
 Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
+
+Parameters Definition – [Week 3](week3.md#tuesday--10-june)
 
 Set up and install SYCL tools – [Week 1](week1.md#monday--26-may)
 

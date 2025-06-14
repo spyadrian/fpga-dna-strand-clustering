@@ -97,7 +97,7 @@ $$
 The **real pais total** is the total number of true pairs the algorithm should output for the whole dataset.
 
 $$
-\text{Real\_pairs\_total} \;=\; \text{Pairs\_per\_bucket} \times b
+\text{Real\_pairs\_total} \;=\; \text{Pairs\_per\_bucket} \times N
 $$
 
 The number of real pairs total and pairs per bucket are summarize on this array for each dataset I use :

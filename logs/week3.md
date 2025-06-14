@@ -3,6 +3,8 @@
 ### Table of contents
 
 1. [Tuesday 10 June](#tuesday--10-june)
+2. [Friday 13 June](#friday--13-june)
+3. [Saturday 14 June](#saturday--14-june)
 
 ### Tasks
 
@@ -43,41 +45,105 @@ Here is a table talking about the many parameters there is on the OneJoin algori
 
 ### Parameters
 
-| Parameter                | Default value (code)    | Impact in the algorithm                                                                                                                                                   | Paper symbol |
-| ------------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| **DEF\_NUM\_STR**        | `7`                     | Number `r` of CGK-Embedding strings generated per read. More embeddings give additional parallel “views” of a sequence, raising recall but also memory use and embedding time. | `r`        |
-| **DEF\_NUM\_HASH**       | `16`                    | Number `z` of LSH hash functions applied to each embedded string. A larger `z` improves filtering selectivity (fewer false positives) at the cost of longer embedding time.    | `z`        |
-| **DEF\_NUM\_BITS**       | `12`                    | Number `m` of bit positions sampled by each LSH function. A higher `m` produces finer (smaller) buckets.                                                                       | `m`        |
-| **DEF\_NUM\_CHAR**       | `4` (DNA), `26`, `37` … | Alphabet size (e.g. A,C,G,T → 4 for DNA). Used to index characters in the embedding lookup tables.                                                                               | \|Σ\|        |
-| **DEF\_K\_INPUT**        | `150`                   | Maximum edit-distance threshold `K` used in the exact verification stage; governs error tolerance.                                                                             | `K`        |
-| **DEF\_SHIFT**           | `50`                    | Length (in bases) of one embedded “block”. Determines `NUM_REP = ceil(K/SHIFT)` (number of substrings per read).                                                                 | SHIFT        |
-| **--samplingrange (-s)** | — (required)            | Highest character index that is embedded. Sets the sliding window examined in each read and sizes all dependent structures (p-matrix, random strings, etc.).                     | —            |
-| **--countfilter (-c)**   | — (required)            | Frequency filter `T`: a read pair becomes a candidate only if it co-occurs in at least `T+1` buckets; applied during the `remove_if` on the candidate vector.                  | `T`        |
-| **--batch\_size (-b)**   | — (required)            | Maximum number of reads processed per batch. Affects buffer size and the host/device parallelism granularity.                                                                    | —            |
+_See array below_
 
 ### Memory
 
-OneJoin store `z × m` char (1B) for `r` embeddings.
-The memory is then driven by the equation `N × r × z × m`, `N` being the number of reads.
-Since buffers must fit into GPU/CPU memory, OneJoin splits the input into **batches**.
-Each batch allocates `batch\_size × r × z × m` bytes for embedding plus space for buckets.
-The code creates these buffers in batches to avoid exceeding hardware limits.
+OneJoin stores `z × m` bytes per embedding and maintains `r` independent embeddings for every read.
+For a batch of `B` reads the embedding buffer therefore occupies `B × r × z × m  bytes`.
+The implementation also holds the raw reads and the (`t`, `k`, `id`, `i`) tuples returned by the hashing kernels, which are often larger than the embedding payload.
+Processing is done batch-by-batch so that the sum of these three buffers fits into accelerator memory.
 
-### Precision
 
-`r` is the number of embeddings (Hamming sequence).
-Decreasing `r` reduces coverage but greatly speeds up the embedding step.
-`z` is the number of AND-hashes performed on an embedding.
-The higher `z`, the less likely two different strings share all their hashes, hence false positives go down and precision go up.
-Each hash observes `m` positions in the embedding.
-A larger `m` means: lucky collision ↓, precision ↑, but the size of the buckets increases because the key is longer.
+## Friday : 13 June
 
-### In Practice
+As the OneJoin algorithm is probabilistic it's important to understand the *recall* and *precision* function.
 
-Finding “the” right setting comes down to balancing these levers:
+### Recall Function
 
-1. set the memory target (GPU/CPU),
-2. choose the triplet (`r`, `z`, `m`) according to the desired precision,
-3. adapt **batch\_size** and **countfilter** to respect memory and time limits.
+It asks : _"Out of all items that should have been found, how many did we actually retrieve?"_. 
+The formula is so :
+
+$$
+\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+$$
+
+- _True Positives (TP)_ – the items your algorithm got right
+- _False Negatives (FN)_ – the missed items that belonged to the positive class but were not retrieved
+
+A high recall (close to 1) means your method rarely misses relevant items, but it says nothing about how much irrelevant stuff you pulled in with them.
+
+### Precision Function
+
+It asks : _"Out of everything we claimed was positive, how many were actually correct?"_
+
+$$
+\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+$$
+
+- _False Positives (FP)_ – the items your algorithm marked positive even though they were not
+
+A high precision tells you your positive predictions are trustworthy, but it doesn’t guarantee you found them all.
+
+### Pairs
+
+The **pairs per bucket** is the number of unique strand–strand pairs within a bucket.
+Each bucket (cluster) contains `s = 30` DNA strands.
+
+$$
+\text{Pairs\_per\_bucket} \;=\; \binom{s}{2} \;=\; \frac{s\,(s-1)}{2}
+$$
+
+The **real pais total** is the total number of true pairs the algorithm should output for the whole dataset.
+
+$$
+\text{Real\_pairs\_total} \;=\; \text{Pairs\_per\_bucket} \times b
+$$
+
+The number of real pairs total and pairs per bucket are summarize on this array for each dataset I use :
+
+|                  | dna-little-processed.txt | dna-big-processed.txt | dna-giant-processed.txt  |
+| ---------------- | ------------------------ | --------------------- | ------------------------ |
+| Pairs per bucket | 435                      | 435                   | 435                      |
+| Real pairs total | 108 750                  | 4 350 000             | 10 875 000               |
+
+
+### Parameters
+
+Here is a better array for all the parameters :
+
+| parameter (Y)            | symbol (X₀) | default value                | brief description                                                       | impact on **speed**                                                                                  | impact on **coverage**<br/>(recall)                 | impact on **precision**      | impact on **false positives** | impact on **true positives** |
+| ------------------------ | ----------- | ---------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------- | ----------------------------- | ---------------------------- |
+| **NUM\_STR**             | *r*         | 7                            | # independent CGK embeddings per read                                   | ↑ linear cost in embedding & LSH; more buckets to sort                                               | Better chance every real pair collides in ≥1 bucket | slight ↓ (more candidates)   | slight ↑ (extra collisions)   | ↑ (fewer FN)                 |
+| **NUM\_HASH**            | *z*         | 16                           | # hash functions (OR-construction) per embedding                        | small ↑ (extra hash ops); more candidates                                                            | ↑ (larger OR fan-out)                               | ↓ (more spurious pairs)      | ↑                             | ↑                            |
+| **NUM\_BITS**            | *m*         | 12                           | bits sampled inside each hash (AND-construction)                        | negligible per-pair cost; BUT larger *m* makes buckets sparser → ↓ candidate count  ⇒ overall faster | ↓ (over-selective buckets may drop good pairs)      | ↑ (fewer random bucket hits) | ↓                             | ↓ (if too large)             |
+| **NUM\_CHAR**            |             | 4 (DNA) / 26 / 37            | alphabet size of the dataset                                            | very small effect (only dictionary lookup)                                                           | —                                                   | —                            | —                             | —                            |
+| **K\_INPUT**             | *K*         | 150                          | edit-distance threshold passed to the verifier                          | large ↑ when K grows (verifier DP expands)                                                           | ↑ (accepts farther pairs)                           | ↓                            | ↑                             | ↑                            |
+| **SHIFT**                |             | 50                           | edit-band stride used when slicing strings during embedding             | smaller SHIFT → more slices ⇒ slower                                                                 | ↑ (denser coverage of edits)                        | —                            | —                             | ↑                            |
+| **NUM\_REP**             | ⌈K/SHIFT⌉   | 3 (150/50)                   | # replicated sub-strings embedded per read                              | ↑ (proportional to NUM\_REP)                                                                         | ↑                                                   | —                            | —                             | ↑                            |
+| **--samplingrange (-s)** | *s*         | *required* (init 0)          | highest character position inspected by LSH; determines embedded length | ↑ when s grows (longer strings in GPU memory)                                                        | ↑                                                   | —                            | —                             | ↑                            |
+| **--countfilter (-c)**   | *c*         | 1 (initial)                  | min occurrences of the same candidate pair before verification          | ↓ (filters low-support pairs early)                                                                  | slight ↓ (might drop rare true pairs)               | ↑ (keeps high-support pairs) | ↓                             | mild ↓                       |
+| **--batch\_size (-b)**   | *B*         | *required* (0 if not given)  | # reads processed together; limited by GPU / RAM                        | can tune GPU occupancy: too small → under-utilised, too big → paging                                 | —                                                   | —                            | —                             | —                            |
+
+
+## Saturday : 14 June
+
+The choice of `K` is critical: too low and true copies are missed; too high and we accept False positives.
+The error rate of our 207nt strands are around 10% (21 char).
+Then, the edit-distance between two reads is in average of 42.
+Adding a little margin of 6 lend me to get `K = 48` with who I get good result.
+The result aren't optimal but for the moment my goal is to use the algorithm with FPGA not to fully optimize the parameters choice.
+
+A good NUM\_REP is around 3.
+So I took a SHIFT of 16 to get that.
+
+Skipping the part where a I had a hard time finding those, here are a set of good parameters for the `dna-little-processed` dataset :
+
+```
+make update PARAMS="-DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_NUM_CHAR=4 -DDEF_K_INPUT=48 -DDEF_SHIFT=16"
+./onejoin -r test/dna-little-processed.txt -a 2 -d 1 -s 300 -c 1 -b 30
+```
+
+I would like to get a set of good parameters for every dataset but time is running so I'll look at it later.
 
 

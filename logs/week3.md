@@ -5,11 +5,11 @@
 1. [Tuesday 10 June](#tuesday--10-june)
 2. [Friday 13 June](#friday--13-june)
 3. [Saturday 14 June](#saturday--14-june)
+4. [Sunday 15 June](#sunday--15-june)
 
 ### Tasks
 
-- [ ] Find proper parameters for the algorithm
-- [ ] Perform an deep analysis on the algorithm with VTune Profiler
+- [x] Find proper parameters for the algorithm (little dataset only)
 - [ ] Analyse OneJoin algorithm implementation
 - [ ] Test the FPGA simulator of SYCL
 
@@ -21,6 +21,7 @@
 - [OneJoin paper](https://adms-conf.org/2021-camera-ready/marinelli_adms21.pdf)
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 - [Altera University Program Teaching Materials](https://www.intel.com/content/www/us/en/developer/topic-technology/fpga-academic/materials.html)
+- [Self-Service Licensing Center](https://licensing.intel.com/psg/s/?language=en_US)
 
 
 ## Tuesday : 10 June
@@ -88,10 +89,10 @@ A high precision tells you your positive predictions are trustworthy, but it doe
 ### Pairs
 
 The **pairs per bucket** is the number of unique strand–strand pairs within a bucket.
-Each bucket (cluster) contains `s = 30` DNA strands.
+Each bucket (cluster) contains `c = 30` DNA strands.
 
 $$
-\text{Pairs\_per\_bucket} \;=\; \binom{s}{2} \;=\; \frac{s\,(s-1)}{2}
+\text{Pairs\_per\_bucket} \;=\; \binom{c}{2} \;=\; \frac{c\,(c-1)}{2}
 $$
 
 The **real pais total** is the total number of true pairs the algorithm should output for the whole dataset.
@@ -114,16 +115,16 @@ Here is a better array for all the parameters :
 
 | parameter (Y)            | symbol (X₀) | default value                | brief description                                                       | impact on **speed**                                                                                  | impact on **coverage**<br/>(recall)                 | impact on **precision**      | impact on **false positives** | impact on **true positives** |
 | ------------------------ | ----------- | ---------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------- | ----------------------------- | ---------------------------- |
-| **NUM\_STR**             | *r*         | 7                            | # independent CGK embeddings per read                                   | ↑ linear cost in embedding & LSH; more buckets to sort                                               | Better chance every real pair collides in ≥1 bucket | slight ↓ (more candidates)   | slight ↑ (extra collisions)   | ↑ (fewer FN)                 |
-| **NUM\_HASH**            | *z*         | 16                           | # hash functions (OR-construction) per embedding                        | small ↑ (extra hash ops); more candidates                                                            | ↑ (larger OR fan-out)                               | ↓ (more spurious pairs)      | ↑                             | ↑                            |
+| **NUM\_STR**             | *r*         | 7                            | independent CGK embeddings per read                                   | ↑ linear cost in embedding & LSH; more buckets to sort                                               | Better chance every real pair collides in ≥1 bucket | slight ↓ (more candidates)   | slight ↑ (extra collisions)   | ↑ (fewer FN)                 |
+| **NUM\_HASH**            | *z*         | 16                           | hash functions (OR-construction) per embedding                        | small ↑ (extra hash ops); more candidates                                                            | ↑ (larger OR fan-out)                               | ↓ (more spurious pairs)      | ↑                             | ↑                            |
 | **NUM\_BITS**            | *m*         | 12                           | bits sampled inside each hash (AND-construction)                        | negligible per-pair cost; BUT larger *m* makes buckets sparser → ↓ candidate count  ⇒ overall faster | ↓ (over-selective buckets may drop good pairs)      | ↑ (fewer random bucket hits) | ↓                             | ↓ (if too large)             |
 | **NUM\_CHAR**            |             | 4 (DNA) / 26 / 37            | alphabet size of the dataset                                            | very small effect (only dictionary lookup)                                                           | —                                                   | —                            | —                             | —                            |
 | **K\_INPUT**             | *K*         | 150                          | edit-distance threshold passed to the verifier                          | large ↑ when K grows (verifier DP expands)                                                           | ↑ (accepts farther pairs)                           | ↓                            | ↑                             | ↑                            |
 | **SHIFT**                |             | 50                           | edit-band stride used when slicing strings during embedding             | smaller SHIFT → more slices ⇒ slower                                                                 | ↑ (denser coverage of edits)                        | —                            | —                             | ↑                            |
-| **NUM\_REP**             | ⌈K/SHIFT⌉   | 3 (150/50)                   | # replicated sub-strings embedded per read                              | ↑ (proportional to NUM\_REP)                                                                         | ↑                                                   | —                            | —                             | ↑                            |
+| **NUM\_REP**             | ⌈K/SHIFT⌉   | 3 (150/50)                   | replicated sub-strings embedded per read                              | ↑ (proportional to NUM\_REP)                                                                         | ↑                                                   | —                            | —                             | ↑                            |
 | **--samplingrange (-s)** | *s*         | *required* (init 0)          | highest character position inspected by LSH; determines embedded length | ↑ when s grows (longer strings in GPU memory)                                                        | ↑                                                   | —                            | —                             | ↑                            |
 | **--countfilter (-c)**   | *c*         | 1 (initial)                  | min occurrences of the same candidate pair before verification          | ↓ (filters low-support pairs early)                                                                  | slight ↓ (might drop rare true pairs)               | ↑ (keeps high-support pairs) | ↓                             | mild ↓                       |
-| **--batch\_size (-b)**   | *B*         | *required* (0 if not given)  | # reads processed together; limited by GPU / RAM                        | can tune GPU occupancy: too small → under-utilised, too big → paging                                 | —                                                   | —                            | —                             | —                            |
+| **--batch\_size (-b)**   | *B*         | *required* (0 if not given)  | reads processed together; limited by GPU / RAM                        | can tune GPU occupancy: too small → under-utilised, too big → paging                                 | —                                                   | —                            | —                             | —                            |
 
 
 ## Saturday : 14 June
@@ -146,4 +147,24 @@ make update PARAMS="-DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_N
 
 I would like to get a set of good parameters for every dataset but time is running so I'll look at it later.
 
+
+## Sunday : 15 June
+
+Trying divers parameters I couldn't find a good set of parameters for the `dna-big-processed` dataset, I can't imagine for the `dna-giant-processed`.
+One solution was to use the CPU, after a few crash I saw that the flag on the build of OneJoin was ruining the use of the CPU.
+I then add another `fsycl-targets` to also build for the CPU.
+It looks like that : `-fsycl-targets=spir64_x86_64,nvptx64-nvidia-cuda`.
+
+Using the CPU, I was only able to have three different scenario :
+
+- A really bad coverage
+- 0 buckets (look like the bug Michaël was talking about)
+- Laptop crash (maybe a sort of out-of-memory)
+
+I let it here and start looking for the Quartus Pro License.
+In fact, the serial number (SN) of the FPGA is the key to get a license.
+To retrieve it, you need to go to the Self Service Licensing Center (SSLC) and ask for the `license.dat` generate from the SN.
+The license is valid for 12 months from the date of activation, for me, til the **25.06.26**.
+
+I got a "Your account set up has begun and expected to be completed in 5-10 minutes.", I'm still waiting...
 

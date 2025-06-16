@@ -18,6 +18,7 @@
     1. [Tuesday 10 June](week3.md#tuesday--10-june)
     2. [Friday 13 June](week3.md#friday--13-june)
     3. [Saturday 14 June](week3.md#saturday--14-june)
+    4. [Sunday 15 June](week3.md#sunday--15-june)
 
 # Index
 

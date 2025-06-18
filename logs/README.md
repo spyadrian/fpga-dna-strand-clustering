@@ -22,6 +22,7 @@
 4. [Week 4 - 16 June](week4.md)
     1. [Monday 16 June](week4.md#monday--16-june)
     2. [Tuesday 17 June](week4.md#tuesday--17-june)
+    3. [Wednesday 18 June](week4.md#wednesday--18-june)
 
 
 # Index
@@ -41,6 +42,8 @@ Getting started with VTune profiler – [Week 2](week2.md#saturday--07-june)
 Make the Nvidia GPU work – [Week 2](week2.md#thursday--05-june)
 
 Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
+
+Meeting report : June 18 – [Week 4](week4.md#wednesday--18-june)
 
 Parameters Definition – [Week 3](week3.md#friday--13-june)
 

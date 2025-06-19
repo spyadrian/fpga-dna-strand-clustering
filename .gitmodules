@@ -1,0 +1,3 @@
+[submodule "external/oneoligo"]
+	path = external/oneoligo
+	url = https://github.com/Eug9/oneoligo.git

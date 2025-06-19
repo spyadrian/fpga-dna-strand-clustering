@@ -29,15 +29,21 @@
 
 Analyse OneJoin algorithm implementation – [Week 1](week1.md#friday--30-may), [Week 2](week2.md#monday--02-june)
 
-Create a Docker container for the FPGA – [Week 2](week2.md#thursday--05-june)
+Analyse OneJoin parameters – [Week 3](week3.md#friday--13-june)
 
-Create a Docker container for the GPU – [Week 2](week2.md#thursday--05-june)
+Dataset Characteristic – [Week 2](week3.md#tuesday--10-june)
 
-Generate a new dataset – [Week 2](week2.md#tuesday--03-june)
+Docker container for the FPGA – [Week 2](week2.md#thursday--05-june)
+
+Docker container for the GPU – [Week 2](week2.md#thursday--05-june)
 
 Get started with SYCL (SYCL Academy) – [Week 1](week1.md#tuesday--27-may)
 
-Getting started with VTune profiler – [Week 2](week2.md#saturday--07-june)
+Get started with VTune profiler – [Week 2](week2.md#saturday--07-june)
+
+Installing overall setup on Laptop – [Week 2](week2.md#thursday--05-june)
+
+Installing Quartus Prime Pro 24.2 on Laptop – [Week 2](week2.md#friday--06-june)
 
 Make the Nvidia GPU work – [Week 2](week2.md#thursday--05-june)
 
@@ -45,7 +51,5 @@ Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
 
 Meeting report : June 18 – [Week 4](week4.md#wednesday--18-june)
 
-Parameters Definition – [Week 3](week3.md#friday--13-june)
-
-Set up and install SYCL tools – [Week 1](week1.md#monday--26-may)
+Set up and install SYCL tools for SYCL Academy – [Week 1](week1.md#monday--26-may)
 

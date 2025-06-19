@@ -16,6 +16,7 @@
 - [x] Create a Docker container for the GPU
 - [x] Create a Docker container for the FPGA
 - [x] Getting started with VTune profiler
+- [x] Installing Quartus Prime Pro 24.2
 - [ ] Test the FPGA simulator of SYCL
 - [ ] Analyse OneJoin algorithm implementation
 
@@ -55,7 +56,7 @@ We also setup new goals for me, that could help me doing the work :
 - The dataset I'm using now is to perfect, let's use the python script from Michaël (before Friday)
 - The use of a profiler would let me test the speed of the algorithm and see where the bottleneck are (see VTune profiler)
 
-Michaël talk me about a bug where the number of groups the algorithm find tend to 0 when there is more than 100000 something (I forgot, I'll ask him next time).
+Michaël talk me about a bug where the number of groups the algorithm find tend to 0 when there is more than 100000 reads.
 I'm also thinking about using docker for this project, but I'll see if I have some problem with my distro during the rest of it.
 
 I put the analyse of the implementation aside, and started by trying the dataset-generator.
@@ -153,6 +154,13 @@ The get it there is two possibilities :
 
 The ideas was to wait for the Agliex 7 to be delivered and see at that moment.
 But, waiting, I already ask for the student licence just in case (it might be useless, cause a forum told that only professor can make them).
+
+To install Quartus Pro 24.2, I download the installer from the Intel page and launch it.
+On the installer, I checked :
+
+- All the Intel Quartus Prime Pro Edition
+- the devices : Agilex 5, Agilex 7 and Cyclone 10 GX
+- the add-ons : "High Level Synthesis Compiler", "Programmer and Tools" and the "Help"
 
 
 ## Saturday : 07 June

@@ -23,13 +23,15 @@
     1. [Monday 16 June](week4.md#monday--16-june)
     2. [Tuesday 17 June](week4.md#tuesday--17-june)
     3. [Wednesday 18 June](week4.md#wednesday--18-june)
-
+    4. [Thursday 19 June](week4.md#thursday--19-june)
 
 # Index
 
 Analyse OneJoin algorithm implementation – [Week 1](week1.md#friday--30-may), [Week 2](week2.md#monday--02-june)
 
 Analyse OneJoin parameters – [Week 3](week3.md#friday--13-june)
+
+Create a patch for the oneoligo sub-module – [Week 4](week4.md#thursday--19-june)
 
 Dataset Characteristic – [Week 2](week3.md#tuesday--10-june)
 

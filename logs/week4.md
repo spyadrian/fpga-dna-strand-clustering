@@ -5,10 +5,12 @@
 1. [Monday 16 June](#monday--16-june)
 2. [Tuesday 17 June](#tuesday--17-june)
 3. [Wednesday 18 June](wednesday--18-june)
+4. [Thursday 19 June](#thursday--19-june)
 
 ### Tasks
 
 - [x] Analyse OneJoin algorithm implementation
+- [x] Create a patch for the oneoligo sub-module
 - [ ] Check for Michaël's problem about Bucket converging to 0
 - [ ] Test the FPGA simulator of SYCL
 
@@ -66,4 +68,48 @@ As the PC is, in part, locked by HEPIA's security, to boot on the key USB, we ha
 After getting the MAC address (NIC) `xx:xx:xx:xx:xx:xx` and the name `cachyos-adrian-fpga` of the PC new setup.
 We manage to create a license.
 I'll check if it works tomorrow.
+
+
+## Thursday : 19 June
+
+I install everything the PC needs with those line : 
+
+```
+sudo pacman -Qs
+sudo pacman -S libxcrypt-compat   // for Quartus
+sudo pacman -S cuda
+sudo ./intel-oneapi-base-toolkit-2025.0.1.46_offline.sh
+sudo ./qinst-linux-24.2-40.run
+```
+
+I didn't install the patch for the Nvidia GPU, but the rest is the same as I already did on Week 2.
+(I install cuda but it might be useless).
+
+Launching Quartus Prime, they ask me for the license.
+I add the `license.dat` Laurent received by mail and it worked.
+
+Before trying the FPGA simulator I push some useful file on the git :
+
+- `dataset/` : all the dataset I generated
+- `external/oneoligo` : the oneoligo Git as a sub-module
+- `patches/oneoligo-local.patch` : a patche for the oneoligo Git
+- `scripts/apply-patches.sh` : a script that apply the patch on the oneoligo Git
+
+The sub-module and the patch was created with : 
+
+```
+git submodule add https://github.com/Eug9/oneoligo.git external/oneoligo
+git commit -m "add module oneoligo as a submodule"
+git config submodule.external/oneoligo.ignore all
+
+// add flag in Makefile and fix ambigus floor
+
+git diff > patches/oneoligo-local.patch
+```
+
+The script `apply-patches.sh` create the directory build before applying the patch.
+So don't forget the `--recurse-submodules` when cloning the repo.
+
+I have some issue doing `make` after cloning it on my PC quite weird.
+BTW I had to remove the GPU thing on the makefile as I don't have the Nvidia patch.
 

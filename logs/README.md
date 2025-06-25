@@ -24,6 +24,8 @@
     2. [Tuesday 17 June](week4.md#tuesday--17-june)
     3. [Wednesday 18 June](week4.md#wednesday--18-june)
     4. [Thursday 19 June](week4.md#thursday--19-june)
+5. [Week 5 - 23 June](week5.md)
+    1. [Tuesday 24 June](week5.md#tuesday--24-june)
 
 # Index
 
@@ -44,6 +46,8 @@ Get started with SYCL (SYCL Academy) – [Week 1](week1.md#tuesday--27-may)
 Get started with VTune profiler – [Week 2](week2.md#saturday--07-june)
 
 Installing overall setup on Laptop – [Week 2](week2.md#thursday--05-june)
+
+Installing overall setup on PC – [Week 4](week4.md#thursday--19-june)
 
 Installing Quartus Prime Pro 24.2 on Laptop – [Week 2](week2.md#friday--06-june)
 

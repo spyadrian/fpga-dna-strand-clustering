@@ -76,10 +76,11 @@ I install everything the PC needs with those line :
 
 ```
 sudo pacman -Qs
-sudo pacman -S libxcrypt-compat   // for Quartus
+sudo pacman -S libxcrypt-compat                                 # for Quartus
 sudo pacman -S cuda
-sudo ./intel-oneapi-base-toolkit-2025.0.1.46_offline.sh
-sudo ./qinst-linux-24.2-40.run
+./intel-oneapi-base-toolkit-2025.0.1.46_offline.sh
+./qinst-linux-24.2-40.run
+./intel-fpga-support-for-compiler-2025.0.0.591_offline.sh  # on Week 5
 ```
 
 I didn't install the patch for the Nvidia GPU, but the rest is the same as I already did on Week 2.

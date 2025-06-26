@@ -1,21 +1,118 @@
 diff --git a/makefile b/makefile
-index 17fbb17..004ca7d 100644
+index 17fbb17..f331512 100644
 --- a/makefile
 +++ b/makefile
-@@ -2,7 +2,7 @@
+@@ -1,8 +1,8 @@
+-.PHONY: build
++.PHONY: build cpu gpu fpga_emu report fpga_sim fpga_hw clean
  PARAMS=-DDEF_NUM_STR=5 -DDEF_NUM_HASH=7 -DDEF_NUM_BITS=12 -DDEF_NUM_CHAR=4 -DDEF_K_INPUT=6 -DDEF_SHIFT=6
  
  DPCPP=dpcpp
 -DPCPP_FLAGS= -O3 -std=c++17 -fsycl -fsycl-unnamed-lambda -w $(PARAMS) 
-+DPCPP_FLAGS= -O3 -std=c++17 -fsycl -fsycl-unnamed-lambda -fsycl-targets=spir64_x86_64,nvptx64-nvidia-cuda -w $(PARAMS) 
++COMMON_FLAGS= -O3 -std=c++17 -fsycl -fsycl-unnamed-lambda -w $(PARAMS)
  
  LDFLAGS= -lsycl -ltbb -lpthread -lboost_program_options -lboost_thread -lboost_system -lboost_log -lboost_log_setup
  EXE_NAME=onejoin
+@@ -10,27 +10,56 @@ EXE_NAME=onejoin
+ SRC=src
+ BUILD=build
+ 
++DEVICE ?= cpu# cpu | gpu | fpga_emu | report | fpga_sim | fpga_hw
++BOARD ?= Agilex7
++
++ifeq ($(DEVICE),cpu)
++  DEVICE_FLAGS = -fsycl-targets=spir64_x86_64
++  EXE_SUFFIX   = .cpu
++else ifeq ($(DEVICE),gpu)
++  DEVICE_FLAGS = -fsycl-targets=nvptx64-nvidia-cuda
++  EXE_SUFFIX   = .gpu
++else ifeq ($(DEVICE),fpga_emu)
++  DEVICE_FLAGS = -DFPGA_EMULATOR -fintelfpga
++  EXE_SUFFIX   = .femu
++else ifeq ($(DEVICE),report)
++  DEVICE_FLAGS = -DFPGA_HARDWARE -fintelfpga -Xscompile-time-report -Xstarget=$(BOARD)
++  EXE_SUFFIX   = .report
++else ifeq ($(DEVICE),fpga_sim)
++  DEVICE_FLAGS = -DFPGA_SIMULATOR -fintelfpga -Xssimulation -Xsghdl -Xstarget=$(BOARD)
++  EXE_SUFFIX   = .fsim
++else ifeq ($(DEVICE),fpga_hw)
++  DEVICE_FLAGS = -DFPGA_HARDWARE -fintelfpga -Xshardware -Xstarget=$(BOARD)
++  EXE_SUFFIX   = .fpga
++else
++  $(error DEVICE=$(DEVICE) not recognized)
++endif
++
++DPCPP_FLAGS = $(COMMON_FLAGS) $(DEVICE_FLAGS)
++
+ build: $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o
+-	$(DPCPP) $(DPCPP_FLAGS) $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(LDFLAGS) -o $(EXE_NAME)
++	$(DPCPP) $(DPCPP_FLAGS) $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(LDFLAGS) -o $(EXE_NAME)$(EXE_SUFFIX)
+ 
++cpu gpu fpga_emu report fpga_sim fpga_hw:
++	$(MAKE) build DEVICE=$@
+ 
+ update:
+ 	rm $(BUILD)/constants.o && make build
+ 
+ $(BUILD)/constants.o: $(SRC)/constants.cpp
+-	$(DPCPP) $(DPCPP_FLAGS) $(PARAMS) $< -c -o $@
++	$(DPCPP) $(DPCPP_FLAGS) $< -c -o $@
+ 
+ $(BUILD)/%.o: $(SRC)/%.cpp
+ 	$(DPCPP) $(DPCPP_FLAGS)  $< -c -o $@
+ 
+ 
+ test-join:
+-	./onejoin -a 1 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500
++	./$(EXE_NAME)$(EXE_SUFFIX) -a 1 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500
+ 
+ test-cluster:
+-	./onejoin -a 2 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500 --min_pts 3
++	./$(EXE_NAME)$(EXE_SUFFIX) -a 2 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500 --min_pts 3
+ 
+ 
+ 
+ clean:
+-	rm $(BUILD)/* 
++	rm $(BUILD)/* $(EXE_NAME).*
+diff --git a/src/onejoin.hpp b/src/onejoin.hpp
+index fe00b75..c09e31b 100644
+--- a/src/onejoin.hpp
++++ b/src/onejoin.hpp
+@@ -44,6 +44,7 @@
+ #include <boost/log/utility/setup/console.hpp>
+ #include <boost/log/utility/setup/common_attributes.hpp>
+ #include "constants.hpp"
++#include <sycl/ext/intel/fpga_extensions.hpp>
+ 
+ using namespace constants;
+ using namespace std;
 diff --git a/src/onejoin_dpcpp.cpp b/src/onejoin_dpcpp.cpp
-index 1ce7c92..8258a55 100644
+index 1ce7c92..8b99845 100644
 --- a/src/onejoin_dpcpp.cpp
 +++ b/src/onejoin_dpcpp.cpp
-@@ -192,7 +192,7 @@ void allocate_work(vector<long> times, int num_dev, size_t units_to_allocate,
+@@ -13,6 +13,20 @@ int num_thr = 0;
+ 
+ Time timer(false);
+ 
++#if defined(FPGA_SIMULATOR)
++  using DeviceSelector = sycl::ext::intel::fpga_simulator_selector;
++#elif defined(FPGA_HARDWARE)
++  using DeviceSelector = sycl::ext::intel::fpga_selector;
++#elif defined(FPGA_EMULATOR)
++  using DeviceSelector = sycl::ext::intel::fpga_emulator_selector;
++#endif
++
++// Helper that builds a queue with the proper properties (in‑order + profiling)
++template <typename AsyncHandlerT>
++inline sycl::queue make_fpga_queue(AsyncHandlerT &&handler) {
++  return sycl::queue(DeviceSelector{}, std::forward<AsyncHandlerT>(handler), sycl::property::queue::in_order{});
++}
++
+ void setuplsh(vector<vector<int>> &hash_lsh, std::vector<int> &a,
+               std::vector<int> &lshnumber, vector<tuple<int, int>> &rev_hash) {
+ 
+@@ -192,7 +206,7 @@ void allocate_work(vector<long> times, int num_dev, size_t units_to_allocate,
        idx_fastest = 1 - idx_slowest;
        fastest = times[idx_fastest];
      }
@@ -24,7 +121,57 @@ index 1ce7c92..8258a55 100644
                     units_to_allocate);
      n_fast = units_to_allocate - n_slow;
  
-@@ -1616,4 +1616,4 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
+@@ -1275,26 +1289,31 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
+     exit(-1);
+   }
+ 
+-  if (device == cpu || device == both) { // Selected CPU or both
+-    queues.push_back(
+-        queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
+-  }
+-  if (device == gpu || device == both) { // Selected GPU or both
+-    try {
+-      queue tmp_queue(gpu_selector{}, asyncHandler,
+-                      property::queue::in_order());
+-      queues.push_back(std::move(tmp_queue));
+-    } catch (
+-        std::exception &e) { // No GPU available, use CPU if not selected yet
+-      BOOST_LOG_TRIVIAL(warning)
+-          << "Attention: no GPU device detected. The program will run on CPU.";
+-      if (queues.size() == 0) {
+-        queues.push_back(
+-            queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
++  #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
++    queues.push_back(make_fpga_queue(asyncHandler));
++    device = cpu; // fallback value so the rest of the code treats it as 1 device
++  #else
++    if (device == cpu || device == both) { // Selected CPU or both
++      queues.push_back(
++          queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
++    }
++    if (device == gpu || device == both) { // Selected GPU or both
++      try {
++        queue tmp_queue(gpu_selector{}, asyncHandler,
++                        property::queue::in_order());
++        queues.push_back(std::move(tmp_queue));
++      } catch (
++          std::exception &e) { // No GPU available, use CPU if not selected yet
++        BOOST_LOG_TRIVIAL(warning)
++            << "Attention: no GPU device detected. The program will run on CPU.";
++        if (queues.size() == 0) {
++          queues.push_back(
++              queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
++        }
++        device = 0;
+       }
+-      device = 0;
+     }
+-  }
++  #endif
+ 
+   if (n_batches <= queues.size() * test_batches) {
+     BOOST_LOG_TRIVIAL(error) << "You need at least 3 batches for one device "
+@@ -1616,4 +1635,4 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
    print_output(input_data, output_pairs, "join_output_parallel.txt");
  
    return output_pairs;

@@ -26,6 +26,8 @@
     4. [Thursday 19 June](week4.md#thursday--19-june)
 5. [Week 5 - 23 June](week5.md)
     1. [Tuesday 24 June](week5.md#tuesday--24-june)
+    2. [Wednesday 25 June](week5.md#wednesday--25-june)
+    3. [Thursday 26 June](week5.md#thursday--26-june)
 
 # Index
 

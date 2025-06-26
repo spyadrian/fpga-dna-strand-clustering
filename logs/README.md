@@ -33,9 +33,9 @@ Analyse OneJoin algorithm implementation – [Week 1](week1.md#friday--30-ma
 
 Analyse OneJoin parameters – [Week 3](week3.md#friday--13-june)
 
-Create a patch for the oneoligo sub-module – [Week 4](week4.md#thursday--19-june)
+Create a patch for the oneoligo sub-module – [Week 4](week4.md#thursday--19-june), [Week 5](week5.md#tuesday--24-june)
 
-Dataset Characteristic – [Week 2](week3.md#tuesday--10-june)
+Dataset Characteristic – [Week 3](week3.md#tuesday--10-june)
 
 Docker container for the FPGA – [Week 2](week2.md#thursday--05-june)
 
@@ -45,7 +45,7 @@ Get started with SYCL (SYCL Academy) – [Week 1](week1.md#tuesday--27-may)
 
 Get started with VTune profiler – [Week 2](week2.md#saturday--07-june)
 
-Installing overall setup on Laptop – [Week 2](week2.md#thursday--05-june)
+Installing overall setup on Laptop – [Week 2](week2.md#thursday--05-june), [Week 5](week5.md#tuesday--24-june)
 
 Installing overall setup on PC – [Week 4](week4.md#thursday--19-june)
 
@@ -58,4 +58,6 @@ Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
 Meeting report : June 18 – [Week 4](week4.md#wednesday--18-june)
 
 Set up and install SYCL tools for SYCL Academy – [Week 1](week1.md#monday--26-may)
+
+Table of the four FPGA compilation Options – [Week 5](week5.md#tuesday--24-june)
 

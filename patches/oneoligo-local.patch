@@ -88,7 +88,7 @@ index fe00b75..c09e31b 100644
  using namespace constants;
  using namespace std;
 diff --git a/src/onejoin_dpcpp.cpp b/src/onejoin_dpcpp.cpp
-index 1ce7c92..8b99845 100644
+index 1ce7c92..3aefcf3 100644
 --- a/src/onejoin_dpcpp.cpp
 +++ b/src/onejoin_dpcpp.cpp
 @@ -13,6 +13,20 @@ int num_thr = 0;
@@ -99,7 +99,7 @@ index 1ce7c92..8b99845 100644
 +  using DeviceSelector = sycl::ext::intel::fpga_simulator_selector;
 +#elif defined(FPGA_HARDWARE)
 +  using DeviceSelector = sycl::ext::intel::fpga_selector;
-+#elif defined(FPGA_EMULATOR)
++#else // if defined(FPGA_EMULATOR)
 +  using DeviceSelector = sycl::ext::intel::fpga_emulator_selector;
 +#endif
 +

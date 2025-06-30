@@ -13,7 +13,7 @@
   content: [
 
     Today, the entire world is accumulating enormous amounts of computer data.
-    This forces the construction of polluting infrastructure and wastes energy.
+    This enforces the construction of polluting infrastructure and wastes energy.
     DNAMIC is a European project that aims to store data in synthetic DNA.
     To achieve this, a microfactory will be created to read and write on synthetic DNA.
     This microfactory contains six steps: encoding, synthesis, amplification, storage, sequencing, and finally, decoding.
@@ -26,10 +26,8 @@
     These operations are the same as those that can occur in DNA mutations: substitution, addition, and deletion.
     In order to handle the largest possible amount of data, the greatest possible speed is required.
     The goal of this project is to leverage the speed of FPGAs to accelerate this calculation.
-    The first step in this project is to find the most viable algorithm for this task.
-    This is Myers' bit-parallel algorithm.
-    An initial implementation in C is carried out for testing and familiarization purposes with the algorithm.
-    The next step is to create a VHDL implementation of this algorithm.
-    This has been covered in this project.
+    The first step in this project was to find the most viable algorithm for this task.
+    The Myers' bit-parallel algorithm was at first chosen, but after seen a problems caused by this one, the OneJoin algorithm have been choose.
+    This algorithm is implemented in SYCL, a C++ framework that let the user use FPGAs device to optimized some function.
   ],
 )

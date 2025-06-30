@@ -30,23 +30,19 @@
 
 #show: chapter
 
-// #include "chapter/00_introduction.typ"
-//
-// #include "chapter/01_algorithms.typ"
-//
-// #include "chapter/02_implementation.typ"
-//
+#include "chapter/00_introduction.typ"
+
+#include "chapter/01_onejoin.typ"
+
+#include "chapter/02_sycl.typ"
+
 // #include "chapter/03_circuits.typ"
 //
 // #include "chapter/04_conclusion.typ"
 
 #show: appendix
 
-// #include "chapter/05_appendix_1.typ"
-//
-// #include "chapter/05_appendix_2.typ"
-//
-// #include "chapter/05_appendix_3.typ"
+// #include "appendix/05_name.typ"
 
 #show: bibli
 

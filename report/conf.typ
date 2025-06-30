@@ -26,7 +26,7 @@
   // document
   set page(
     margin: 2.5cm,
-    header: text(size: 8pt, fill: color.gray, [#authors – #title  – Semester project – #date])
+    header: text(size: 8pt, fill: color.gray, [#authors – #title  – Bachelor project – #date])
   )
 
   // paragraph
@@ -106,6 +106,7 @@
   set math.cases(gap: 0.5em)
 
   // table
+  show table: set par(justify: false, spacing: 1em, leading: 1em)
   set list(marker: [--], indent: 1.5em)
   set enum(indent: 1.5em)
 
@@ -135,7 +136,7 @@
     if illustration != none [#illustration #v(1fr)]
 
     // authors, orientation & date
-    text(size: 14pt, [Semester project presented by])
+    text(size: 14pt, [Bachelor project presented by])
     v(0em)
     text(size: 16pt, weight: "bold", authors)
     v(1.5em)
@@ -178,7 +179,7 @@
 #let todo(body) = {
   set text(fill: red, weight: "bold", style: "italic")
 
-  highlight(body)
+  highlight(upper(body))
 }
 
 // -------------------------------------------------------------------------

@@ -2,20 +2,24 @@
 
 ### Table of contents
 
-1. [Tuesday 24 June](#monday--24-june)
+1. [Tuesday 24 June](#tuesday--24-june)
 2. [Wednesday 25 June](#wednesday--25-june)
 3. [Thursday 26 June](#thursday--26-june)
+4. [Friday 27 June](#friday--27-june)
+5. [Saturday 28 June](#saturday--28-june)
+6. [Sunday 29 June](#sunday--29-june)
 
 ### Tasks
 
+- [x] Make the intermediate report
+- [x] Test the FPGA emulator (first level)
+- [ ] Test all levels of the FPGA usage
 - [ ] Check for Michaël's problem about Bucket converging to 0
-- [ ] Test the FPGA simulator of SYCL
-- [ ] Make the intermediate report
 
 ### Links
 
 - [FPGA Support Package for the Intel](https://www.intel.com/content/www/us/en/developer/articles/release-notes/intel-oneapi-compiler-fpga-add-on-release-notes.html)
-- [Get FPGA SUpport Package for Intel](https://www.intel.com/content/www/us/en/developer/tools/oneapi/fpga-download.html?operatingsystem=linux&linux-install=offline)
+- [Get FPGA Support Package for Intel](https://www.intel.com/content/www/us/en/developer/tools/oneapi/fpga-download.html?operatingsystem=linux&linux-install=offline)
 - [OneJoin implementation C++/SYCL](https://github.com/Eug9/oneoligo)
 - [FPGA tutorial - How to compile SYCL for FPGAs](https://github.com/oneapi-src/oneAPI-samples/tree/master/DirectProgramming/C++SYCL_FPGA/Tutorials/GettingStarted/fpga_compile)
 
@@ -201,4 +205,20 @@ Platform #3: NVIDIA CUDA
 Thus, the `make fpga_emu` worked.
 
 Special thanks to David Da Silva Marques who help me with this issue.
+
+
+## Friday : 27 June
+
+Writing the intermediate report...
+
+
+## Saturday : 28 June
+
+Writing the intermediate report...
+
+
+## Sunday : 29 June
+
+Writing the intermediate report...
+
 

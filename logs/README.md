@@ -37,6 +37,8 @@ Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
 
 Meeting report : June 18 – [Week 4](week4.md#wednesday--18-june)
 
+Meeting report : July 01 – [Week 4](week6.md#tuesday--01-july)
+
 Set up and install SYCL tools for SYCL Academy – [Week 1](week1.md#monday--26-may)
 
 Table of the four FPGA compilation Options – [Week 5](week5.md#tuesday--24-june)

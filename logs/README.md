@@ -6,6 +6,7 @@
 4. [Week 4 - 16 June](week4.md)
 5. [Week 5 - 23 June](week5.md)
 6. [Week 6 - 30 June](week6.md)
+7. [Week 7 - 07 July](week7.md)
 
 # Index
 
@@ -27,7 +28,9 @@ Get started with VTune profiler – [Week 2](week2.md#saturday--07-june)
 
 Installing overall setup on Laptop – [Week 2](week2.md#thursday--05-june), [Week 5](week5.md#tuesday--24-june)
 
-Installing overall setup on PC – [Week 4](week4.md#thursday--19-june)
+Installing overall setup on PC (CachyOS) – [Week 4](week4.md#thursday--19-june)
+
+Installing overall setup on PC (Ubuntu)– [Week 7](week7.md#thursday--10-july)
 
 Installing Quartus Prime Pro 24.2 on Laptop – [Week 2](week2.md#friday--06-june)
 

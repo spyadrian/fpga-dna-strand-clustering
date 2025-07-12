@@ -5,11 +5,13 @@
 1. [Wednesday 09 July](#Wednesday--09-july)
 2. [Thursday 10 July](#thursday--10-july)
 3. [Friday 11 July](#friday--11-july)
+4. [Saturday 12 July](#saturday--12-july)
 
 ### Tasks
 
 - [x] Setup Ubuntu 22.04
-- [ ] Test all levels of the FPGA usage
+- [x] Test level 3 of the FPGA compilation
+- [ ] Test all levels of the FPGA compilation
 
 ### Links
 
@@ -17,6 +19,7 @@
 - [FPGA tutorial - How to compile SYCL for FPGAs](https://github.com/oneapi-src/oneAPI-samples/tree/master/DirectProgramming/C++SYCL_FPGA/Tutorials/GettingStarted/fpga_compile)
 - [FPGA Operating System (OS) Support](https://www.intel.com/content/www/us/en/support/programmable/support-resources/design-software/os-support.html)
 - [Intel® oneAPI Base Toolkit System Requirements](https://www.intel.com/content/www/us/en/developer/articles/system-requirements/oneapi-base-toolkit/2025.html)
+- [Agilex 7 FPGA Starter Kit Resources](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=142&No=1295&PartNo=4)
 
 
 ## Wednesday : 09 July
@@ -147,5 +150,109 @@ But the script stop at the start of onejoin doing the first batch.
 
 For me there is 2 possibility, the `segfault` on the kernel ring buffer are critical or the algorithm can't handle the FPGAs and I need to change something on it.
 I'll check that tomorrow.
+
+
+## Saturday : 12 July
+
+About the two errors possibilities that I've highlighted, I was wrong.
+The algorithm work but just really slowly.
+It's after the whole night, letting the script run, that I see that the algorithm was working (even after one night it didn't finished).
+
+Reading the logs more attentively, I saw that all the batch (`print` concerning the batch) are run really quickly but that the algorithm lose time between them.
+Here are some `print` that shows it :
+
+```
+[2025-07-11 17:02:31.578611] [info] Reading dataset...
+[2025-07-11 17:02:31.580854] [info] Starting OneCluster...
+7499
+[2025-07-11 17:02:31.582506] [info] Computing OneJoin...
+[2025-07-11 17:02:31.582547] [info] Parameter selected:
+[2025-07-11 17:02:31.582560] [info] Num of strings:                                  7499
+[2025-07-11 17:02:31.582566] [info] Len output:                                      84
+[2025-07-11 17:02:31.582575] [info] Samplingrange:                                   300
+[2025-07-11 17:02:31.582587] [info] Number of Hash Function:                         7
+[2025-07-11 17:02:31.582594] [info] Number of Bits per hash function:                12
+[2025-07-11 17:02:31.582600] [info] Number of Random Strings per input string:       5
+[2025-07-11 17:02:31.582605] [info] Number of Replication per input string:          1
+[2025-07-11 17:02:31.582609] [info] K distance:                                      6
+[2025-07-11 17:02:31.582616] [info] Count filter:                                    1
+[2025-07-11 17:02:31.582622] [info] Batch size:                                      30
+[2025-07-11 17:02:31.582631] [info] Number of batches:                               249
+
+[2025-07-11 17:02:31.582640] [debug] Size last batch: 29
+[2025-07-11 17:02:31.582646] [debug] Number of batches: 250
+[2025-07-11 17:02:31.604776] [debug] Number of devices: 1
+[2025-07-11 17:02:31.605009] [info] Start parallel algorithm...
+[2025-07-11 17:02:31.606009] [info] Parallel Embedding
+[2025-07-11 17:02:31.606016] [debug] Len output: 84
+[2025-07-11 17:02:31.606121] [info] Start profiling on devices...
+[2025-07-11 17:02:31.606125] [debug] Offset input strings: 0
+[2025-07-11 17:02:31.606136] [info] Task: Embedding DataDevice: SimulatorDevice : Multi-process Simulator (aclmsim0)
+[2025-07-11 17:02:31.606161] [debug] Batch size: 30
+[2025-07-11 17:02:31.606164] [debug] Range: (30, 5, 1)
+[2025-07-11 23:26:38.401590] [debug] Offset input strings: 6210
+[2025-07-11 23:26:38.401628] [info] Task: Embedding DataDevice: SimulatorDevice : Multi-process Simulator (aclmsim0)
+[2025-07-11 23:26:38.401650] [debug] Batch size: 30
+[2025-07-11 23:26:38.401652] [debug] Range: (30, 5, 1)
+[2025-07-12 05:46:47.811140] [debug] Times kernel: 22809.4sec
+[2025-07-12 05:46:47.811179] [debug] n_fast: 248
+[2025-07-12 05:46:47.811182] [debug] n_slow: 0
+[2025-07-12 05:46:47.811183] [debug] id_fastest: 0
+[2025-07-12 05:46:47.811185] [debug] id_slowest: 18446744073709551615
+[2025-07-12 05:46:47.811187] [debug] Dev 0:
+[2025-07-12 05:46:47.811189] [debug] 0. 2
+[2025-07-12 05:46:47.811214] [debug] 1. 248
+[2025-07-12 05:46:47.811215] [info] Start computing on devices...
+[2025-07-12 05:46:47.811218] [debug] Offset input strings: 12420
+[2025-07-12 05:46:47.811232] [info] Task: Embedding DataDevice: SimulatorDevice : Multi-process Simulator (aclmsim0)
+[2025-07-12 05:46:47.811251] [debug] Batch size: 30
+[2025-07-12 05:46:47.811253] [debug] Range: (30, 5, 1)
+[2025-07-12 05:46:47.811579] [debug] Offset input strings: 18630
+[2025-07-12 05:46:47.811589] [info] Task: Embedding DataDevice: SimulatorDevice : Multi-process Simulator (aclmsim0)
+[2025-07-12 05:46:47.811596] [debug] Batch size: 30
+[2025-07-12 05:46:47.811597] [debug] Range: (30, 5, 1)
+
+[...]
+
+[2025-07-12 05:46:47.869511] [debug] Offset input strings: 1546290
+[2025-07-12 05:46:47.869517] [info] Task: Embedding DataDevice: SimulatorDevice : Multi-process Simulator (aclmsim0)
+[2025-07-12 05:46:47.869522] [debug] Batch size: 29
+[2025-07-12 05:46:47.869525] [debug] Range: (29, 5, 1)
+[2025-07-11 17:02:31.578611] [info] Reading dataset...
+[2025-07-11 17:02:31.580854] [info] Starting OneCluster...
+7499
+[2025-07-11 17:02:31.582506] [info] Computing OneJoin...
+```
+
+It might be cause of :
+
+1. the time to give the data to the FPGA simulator, if so I might try to use other form of data usage
+2. all the print are print at the end of the computation, one after the others
+
+In any case, it might be the cause of the simulator, my principal goals is the hardware so I'll let it like so.
+
+For the level 4 (hardware), I notice that I don't have the Board Support Package (BSP) doing `aoc -list-boards`.
+We can create it via the Open FPGA Stack (OFS) software but in our case, with the Terasic Agilex 7 FPGA Starter Kit, we can downloads it on their site, and add it to the board doing :
+
+```bash
+tar xf oneapi-asp-a7sk.tar.gz
+mv oneapi-asp-a7sk /home/adrian/intel/oneapi/compiler/2025.0/opt/oclfpga/board/
+
+aocl install oneapi-asp-a7sk
+```
+
+Now, doing `aoc -list-boards`, I have :
+
+```
+Board list:
+  a7sk (default)
+     Board Package: /home/adrian/intel/oneapi/compiler/2025.0/opt/oclfpga/board/oneapi-asp-a7sk
+
+  a7sk_usm
+     Board Package: /home/adrian/intel/oneapi/compiler/2025.0/opt/oclfpga/board/oneapi-asp-a7sk
+     Memories:      device, host`
+```
+
+To start using the Agilex 7, I need now to bring up the FPGA Board.
 
 

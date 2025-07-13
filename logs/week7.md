@@ -20,6 +20,7 @@
 - [FPGA Operating System (OS) Support](https://www.intel.com/content/www/us/en/support/programmable/support-resources/design-software/os-support.html)
 - [Intel® oneAPI Base Toolkit System Requirements](https://www.intel.com/content/www/us/en/developer/articles/system-requirements/oneapi-base-toolkit/2025.html)
 - [Agilex 7 FPGA Starter Kit Resources](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=142&No=1295&PartNo=4)
+- [OFS Release for Intel Agilex 7 PCIe Attach Reference Shells](https://github.com/OFS/ofs-agx7-pcie-attach/releases/tag/ofs-2023.2-1)
 
 
 ## Wednesday : 09 July
@@ -77,7 +78,8 @@ The end of my `.bashrc` look like so (after some modification next day) :
 
 ```bash
 export QSYS_ROOTDIR="/home/adrian/intelFPGA_pro/24.2/qsys/bin"
-export QUARTUS_ROOTDIR="/opt/intel/intelFPGA_pro/24.2/quartus"
+export QUARTUS_ROOTDIR="/home/adrian/intel/intelFPGA_pro/24.2/quartus"
+export QUARTUS_ROOTDIR_OVERRIDE="$QUARTUS_ROOTDIR"
 export LM_LICENSE_FILE="/home/adrian/Downloads/LR-238975_License.dat"
 export PATH="$PATH:/home/adrian/intelFPGA_pro/24.2/quartus/bin:/home/adrian/intelFPGA_pro/24.2/questa_fe/linux_x86_64:/home/adrian/intel/oneapi/compiler/2025.0/lib"
 
@@ -256,3 +258,22 @@ Board list:
 To start using the Agilex 7, I need now to bring up the FPGA Board.
 
 
+## Sunday : 13 July
+
+Following the guide of the Agilex 7 Starter Kit (A7SK), they say to install three more tools :
+
+1. OFS DFL Kernel Drivers - Essential for PCIe communication
+2. USB Blaster II Driver - Essential for FPGA programming
+3. OPAE SDK - Recommended for completeness, even if not directly used
+
+The guide is made on and for CentOS, so I don't really know if I'm gonna have some errors doing it on Ubuntu 22.04.
+In fact, quite all of the Intel tools work on Ubuntu 22.04 but maybe that the A7SK is not made for it.
+What I did is still install those tools, converting the `.rpm` to `.deb` with `alien --to-deb`.
+We'll see if it work or not.
+
+As the `alien` conversion fail on some of the package, I didn't install the whole OFS.
+I'll check for a solution later, if it didn't work.
+Same for OPAE.
+
+Passing through the guide, I didn't manage to make that my PC recognize my PCIe card doing `lspci -d 8086:bcce`.
+The `aocl diagnose` reveal some of the potential errors mostly due to the fact that I was unable to install the OFS and OPAE tools.

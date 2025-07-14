@@ -2,10 +2,11 @@
 
 ### Table of contents
 
-1. [Wednesday 09 July](#Wednesday--09-july)
+1. [Wednesday 09 July](#wednesday--09-july)
 2. [Thursday 10 July](#thursday--10-july)
 3. [Friday 11 July](#friday--11-july)
 4. [Saturday 12 July](#saturday--12-july)
+5. [Sunday 13 July](#sunday--13-july)
 
 ### Tasks
 

@@ -7,6 +7,7 @@
 5. [Week 5 - 23 June](week5.md)
 6. [Week 6 - 30 June](week6.md)
 7. [Week 7 - 07 July](week7.md)
+8. [Week 8 - 14 July](week8.md)
 
 # Index
 

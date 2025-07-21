@@ -19,15 +19,17 @@
 - [FPGA tutorial - How to compile SYCL for FPGAs](https://github.com/oneapi-src/oneAPI-samples/tree/master/DirectProgramming/C++SYCL_FPGA/Tutorials/GettingStarted/fpga_compile)
 - [Intel® oneAPI DPC++/C++ Compiler Handbook for FPGAs](https://www.intel.com/content/www/us/en/docs/oneapi-fpga-add-on/developer-guide/2025-0/installing-the-intel-oneapi-fpga-development.html)
 - [Ubuntu: Installing the OPAE Framework from Prebuilt Binaries](https://www.intel.com/content/www/us/en/docs/programmable/683633/1-2-1/ubuntu-installing-the-framework-from.html)
-- [Installing the Intel oneAPI FPGA Development Environment](https://cdrdv2.intel.com/v1/dl/getContent/854477)
+- [Installing the Intel oneAPI FPGA Development Environment (pdf)](https://cdrdv2.intel.com/v1/dl/getContent/854477)
 - [Software Installation Guide: Open FPGA Stack for PCIe Attach](https://ofs.github.io/ofs-2024.2-1/hw/common/sw_installation/pcie_attach/sw_install_pcie_attach/)
 - [oneAPI Accelerator Support Package (ASP): Getting Started User Guide](https://ofs.github.io/ofs-2024.2-1/hw/common/user_guides/oneapi_asp/ug_oneapi_asp/)
+- [Agilex 7 FPGA Starter Kit oneAPI Toolkit User Manual (pdf)](https://www.terasic.com.tw/cgi-bin/page/archive_download.pl?Language=English&No=1295&FID=a92b06c2fd045fcd5e9be408f67965d9)
 
 #### Resources
 
 - [Agilex 7 FPGA Starter Kit Resources](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=142&No=1295&PartNo=4)
 - [ofs-2024.2-1 Release for Agilex 7](https://github.com/OFS/ofs-agx7-pcie-attach/releases/tag/ofs-2024.2-1)
 - [ofs-2023.2 Release for Agilex 7](https://github.com/OFS/ofs-agx7-pcie-attach/releases/tag/ofs-2023.2-1)
+- [vector-add example](https://github.com/oneapi-src/oneAPI-samples/tree/release/2024.2/DirectProgramming/C%2B%2BSYCL/DenseLinearAlgebra/vector-add)
 
 
 ## Monday : 14 July
@@ -335,6 +337,7 @@ Here is the last few line of my `.bashrc` :
 
 ```bash
 export QSYS_ROOTDIR="/home/dna-fpga-workstation/intelFPGA_pro/24.1/qsys/bin"
+export LM_LICENSE_FILE=/home/dna-fpga-workstation/Documents/LR-242596_License.dat
 source /opt/intel/oneapi/setvars.sh
 
 # Adding Quartus to PATH
@@ -358,7 +361,77 @@ export LIBOPAE_C_ROOT=/usr # (OPAE libraries are installed in /usr/lib64 by defa
 The next part is about build and install the asp.
 As I use the A7SK, I'll use the asp given by Terasic and install it with `aocl install oneapi-asp-a7sk`.
 
-Doing `aocl list-devices` I have an error saying `p is NULL` and a warning "No device attached for packages : .../oneapi-asp-a7sk"
+Doing `aocl list-devices` I have an error saying `p is NULL` and a warning "No device attached for packages : .../oneapi-asp-a7sk".
 I can either search more on that error/warning or try to build the fseries asp of the guide.
 
+
+## Sunday : 20 July
+
+After some research, the DKMS package I installed (intel-fpga-dfl-dkms-1.11.0-2) back-ports the drivers into the running kernel.
+It does not create a new kernel named 4.18.0-dfl.
+Therefore the driver files live under `/usr/lib/modules/4.18.0-477.27.1.el8_8.x86_64/extra/…` instead of `/usr/lib/modules/4.18.0-dfl/kernel/drivers/fpga/…`.
+This difference is cosmetic, the functionality is identical.
+
+I understand that what was missing on my setup was the Accelerator Support Package (ASP) and the FPGA Interface Manager (FIM).
+The way we normally install them is by building with a Git repos.
+I start doing it to see how it was, but for my setup (using the A7SK) both was given in the A7SK oneAPI 2024.0.
+
+The ASP was already installed by doing the `aocl install oneapi-asp-a7sk` after downloading it and putting it into a specific folder (see A7SK oneAPI guide).
+For the FIM it was necessary to run the `bringup_fpga.sh` and to reboot the system.
+After that, I was able to see the FPGA doing :
+
+```bash
+lspci -d 8086:bcce
+01:00.0 Processing accelerators: Intel Corporation Device bcce (rev 01)
+01:00.1 Processing accelerators: Intel Corporation Device bcce
+01:00.2 Processing accelerators: Intel Corporation Device bcce
+01:00.3 Processing accelerators: Intel Corporation Device bcce
+01:00.4 Processing accelerators: Intel Corporation Device bcce
+```
+
+```bash
+aoc -list-boards
+Board list:
+  a7sk (default)
+     Board Package: /opt/intel/oneapi/compiler/2025.0/opt/oclfpga/board/oneapi-asp-a7sk
+
+  a7sk_usm
+     Board Package: /opt/intel/oneapi/compiler/2025.0/opt/oclfpga/board/oneapi-asp-a7sk
+     Memories:      device, host
+```
+
+The fact that it worked on RHEL 8.8 and not on Ubuntu 22.04 is really a mystery for me.
+
+To try SYCL on FPGA I decide to download some code sample.
+I try divers method, code and others, but what worked for me was the "[vector-add](https://github.com/oneapi-src/oneAPI-samples/tree/release/2024.2/DirectProgramming/C%2B%2BSYCL/DenseLinearAlgebra/vector-add)" example.
+At least, it's what worked the better.
+
+Trying the FPGA simulation doing `icpx -fintelfpga -DFPGA_SIMULATOR vector-add-buffers.cpp -Xssimulation -Xstarget=a7sk -Xsghdl -o vector-add-sim-buffers.fpga_sim` and running it via `./vector-add-sim-buffers.fpga_sim`.
+I got this "error" :
+
+```
+An exception is caught for vector add.
+terminate called after throwing an instance of 'sycl::_V1::exception'
+  what():  No device of requested type available. Please check https://software.intel.com/content/www/us/en/develop/articles/intel-oneapi-dpcpp-system-requirements.html
+Aborted (core dumped)
+```
+
+About the FPGA hardware, compiling with `icpx -fintelfpga -DFPGA_HARDWARE vector-add-buffers.cpp -Xshardware -Xstarget=a7sk -o vector-add.fpga`, I got this message :
+
+```
+aoc: Compiling for FPGA. This process may take several hours to complete.  Prior to performing this compile, be sure to check the reports to ensure the design will meet your performance targets.  If the reports indicate performance targets are not being met, code edits may be required.  Please refer to the oneAPI FPGA Optimization Guide for information on performance tuning applications for FPGAs.
+Error (24155): The Quartus Partition Database File 'ofs_top.qdb' was generated using version 'Version 23.2.0 Build 94 06/14/2023 Patches 0.02iofs,0.11,0.19,0.02 SC Pro Edition', which cannot be read by the current version of the Quartus Prime software. Regenerate 'ofs_top.qdb' using the current version of the Quartus Prime Software.
+
+[...]
+
+icpx: error: fpga compiler command failed with exit code 1 (use -v to see invocation)
+```
+
+When I search for the `ofs_top.qdb`, I don't know if they are talking about the one in the ASP or in the `vector-add` project.
+If it's the one in the ASP, I might need to install Quartus Prime Pro 23.2.
+When compiling the oneoligo algorithm, I don't have the same error (maybe because we stop before it), instead I have : `undefined reference to 'tbb::detail::r1::initialize(tbb::detail::d1::task_group_context&)'`, after the `aoc: Simulation generation done`.
+For the hardware one it's the same.
+Of course, the executable is not generated.
+
+I had to add the `-Wno-enum-constexpr-conversion` in the makefile as some because til Clang/LLVM 16 some warning are now diagnosed as errors.
 

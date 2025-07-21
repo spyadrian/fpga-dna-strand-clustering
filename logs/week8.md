@@ -3,9 +3,18 @@
 ### Table of contents
 
 1. [Monday 14 July](#monday--14-july)
+2. [Tuesday 15 July](#tuesday--15-july)
+3. [Wednesday 16 July](#wednesday--16-july)
+4. [Thursday 17 July](#thursday--17-july)
+5. [Friday 18 July](#friday--18-july)
+6. [Saturday 19 July](#saturday--19-july)
+7. [Sunday 20 July](#sunday--20-july)
 
 ### Tasks
 
+- [x] Install RHEL 8.8 setup
+- [x] Be able to see the FPGA
+- [ ] Launch a sample code on the FPGA
 - [ ] Test all levels of the FPGA compilation
 
 ### Links

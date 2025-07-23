@@ -106,5 +106,28 @@ When I finish those step, my computer was able to see my FPGA with `sycl-ls` !
 Note: it was detected but they were an error with the DMA doing the `sycl-ls` commands.
 
 
+## Wednesday : 23 July
 
+When turning on the PC.
+I didn't saw my FPGA on the `lspci` (same for `sycl-ls`).
+I think I had to make these few commands after every turnoff :
+
+```bash
+cd /opt/intel/oneapi/compiler/2024.0/opt/oclfpga/board/oneapi-asp-a7sk/bringup/sof
+./bringup_fpga.sh
+
+sudo pci_device 05:00.0 vf 1
+sudo opae.io init -d 0000:05:00.5 $USER
+aocl initialize acl0 a7sk
+```
+
+I received and add the licence so I could try to compile and run.
+When I run it I have errors about the DMA :
+
+```
+Error allocating DMA buffer
+Error allocating write_fence buffer
+```
+
+I'm searching about the issue, but don't find something relevant.
 

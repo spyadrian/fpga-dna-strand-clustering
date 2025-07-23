@@ -8,6 +8,7 @@
 6. [Week 6 - 30 June](week6.md)
 7. [Week 7 - 07 July](week7.md)
 8. [Week 8 - 14 July](week8.md)
+9. [Week 9 - 21 July](week9.md)
 
 # Index
 
@@ -22,6 +23,8 @@ Dataset Characteristic – [Week 3](week3.md#tuesday--10-june)
 Docker container for the FPGA – [Week 2](week2.md#thursday--05-june)
 
 Docker container for the GPU – [Week 2](week2.md#thursday--05-june)
+
+Environment Variables (`.bashrc`) – [Week 7](week9.md#thursday--10-july), [Week 8](week8.md#friday--19-july), [Week 9](week9.md#tuesday--22-july)
 
 Get started with SYCL (SYCL Academy) – [Week 1](week1.md#tuesday--27-may)
 
@@ -43,7 +46,9 @@ Meeting report : June 03 – [Week 2](week2.md#tuesday--03-june)
 
 Meeting report : June 18 – [Week 4](week4.md#wednesday--18-june)
 
-Meeting report : July 01 – [Week 4](week6.md#tuesday--01-july)
+Meeting report : July 01 – [Week 6](week6.md#tuesday--01-july)
+
+Meeting report : July 22 – [Week 9](week9.md#tuesday--22-july)
 
 Set up and install SYCL tools for SYCL Academy – [Week 1](week1.md#monday--26-may)
 

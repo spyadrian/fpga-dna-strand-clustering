@@ -131,3 +131,24 @@ Error allocating write_fence buffer
 
 I'm searching about the issue, but don't find something relevant.
 
+
+## Thursday : 24 July
+
+Ok in brief, the error I had "Error allocating DMA buffer" was due to the amount of memory a process can lock in RAM (prevent the kernel from swapping these pages to disk).
+Doing `ulimit -l` show the actual value.
+In my case it was 64, sufficient for small buffers but not for FPGA transfers.
+When the driver was calling `dma_alloc_coherent()` to lock pages, if the number of page actually locked plus those going to be, the driver send "Error allocating DMA buffer".
+
+The commands `aocl initialize acl0 a7sk` change this value but it take effect only after a new login which can be done with `ssh localhost`.
+After that I could run the already compile file.
+The vector-add code using buffer, didn't work while the one using the USM did.
+The buffer one don't give any errors, it's just that the verification phase failed trying to check the value of the sum.
+
+I could just use the USM memory access, but the whole oneoligo code is made using buffer access.
+Trying to change all the memory access to USM would be possible but would take to much time.
+(Except IA there is no tools to do it and I don't really want to deals with IA stuff right now).
+
+
+## Friday : 25 July
+
+

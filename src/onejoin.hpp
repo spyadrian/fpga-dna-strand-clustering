@@ -44,6 +44,7 @@
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include "constants.hpp"
+#include <sycl/ext/intel/fpga_extensions.hpp>
 
 using namespace constants;
 using namespace std;

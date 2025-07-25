@@ -13,6 +13,20 @@ int num_thr = 0;
 
 Time timer(false);
 
+#if defined(FPGA_SIMULATOR)
+  using DeviceSelector = sycl::ext::intel::fpga_simulator_selector;
+#elif defined(FPGA_HARDWARE)
+  using DeviceSelector = sycl::ext::intel::fpga_selector;
+#else // if defined(FPGA_EMULATOR)
+  using DeviceSelector = sycl::ext::intel::fpga_emulator_selector;
+#endif
+
+// Helper that builds a queue with the proper properties (in‑order + profiling)
+template <typename AsyncHandlerT>
+inline sycl::queue make_fpga_queue(AsyncHandlerT &&handler) {
+  return sycl::queue(DeviceSelector{}, std::forward<AsyncHandlerT>(handler), sycl::property::queue::in_order{});
+}
+
 void setuplsh(vector<vector<int>> &hash_lsh, std::vector<int> &a,
               std::vector<int> &lshnumber, vector<tuple<int, int>> &rev_hash) {
 
@@ -192,7 +206,7 @@ void allocate_work(vector<long> times, int num_dev, size_t units_to_allocate,
       idx_fastest = 1 - idx_slowest;
       fastest = times[idx_fastest];
     }
-    n_slow = floor(((float)fastest / (float)(fastest + slowest)) *
+    n_slow = (int)std::floor(((float)fastest / (float)(fastest + slowest)) *
                    units_to_allocate);
     n_fast = units_to_allocate - n_slow;
 
@@ -1275,26 +1289,31 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
     exit(-1);
   }
 
-  if (device == cpu || device == both) { // Selected CPU or both
-    queues.push_back(
-        queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
-  }
-  if (device == gpu || device == both) { // Selected GPU or both
-    try {
-      queue tmp_queue(gpu_selector{}, asyncHandler,
-                      property::queue::in_order());
-      queues.push_back(std::move(tmp_queue));
-    } catch (
-        std::exception &e) { // No GPU available, use CPU if not selected yet
-      BOOST_LOG_TRIVIAL(warning)
-          << "Attention: no GPU device detected. The program will run on CPU.";
-      if (queues.size() == 0) {
-        queues.push_back(
-            queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
-      }
-      device = 0;
+  #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
+    queues.push_back(make_fpga_queue(asyncHandler));
+    device = cpu; // fallback value so the rest of the code treats it as 1 device
+  #else
+    if (device == cpu || device == both) { // Selected CPU or both
+      queues.push_back(
+          queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
     }
-  }
+    if (device == gpu || device == both) { // Selected GPU or both
+      try {
+        queue tmp_queue(gpu_selector{}, asyncHandler,
+                        property::queue::in_order());
+        queues.push_back(std::move(tmp_queue));
+      } catch (
+          std::exception &e) { // No GPU available, use CPU if not selected yet
+        BOOST_LOG_TRIVIAL(warning)
+            << "Attention: no GPU device detected. The program will run on CPU.";
+        if (queues.size() == 0) {
+          queues.push_back(
+              queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
+        }
+        device = 0;
+      }
+    }
+  #endif
 
   if (n_batches <= queues.size() * test_batches) {
     BOOST_LOG_TRIVIAL(error) << "You need at least 3 batches for one device "

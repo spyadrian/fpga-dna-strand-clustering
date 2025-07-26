@@ -1290,7 +1290,10 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
   }
 
   #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
-    queues.push_back(make_fpga_queue(asyncHandler));
+
+    // add only CPU's queue
+    queues.push_back(queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
+
     device = cpu; // fallback value so the rest of the code treats it as 1 device
   #else
     if (device == cpu || device == both) { // Selected CPU or both
@@ -1381,12 +1384,33 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
   }
   timer.end_time(buckets::allocation);
 
+  #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
+
+    // create FPGA's queue
+    sycl::queue fpga_q = make_fpga_queue(asyncHandler);
+
+    // remove CPU queue to queues
+    sycl::queue cpu_q_tmp = std::move(queues.front()); // save it
+    queues.erase(queues.begin());
+
+    // add FPGA queue to queues
+    queues.insert(queues.begin(), std::move(fpga_q));
+
+  #endif
+
   create_buckets_wrapper(queues, set_embdata_dev, buckets, n_batches,
                          batch_hdrs, a, lshnumber, len_output);
 
   for (auto &q : queues) {
     q.wait();
   }
+
+  #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
+
+    // del FPGA and insert CPU queue
+    queues.erase(queues.begin());
+    queues.insert(queues.begin(), std::move(cpu_q_tmp));
+  #endif
 
   timer.start_time(buckets::sort);
   tbb::parallel_sort(buckets.begin(), buckets.end());

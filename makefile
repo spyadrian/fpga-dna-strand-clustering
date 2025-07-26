@@ -11,7 +11,7 @@ SRC=src
 BUILD=build
 
 DEVICE ?= cpu# cpu | gpu | fpga_emu | report | fpga_sim | fpga_hw
-BOARD ?= Agilex7
+BOARD ?= a7sk_usm
 
 ifeq ($(DEVICE),cpu)
   DEVICE_FLAGS = -fsycl-targets=spir64_x86_64
@@ -20,16 +20,16 @@ else ifeq ($(DEVICE),gpu)
   DEVICE_FLAGS = -fsycl-targets=nvptx64-nvidia-cuda
   EXE_SUFFIX   = .gpu
 else ifeq ($(DEVICE),fpga_emu)
-  DEVICE_FLAGS = -DFPGA_EMULATOR -fintelfpga
+  DEVICE_FLAGS = -DFPGA_EMULATOR -fsycl-targets=spir64_x86_64,spir64_fpga
   EXE_SUFFIX   = .femu
 else ifeq ($(DEVICE),report)
-  DEVICE_FLAGS = -DFPGA_HARDWARE -fintelfpga -Xshardware -fsycl-link=early -Xstarget=$(BOARD)
+  DEVICE_FLAGS = -DFPGA_HARDWARE -fsycl-targets=spir64_fpga -fsycl-link=early -Xshardware -Xstarget=$(BOARD)
   EXE_SUFFIX   = .report
 else ifeq ($(DEVICE),fpga_sim)
-  DEVICE_FLAGS = -DFPGA_SIMULATOR -fintelfpga -Xssimulation -Xsghdl -Xstarget=$(BOARD)
+  DEVICE_FLAGS = -DFPGA_SIMULATOR -fsycl-targets=spir64_x86_64,spir64_fpga -Xsghdl -Xssimulation -Xstarget=$(BOARD)
   EXE_SUFFIX   = .fsim
 else ifeq ($(DEVICE),fpga_hw)
-  DEVICE_FLAGS = -DFPGA_HARDWARE -fintelfpga -Xshardware -Xstarget=$(BOARD)
+  DEVICE_FLAGS = -DFPGA_HARDWARE -fsycl-targets=spir64_x86_64,spir64_fpga -Xshardware -Xstarget=$(BOARD)
   EXE_SUFFIX   = .fpga
 else
   $(error DEVICE=$(DEVICE) not recognized)
@@ -49,7 +49,7 @@ update:
 $(BUILD)/constants.o: $(SRC)/constants.cpp
 	$(DPCPP) $(DPCPP_FLAGS) $< -c -o $@
 
-$(BUILD)/%.o: $(SRC)/%.cpp
+$(BUILD)/%.o: $(SRC)/%.cpp makefile
 	$(DPCPP) $(DPCPP_FLAGS)  $< -c -o $@
 
 
@@ -60,6 +60,5 @@ test-cluster:
 	./$(EXE_NAME)$(EXE_SUFFIX) -a 2 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500 --min_pts 3
 
 
-
 clean:
-	rm $(BUILD)/* $(EXE_NAME).*
+	rm -rf $(BUILD)/* $(EXE_NAME).* report--*.csv consensus_results_chunk*

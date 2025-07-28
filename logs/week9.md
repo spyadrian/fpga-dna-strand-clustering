@@ -8,7 +8,6 @@
 4. [Thursday 24 July](#thursday--24-july)
 5. [Friday 25 July](#friday--25-july)
 6. [Saturday 26 July](#saturday--26-july)
-7. [Sunday 27 July](#sunday--27-july)
 
 ### Tasks
 

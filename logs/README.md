@@ -36,7 +36,7 @@ Installing overall setup on PC (CachyOS) – [Week 4](week4.md#thursday--19-
 
 Installing overall setup on PC (Ubuntu 22.04) – [Week 7](week7.md#thursday--10-july)
 
-Installing overall setup on PC (RHEL 8.8) – [Week 8](week8.md#friday--18-july)
+Installing overall setup on PC (RHEL 8.8) – [Week 8](week8.md#friday--18-july), [Week 9](week9.md#tuesday--22-july)
 
 Installing Quartus Prime Pro 24.2 on Laptop – [Week 2](week2.md#friday--06-june)
 
@@ -55,4 +55,6 @@ Set up and install SYCL tools for SYCL Academy – [Week 1](week1.md#monday-
 Table of the best known configuration (BKC) for Agilex® 7 FPGA OFS – [Week 8](week8.md#thursday--17-july)
 
 Table of the four FPGA compilation Options – [Week 5](week5.md#tuesday--24-june)
+
+Table of the time of each step of the OneJoin algorithm – [Week 4](week4.md#monday--16-june)
 

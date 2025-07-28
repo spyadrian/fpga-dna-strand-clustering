@@ -45,6 +45,12 @@ During that time, I study the Compilation Flow of the SYCL and OFS.
 
 ## Tuesday : 22 July
 
+At the appointment today, we talk about a new way of compute the DNA join.
+Michaël was working those last few week on creating a large number of bucket ID, different enough (distance of Levenshtein speaking) to be able to make a first cluster of the strand.
+It require to calculate the Levenshtein distance between the bucket ID of the strand and all the bucket ID that exist.
+It might require Myers' algorithm.
+The idea is quite new so Michaël will give me more details later.
+
 To make Quartus Prime Pro 23.2, I had to make some change on my `.bashrc`, here are they :
 
 ```bash
@@ -151,4 +157,31 @@ Trying to change all the memory access to USM would be possible but would take t
 
 ## Friday : 25 July
 
+Two options open up for me :
 
+1. Modify oneoligo to work with USM only on the part manage by FPGA
+2. Work on the second option of Michaël
+
+I'll start by modify the oneoligo algorithm and if I have time I'll work on the second option of Michaël.
+As I'm gonna change more than just some compilation line of the algorithm, it's better if I fork it and modify it.
+
+I'm modifying the "Bucket creation" part.
+The overall idea is to switch the queue being use by one with a FPGA selector.
+
+
+## Saturday : 26 July
+
+I try to compile the report for both device, CPU and FPGA.
+The report compile, but don't create the report folder with the data inside.
+When compiling with a CPU, it seems that I can really have a report.
+I might be able to do it, if I split the code in two part (two files), one with the FPGA queue (FPGA compilation) and the other with the CPU.
+
+Trying to compile the new code on the PC.
+I still have the `tbb` error which need to be fix.
+
+It were a conflict between the tbb of oneapi and the one on the machine.
+I had to remove `tbb` and reinstall some depedence of `opae` doing the `sudo dnf localinstall opae*.rpm` (of the archive).
+
+`fpga_emu` work on the PC and on the laptop.
+Let's see for the hardware.
+It doesn't.

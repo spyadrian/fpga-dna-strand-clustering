@@ -11,8 +11,9 @@
 
 ### Tasks
 
-- [ ] Launch a sample code on the FPGA
-- [ ] Test all levels of the FPGA compilation
+- [x] Launch a sample code on the FPGA
+- [x] Test all levels of the FPGA compilation
+- [ ] Launch oneoligo on FPGA
 
 ### Links
 

@@ -13,19 +13,23 @@ int num_thr = 0;
 
 Time timer(false);
 
-#if defined(FPGA_SIMULATOR)
-  using DeviceSelector = sycl::ext::intel::fpga_simulator_selector;
-#elif defined(FPGA_HARDWARE)
-  using DeviceSelector = sycl::ext::intel::fpga_selector;
-#else // if defined(FPGA_EMULATOR)
-  using DeviceSelector = sycl::ext::intel::fpga_emulator_selector;
-#endif
+#if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
 
-// Helper that builds a queue with the proper properties (in‑order + profiling)
-template <typename AsyncHandlerT>
-inline sycl::queue make_fpga_queue(AsyncHandlerT &&handler) {
-  return sycl::queue(DeviceSelector{}, std::forward<AsyncHandlerT>(handler), sycl::property::queue::in_order{});
-}
+  #if defined(FPGA_SIMULATOR)
+    using DeviceSelector = sycl::ext::intel::fpga_simulator_selector;
+  #elif defined(FPGA_HARDWARE)
+    using DeviceSelector = sycl::ext::intel::fpga_selector;
+  #else // if defined(FPGA_EMULATOR)
+    using DeviceSelector = sycl::ext::intel::fpga_emulator_selector;
+  #endif
+
+  // Helper that builds a queue with the proper properties (in‑order + profiling)
+  template <typename AsyncHandlerT>
+  inline sycl::queue make_fpga_queue(AsyncHandlerT &&handler) {
+    return sycl::queue(DeviceSelector{}, std::forward<AsyncHandlerT>(handler), sycl::property::queue::in_order{});
+  }
+
+#endif
 
 void create_buckets_wrapper_fpga(queue &q, char **embdata,
                                 vector<buckets_t> &buckets, size_t n_batches,

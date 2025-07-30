@@ -37,8 +37,8 @@ endif
 
 DPCPP_FLAGS = $(COMMON_FLAGS) $(DEVICE_FLAGS)
 
-build: $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o
-	$(DPCPP) $(DPCPP_FLAGS) $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(LDFLAGS) -o $(EXE_NAME)$(EXE_SUFFIX)
+build: $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(BUILD)/create_buckets_fpga.o
+	$(DPCPP) $(DPCPP_FLAGS) $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(BUILD)/create_buckets_fpga.o $(LDFLAGS) -o $(EXE_NAME)$(EXE_SUFFIX)
 
 cpu gpu fpga_emu report fpga_sim fpga_hw:
 	$(MAKE) build DEVICE=$@

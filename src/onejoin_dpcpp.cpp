@@ -27,6 +27,11 @@ inline sycl::queue make_fpga_queue(AsyncHandlerT &&handler) {
   return sycl::queue(DeviceSelector{}, std::forward<AsyncHandlerT>(handler), sycl::property::queue::in_order{});
 }
 
+void create_buckets_wrapper_fpga(queue &q, char **embdata,
+                                vector<buckets_t> &buckets, size_t n_batches,
+                                vector<batch_hdr> &batch_hdrs, vector<int> &a,
+                                vector<int> &lshnumber, size_t len_output);
+
 void setuplsh(vector<vector<int>> &hash_lsh, std::vector<int> &a,
               std::vector<int> &lshnumber, vector<tuple<int, int>> &rev_hash) {
 
@@ -1294,6 +1299,9 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
     // add only CPU's queue
     queues.push_back(queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
 
+    // create a queue for fpga
+    sycl::queue queue_fpga = make_fpga_queue(asyncHandler);
+
     device = cpu; // fallback value so the rest of the code treats it as 1 device
   #else
     if (device == cpu || device == both) { // Selected CPU or both
@@ -1386,30 +1394,20 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
 
   #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
 
-    // create FPGA's queue
-    sycl::queue fpga_q = make_fpga_queue(asyncHandler);
+    create_buckets_wrapper_fpga(queue_fpga, set_embdata_dev, buckets, n_batches,
+                                batch_hdrs, a, lshnumber, len_output);
 
-    // remove CPU queue to queues
-    sycl::queue cpu_q_tmp = std::move(queues.front()); // save it
-    queues.erase(queues.begin());
+    queue_fpga.wait();
 
-    // add FPGA queue to queues
-    queues.insert(queues.begin(), std::move(fpga_q));
+  #else
 
-  #endif
+    create_buckets_wrapper(queues, set_embdata_dev, buckets, n_batches,
+                          batch_hdrs, a, lshnumber, len_output);
 
-  create_buckets_wrapper(queues, set_embdata_dev, buckets, n_batches,
-                         batch_hdrs, a, lshnumber, len_output);
+    for (auto &q : queues) {
+      q.wait();
+    }
 
-  for (auto &q : queues) {
-    q.wait();
-  }
-
-  #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
-
-    // del FPGA and insert CPU queue
-    queues.erase(queues.begin());
-    queues.insert(queues.begin(), std::move(cpu_q_tmp));
   #endif
 
   timer.start_time(buckets::sort);

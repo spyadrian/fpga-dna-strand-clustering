@@ -202,7 +202,8 @@ chmod u+x qinst-linux-24.1-115.run
 I checked those options :
 
 - [x] Intel Quartus Prime Pro Edition Software
-- [x] Questa-Intel FPGA and Starter Edition
+- [x] Questa-Intel FPGA Starter Edition
+- [x] Questa-Intel FPGA Edition
 - [x] Intel Agilex 5 device support
 - [x] Intel Agilex 7 device support
 - [x] Intel Arria 10 device support

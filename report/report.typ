@@ -32,13 +32,23 @@
 
 #include "chapter/00_introduction.typ"
 
-#include "chapter/01_onejoin.typ"
+#include "chapter/01_edit-distance.typ"
 
-#include "chapter/02_sycl.typ"
+#include "chapter/02_oneapi.typ"
 
-// #include "chapter/03_circuits.typ"
-//
-// #include "chapter/04_conclusion.typ"
+#include "chapter/03_algorithms.typ"
+
+#include "chapter/04_architecture-programming.typ"
+
+#include "chapter/05_mixed-programming.typ"
+
+#include "chapter/06_implementation.typ"
+
+#include "chapter/07_problems.typ"
+
+#include "chapter/08_results.typ"
+
+#include "chapter/09_conclusion.typ"
 
 #show: appendix
 

@@ -7,6 +7,8 @@
 // - introduce project
 // - why is DNA strand clustering important?
 
+#todo[why better for DNAMIC + context + yareta]
+
 In recent years, the amount of data has continued to increase to the point where, today, we have huge infrastructures dedicated to information storage.
 These infrastructures are the cause of enormous energy waste.
 However, it's difficult to eliminate them given that sectors such as education, medicine, and others depend on them.
@@ -41,6 +43,8 @@ These errors must then be corrected to maintain data integrity.
     ) <fig_img_MinION>
   ]
 )
+
+#todo[Is this still real]
 
 To address this issue, engineers at DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
 At this stage of the project, sequence assembly becomes essential.

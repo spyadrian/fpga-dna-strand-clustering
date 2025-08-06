@@ -1,3 +1,3 @@
 #import "../conf.typ": *
 
-= Conclusions and ...
+= Conclusions and Perspectives

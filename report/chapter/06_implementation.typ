@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Implementation details
+= Implementation Details
 
 - parler pragma (UNROLL, DATAFLOW, PIPELINE)
 

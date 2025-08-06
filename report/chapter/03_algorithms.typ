@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Algorithms: How to solve this problems
+= Algorithms: How to solve this Problems
 
 == Original Thoughs
 
@@ -203,8 +203,4 @@ From paper in reality
 
 == OneMyers
 
-present onemyers; plus value; rapidité théorique; ressemblance avec onejoin; étapes (extraction bucket ID, find nearest, bucket creation, verification); parler unroll (ici ou sur SYCL ?);
-
-== (Generation of dataset) + dataset used
-
-#todo[demander si je devrais parler de ca ou non, c'est intéressant mais c'est pas vraiment moi qui ai fait]
+#todo[present onemyers; plus value; rapidité théorique; ressemblance avec onejoin; étapes (extraction bucket ID, find nearest, bucket creation, verification); parler unroll (ici ou sur SYCL ?);]

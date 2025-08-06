@@ -32,7 +32,7 @@ OFS is utilized by Intel (formerly Altera) as well as by several third-party pla
 #figure(
   caption: [Base FPGA Interface Manager (FIMs)],
 
-  image("../figure/base-fim.png", width: 80%)
+  image("../figure/base-fim.png", width: 100%)
 )
 
 === Infrastructure Hardware

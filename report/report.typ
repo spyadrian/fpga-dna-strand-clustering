@@ -26,7 +26,9 @@
 
 #include "chapter/G_list-of-tables.typ"
 
-#include "chapter/H_list-of-appendices.typ"
+#include "chapter/H_list-of-codes.typ"
+
+#include "chapter/I_list-of-appendices.typ"
 
 #show: chapter
 
@@ -44,11 +46,9 @@
 
 #include "chapter/06_implementation.typ"
 
-#include "chapter/07_problems.typ"
+#include "chapter/07_results.typ"
 
-#include "chapter/08_results.typ"
-
-#include "chapter/09_conclusion.typ"
+#include "chapter/08_conclusion.typ"
 
 #show: appendix
 
@@ -56,5 +56,5 @@
 
 #show: bibli
 
-#include "chapter/I_bibliography.typ"
+#include "chapter/J_bibliography.typ"
 

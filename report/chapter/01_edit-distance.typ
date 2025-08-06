@@ -15,26 +15,22 @@ By doing so, it enables researchers to detect, analyze and study mutations.
 There are several types of editing distance that can be categorized according to the operations they support and allow.
 You can see some of those different types on the @fig_tab_edit_distance_types.
 
-#sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Edit_distance", [from en.wikipedia.org, ref. URL04]),
-  fig: [
-    #figure(
-      caption: [Different types of edit distance and which operations they allowed],
+// source: link("https://en.wikipedia.org/wiki/Edit_distance", [from en.wikipedia.org, ref. URL04]),
+#figure(
+  caption: [Different types of edit distance and which operations they allowed],
 
-      table(
-        columns: (1fr, auto, auto, auto, auto),
-        align: (left, center, center, center, center),
-        table.header(align(center)[*Algorithm*], table.cell(colspan: 4)[*Operations Allowed*],
-                     [], [*Insertions*], [*Deletions*], [*Substitutions*], [*Transpositions*]),
-        [Hamming Distance],             [],  [],  [✓], [],
-        [Longest Common Subsequence],   [✓], [✓], [],  [],
-        [Levenshtein Distance],         [✓], [✓], [✓], [],
-        [Damerau-Levenshtein Distance], [✓], [✓], [✓], [✓],
-        [Jaro Distance],                [],  [],  [],  [✓],
-      ),
-    ) <fig_tab_edit_distance_types>
-  ]
-)
+  table(
+    columns: (1fr, auto, auto, auto, auto),
+    align: (left, center, center, center, center),
+    table.header(align(center)[*Algorithm*], table.cell(colspan: 4)[*Operations Allowed*],
+                [], [*Insertions*], [*Deletions*], [*Substitutions*], [*Transpositions*]),
+    [Hamming Distance],             [],  [],  [✓], [],
+    [Longest Common Subsequence],   [✓], [✓], [],  [],
+    [Levenshtein Distance],         [✓], [✓], [✓], [],
+    [Damerau-Levenshtein Distance], [✓], [✓], [✓], [✓],
+    [Jaro Distance],                [],  [],  [],  [✓],
+  ),
+) <fig_tab_edit_distance_types>
 
 As mentioned in the introduction, DNA is subject to three types of operations: insertion, deletion and substitution.
 These are due to the variability introduced throughout the DNA processing pipeline.
@@ -96,35 +92,31 @@ The highlighted path shows the most optimized path for moving from one string to
 If we want to correct the word "sitting" to "kitten", we can think of a diagonal movement as a substitution (or no operation if the letters are identical), movements to the right as an insertion, and movements downward as a deletion.
 
 #let path_color = rgb("#C6DBEF");
-#sourced_figure(
-  source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [from en.wikipedia.org, ref. URL05]),
-  fig: [
-    #figure(
-      caption: [Wagner-Fischer matrix between "sitting" and "kitten"],
+// source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [from en.wikipedia.org, ref. URL05]),
+#figure(
+  caption: [Wagner-Fischer matrix between "sitting" and "kitten"],
 
-      grid(
-        fill: (x, y) => rgb(
-          if x == 0 or y == 0 { "#E0E0E0" }
-          else { "#FFFFFF" }
-        ),
-        columns: (1.3em, ) * 8,
-        rows: 1.3em,
-        row-gutter: 0em,
-        align: center + horizon,
+  grid(
+    fill: (x, y) => rgb(
+      if x == 0 or y == 0 { "#E0E0E0" }
+      else { "#FFFFFF" }
+    ),
+    columns: (1.3em, ) * 8,
+    rows: 1.3em,
+    row-gutter: 0em,
+    align: center + horizon,
 
-        [], [], [*k*], [*i*], [*t*], [*t*], [*e*], [*n*],
-        [], [0], [1], [2], [3], [4], [5], [6],
-        [*s*], [1], grid.cell(fill: path_color)[1], [2], [3], [4], [5], [6],
-        [*i*], [2], [2], grid.cell(fill: path_color)[1], [2], [3], [4], [5],
-        [*t*], [3], [3], [2], grid.cell(fill: path_color)[1], [2], [3], [4],
-        [*t*], [4], [4], [3], [2], grid.cell(fill: path_color)[1], [2], [3],
-        [*i*], [5], [5], [4], [3], [2], grid.cell(fill: path_color)[2], [3],
-        [*n*], [6], [6], [5], [4], [3], [3], grid.cell(fill: path_color)[2],
-        [*g*], [7], [7], [6], [5], [4], [4], grid.cell(fill: path_color)[3],
-      )
-    ) <fig_grid_wagner-fischer>
-  ]
-)
+    [], [], [*k*], [*i*], [*t*], [*t*], [*e*], [*n*],
+    [], [0], [1], [2], [3], [4], [5], [6],
+    [*s*], [1], grid.cell(fill: path_color)[1], [2], [3], [4], [5], [6],
+    [*i*], [2], [2], grid.cell(fill: path_color)[1], [2], [3], [4], [5],
+    [*t*], [3], [3], [2], grid.cell(fill: path_color)[1], [2], [3], [4],
+    [*t*], [4], [4], [3], [2], grid.cell(fill: path_color)[1], [2], [3],
+    [*i*], [5], [5], [4], [3], [2], grid.cell(fill: path_color)[2], [3],
+    [*n*], [6], [6], [5], [4], [3], [3], grid.cell(fill: path_color)[2],
+    [*g*], [7], [7], [6], [5], [4], [4], grid.cell(fill: path_color)[3],
+  )
+) <fig_grid_wagner-fischer>
 
 One of the key strengths of the Wagner-Fischer algorithm lies in its simplicity.
 But, unfortunately, when dealing with long strings, this algorithm is not very efficient.
@@ -143,16 +135,12 @@ $Delta v$ and $Delta h$ are matrices that represent the traditional Wagner-Fisch
 Using several theorems, Myers manages to transform the problem of calculating the Wagner-Fischer matrix into the calculation of the matrix $Delta v$ except for the last step where $Delta h$ is necessary.
 But this can be calculated using a simple product on a part of $Delta v$.
 
-#sourced_figure(
-  source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [from gersteinlab.org, ref. URL09]),
-  fig : [
-    #figure(
-      caption: [Myers' bit-parallel algorithm dynamic programming (d.p.) matrices],
+// source: link("https://www.gersteinlab.org/courses/452/09-spring/pdf/Myers.pdf", [from gersteinlab.org, ref. URL09]),
+#figure(
+  caption: [Myers' bit-parallel algorithm dynamic programming (d.p.) matrices],
 
-      image("../figure/myers_matrices.png"),
-    ) <fig_img_myers_matrices>
-  ]
-)
+  image("../figure/myers_matrices.png"),
+) <fig_img_myers_matrices>
 
 The @fig_img_myers_matrices shows, on the left, the traditional matrix found in Wagner-Fischer and, on the right, the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
 The illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$.

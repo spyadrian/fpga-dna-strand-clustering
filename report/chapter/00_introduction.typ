@@ -18,13 +18,11 @@ This method overcomes many of the problems that come with traditional data stora
 A European project called DNAMIC aims to replace these infrastructures by a mobile, self-contained, future-proof microfactory for DNA data archiving.
 This microfactory would only be finished after implementing the six steps that constitute it, that is, encoding, synthesis, amplification, storage, sequencing and finally, decoding.
 
-#sourced_figure(
-  source: link("https://www.youtube.com/watch?app=desktop&v=gNv72a1ugiA", [from youtube.com, ref. URL02]),
-  fig : figure(
-    caption: [Schema of the six steps constituting the micro-factory of the DNAMIC project],
+// source: link("https://www.youtube.com/watch?app=desktop&v=gNv72a1ugiA", [from youtube.com, ref. URL02]),
+#figure(
+  caption: [Schema of the six steps constituting the micro-factory of the DNAMIC project],
 
-    image("../figure/micro-factory_steps.png")
-  )
+  image("../figure/micro-factory_steps.png")
 )
 
 One of many difficulties this project encounters is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
@@ -33,16 +31,12 @@ This is done using a nanopore, like the MinION in the @fig_img_MinION, a technol
 In addition to errors due to reading, DNA can also undergo mutations.
 These errors must then be corrected to maintain data integrity.
 
-#sourced_figure(
-  source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),
-  fig : [
-    #figure(
-      caption: [The MinION nanopore sequencer by Oxford Nanopore Technology],
+// source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),
+#figure(
+  caption: [The MinION nanopore sequencer by Oxford Nanopore Technology],
 
-      image("../figure/minION_nanopore.png", width: 50%)
-    ) <fig_img_MinION>
-  ]
-)
+  image("../figure/minION_nanopore.png", width: 50%)
+) <fig_img_MinION>
 
 #todo[Is this still real]
 

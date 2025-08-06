@@ -130,7 +130,7 @@ The table below summarizes these parameters, their effects on critical metrics, 
 
   table(
     columns: (auto, auto, auto, auto),
-    align: (center, center, center, left),
+    align: (center + horizon, center + horizon, center + horizon, left),
     table.header([*Parameter*], [*Symbol*], [*Default value*], align(center)[*Brief description*]),
     [NUM\_STR], [_r_], [$5$], [independent CGK embeddings per read],
     [NUM\_HASH], [_z_], [$7$], [hash functions (OR-construction) per embedding],
@@ -160,7 +160,7 @@ It table serves as a reference for tailoring OneJoin to specific datasets, balan
 
   table(
     columns: (auto, auto, auto, auto, auto, auto),
-    align: center,
+    align: center + horizon,
     table.header([*Parameter*], [*Speed impact*], [*Recall impact*], [*Precision impact*], [*False positives impact*], [*True positives impact*]),
     [NUM\_STR], [↑ (linear cost)], [↑], [slight ↓], [slight ↑], [↑],
     [NUM\_HASH], [slight ↑], [↑], [↓], [↑], [↑],

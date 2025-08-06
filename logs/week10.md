@@ -89,7 +89,7 @@ Here are the compile line :
 
 ```bash
 icpx -fsycl -fPIC -fsycl-targets=spir64 -c kernel-cpu.cpp -o kernel-cpu.o
-icpx -fsycl -fintelfpga -fsycl-link=image -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm kernel-fpga.cpp -o kernel-fpga-hw.a 
+icpx -fsycl -fintelfpga -fsycl-link=image -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm kernel-fpga.cpp -o kernel-fpga-hw.a
 icpx -fsycl -fintelfpga -o vector-add-sep main.cpp kernel-cpu.o kernel-fpga-hw.a
 ```
 

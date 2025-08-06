@@ -43,13 +43,11 @@ The Intel® oneAPI DPC++/C++ Compiler is Intel’s implementation of the SYCL st
 It optimizes applications for Intel® 64 architectures on Linux and Windows, supporting the latest C and C++ standards.
 Builds upon SYCL by introducing additional extensions and features aimed at optimizing performance and increasing productivity for developers targeting Intel architectures.
 
-#sourced_figure(
-  source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [from khronos.org, ref. URL05]),
-  fig : figure(
-    caption: [SYCL Implementations Provide Access to Diverse Processors Through Standard C++],
+// source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [from khronos.org, ref. URL05]),
+#figure(
+  caption: [SYCL Implementations Provide Access to Diverse Processors Through Standard C++],
 
-    image("../figure/sycl-provide-access-to-diverse-processors.jpg")
-  )
+  image("../figure/sycl-provide-access-to-diverse-processors.jpg")
 )
 
 #todo[talk about codeplay plugins ?]
@@ -90,16 +88,12 @@ As DPC++ is based on C++ programming language, its syntax and usage look exactly
 The difference occurs when programming with different types of devices.
 Here is a first example of SYCL code, the different elements will be explained in coming sections.
 
-#sourced_figure(
-  source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [ADD SOURCE]),
-  fig : [
-    #figure(
-      caption: [A first example of SYCL code explained],
+// source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [ADD SOURCE]),
+#figure(
+  caption: [A first example of SYCL code explained],
 
-      image("../figure/basic-code-explained.png", width: 92%)
-    ) <fig_img_basic-code>
-  ]
-)
+  image("../figure/basic-code-explained.png", width: 92%)
+) <fig_img_basic-code>
 
 === Queues and Device Selector
 

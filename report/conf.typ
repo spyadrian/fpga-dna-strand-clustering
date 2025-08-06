@@ -19,22 +19,27 @@
 
   // font
   set text(font: "Times New Roman", size: 12pt, lang: "en")
-  show raw: set text(font: "Ubuntu Mono", size: 10pt, lang: "en")
+  show raw: set text(font: "Consolas", size: 11pt, lang: "en")
   show raw.where(block: true): set par(justify: false, spacing: 1em, leading: 1em)
   set raw(tab-size: 4)
+
+  let current-chapter-title() = context {
+    let headings = query(heading.where(level: 1).before(here()))
+    if headings != () {headings.last().body}
+  }
 
   // document
   set page(
     margin: 2.5cm,
-    header: text(size: 8pt, fill: color.gray, [#authors – #title  – Bachelor project – #date])
+    header: text(size: 8pt, fill: color.gray, [#authors – #title #h(1fr)]) // #current-chapter-title()
   )
 
   // paragraph
   set par(
     justify: true,
     leading: 1.5em,
-    spacing: 1.5em,
-    first-line-indent: 2em,
+    spacing: 2.5em,
+    // first-line-indent: 2em,
   )
 
 
@@ -43,7 +48,6 @@
   // -------------------------------------------------------------------------
 
   show heading: set text(weight: "bold")
-
   show heading.where(level: 1): set align(center)
   show heading.where(level: 1): set text(size: 16pt)
   show heading.where(level: 2): set text(size: 14pt)
@@ -58,15 +62,23 @@
 
   show heading.where(level: 2): it => {
 
-    v(weak: true, 2.25em)
+    v(weak: true, 2.5em)
     block(counter(heading).display(it.numbering) + h(weak: true, 1.5em) + it.body)
-    v(weak: true, 1.75em)
+    v(weak: true, 1.5em)
   }
 
   show heading.where(level: 3): it => {
 
-    v(weak: true, 2em)
+    v(weak: true, 2.5em)
     block(counter(heading).display("1.1.a )").split(".").last() + h(weak: true, 1.5em) + it.body)
+    v(weak: true, 1.5em)
+  }
+
+  show heading.where(level: 4): it => {
+    set heading(numbering: none)
+
+    v(weak: true, 2.5em)
+    block(it.body)
     v(weak: true, 1.5em)
   }
 
@@ -90,13 +102,13 @@
   show figure.where(kind: image) : set figure(supplement: "Figure")
   show figure.where(kind: raw) : set figure(supplement: "Code")
 
-  show figure: it => {
-    v(1em)
-    it.body
-
-    set align(left)
-    it.caption
-  }
+  // show figure: it => {
+  //   v(1em)
+  //   it.body
+  //
+  //   set align(left)
+  //   it.caption
+  // }
 
   // grid
   set grid(row-gutter: 1.5em)
@@ -106,7 +118,8 @@
   set math.cases(gap: 0.5em)
 
   // table
-  show table: set par(justify: false, spacing: 1em, leading: 1em)
+  show table: set par(justify: false, spacing: 0.5em, leading: 0.5em)
+  set table(stroke: 0.5pt)
   set list(marker: [--], indent: 1.5em)
   set enum(indent: 1.5em)
 
@@ -169,12 +182,12 @@
 // NEW COMPONENTS
 // -------------------------------------------------------------------------
 
-#let sourced_figure(source: [], fig: figure) = {
-  set par(first-line-indent: 0em)
-  fig
-
-  emph[_Source_ : #source]
-}
+// #let sourced_figure(source: [], fig: figure) = {
+//   set par(first-line-indent: 0em)
+//   fig
+//
+//   emph[_Source_ : #source]
+// }
 
 #let todo(body) = {
   set text(fill: red, weight: "bold", style: "italic")

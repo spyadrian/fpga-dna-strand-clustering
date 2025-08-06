@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Programming for Mixed Code with CPU and FPGA   (maybe before Hardware archit...)
+= Programming for Mixed Code with CPU and FPGA
 
 
 == Compiling for Mixed Device

@@ -4,8 +4,6 @@
 
 == Original Thoughs
 
-#todo[Can I really say naive approach ?]
-
 The first solution that was considered was to compare all the DNA sequences against each other.
 To do this, Myers' algorithm would be used to obtain the Levenshtein distance.
 If it was below a certain threshold, the two DNA strands being compared would be considered identical (from the same original strand).

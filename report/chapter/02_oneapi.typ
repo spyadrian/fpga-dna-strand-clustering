@@ -32,7 +32,11 @@ SYCL (pronounced “sick-el”) is an open standard developed by the Khronos Gro
 It provides a single-source programming model, allowing both host and device code to be written in the same file called a "big binary".
 SYCL is designed to enable efficient execution on a wide range of hardware, including CPUs, GPUs, and FPGAs, without requiring platform-specific code changes.
 
-#todo[add logo sycl + C++]
+#figure(
+  caption: [SYCL Logo],
+
+  image("../figure/sycl.png", width: 50%)
+)
 
 SYCL works by expressing parallelism through kernels, which are functions executed on the device (such as a GPU or FPGA).
 The runtime manages data transfer between host and device, as well as the scheduling of kernels.
@@ -50,8 +54,6 @@ Builds upon SYCL by introducing additional extensions and features aimed at opti
   image("../figure/sycl-provide-access-to-diverse-processors.jpg")
 )
 
-#todo[talk about codeplay plugins ?]
-
 #todo[is relation between SYCL, DPC++, and oneAPI clear enough ?]
 
 /*
@@ -65,8 +67,6 @@ It is helpful to understand how these technologies are related:
 
 
 == Advantages of SYCL for FPGA Acceleration
-
-#todo[a lot of repetition here, remove it ? recap it ?]
 
 SYCL offers significant benefits for developers seeking to leverage FPGA acceleration in their applications.
 One of the primary advantages is hardware abstraction: SYCL enables the writing of code that can be efficiently compiled for FPGA using High-Level Synthesis (HLS) tools, eliminating the need for FPGA-specific programming.

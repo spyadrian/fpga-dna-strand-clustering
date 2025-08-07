@@ -2,22 +2,24 @@
 
 = OneAPI
 
+#todo[Is chapter 2.3 to much a repetition of the rest ?]
+
 Traditionally, programming FPGAs relies on hardware description languages like Verilog HDL or VHDL, which require specifying low-level circuit structure and functionality.
 While powerful, these languages are complex and challenging for most developers, leading to high development costs and steep learning curves.
-High-Level Synthesis (HLS) has emerged as a solution—allowing developers to describe hardware behavior using more familiar languages like C or C++.
-HLS tools then translate this high-level code into register-transfer level designs, streamlining and simplifying hardware development.
+High-Level Synthesis (HLS) has emerged as a solution, allowing developers to describe hardware behavior using more familiar languages like C or C++.
+HLS tools then translate this high-level code into register-transfer level designs, simplifying hardware development.
 
-Initially, the task of this project was to implement the Myers algorithm entirely in VHDL.
+Initially, the task of this project was to implement an algorithm (e.g. The Myers’ Bit-parallel) entirely in VHDL.
 However, because maintaining and transferring this low-level code proved challenging for the client, we decided to shift to an HLS-based approach using oneAPI, making the project more accessible and manageable for future development.
 
 
 == oneAPI Overview
 
-CPUs and GPUs are both essential computing engines, but each excels at different types of workloads due to architectural differences.
-As modern applications become more diverse, achieving optimal performance increasingly requires a mix of specialized architectures—including CPUs, GPUs, AI accelerators, and FPGAs.
+CPUs, GPUs, and FPGAs are all essential computing engines, but each excels at different types of workloads due to architectural differences.
+As modern applications become more diverse, achieving optimal performance increasingly requires a mix of specialized architectures, including CPUs, GPUs, AI accelerators, and FPGAs.
 However, programming each of these devices typically involves different languages and tools, making code less portable and increasing software development effort.
 
-To address these challenges, Intel introduced oneAPI—a unified programming model designed to simplify development across CPUs, GPUs, FPGAs, and other accelerators.
+To address these challenges, Intel introduced oneAPI, a unified programming model designed to simplify development across CPUs, GPUs, FPGAs, and other accelerators.
 By providing a single set of tools, languages, and libraries, oneAPI enables developers to write code once and deploy it efficiently across diverse hardware platforms, streamlining workflow and enhancing code portability.
 Those features are offered thanks to the use of modern C++ features and the help of SYCL to express parallelism.
 
@@ -41,11 +43,12 @@ SYCL is designed to enable efficient execution on a wide range of hardware, incl
 SYCL works by expressing parallelism through kernels, which are functions executed on the device (such as a GPU or FPGA).
 The runtime manages data transfer between host and device, as well as the scheduling of kernels.
 SYCL uses modern C++ features, such as templates and lambdas, to define kernels and data management abstractions.
-The programmer writes a single codebase, and SYCL ensures that the appropriate hardware is targeted at runtime, depending on the available devices and the configuration.
+The programmer writes a single codebase, and SYCL ensures that the appropriate hardware is targeted at runtime, depending on the available devices and configuration.
 
 The Intel® oneAPI DPC++/C++ Compiler is Intel’s implementation of the SYCL standard.
 It optimizes applications for Intel® 64 architectures on Linux and Windows, supporting the latest C and C++ standards.
 Builds upon SYCL by introducing additional extensions and features aimed at optimizing performance and increasing productivity for developers targeting Intel architectures.
+We can say that the DPC++/C++ is contained in the oneAPI framework.
 
 // source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [from khronos.org, ref. URL05]),
 #figure(
@@ -53,17 +56,6 @@ Builds upon SYCL by introducing additional extensions and features aimed at opti
 
   image("../figure/sycl-provide-access-to-diverse-processors.jpg")
 )
-
-#todo[is relation between SYCL, DPC++, and oneAPI clear enough ?]
-
-/*
-It is helpful to understand how these technologies are related:
-- SYCL is an open standard maintained by the Khronos Group. It defines a C++-based programming model for heterogeneous computing and supports writing portable code across CPUs, GPUs, and FPGAs.
-- DPC++ (Data Parallel C++) is Intel’s compiler and language implementation built on top of SYCL. It incorporates all standard SYCL features and adds Intel-specific extensions—particularly for advanced FPGA support and improved performance tuning.
-- oneAPI is Intel’s comprehensive development framework. It combines DPC++, toolchains, libraries, and various utilities to provide a unified way of programming diverse hardware, including CPUs, GPUs, AI accelerators, and FPGAs.
-*/
-
-#todo[why I use it clear enough ? (HLS -> good; oneAPI -> provide DPC++ -> provide SYCL -> provide HLS)]
 
 
 == Advantages of SYCL for FPGA Acceleration
@@ -82,6 +74,7 @@ SYCL’s single-source approach further simplifies development.
 Developers can experiment with FPGA acceleration without the need to rewrite their entire codebase, making it easier to integrate FPGA into existing pipelines.
 This approach streamlines the adoption of FPGA technology and reduces development overhead, something that was searched by the DNAMIC engineers.
 
+
 == Programming with DPC++
 
 As DPC++ is based on C++ programming language, its syntax and usage look exactly like those in C++.
@@ -97,9 +90,9 @@ Here is a first example of SYCL code, the different elements will be explained i
 
 === Queues and Device Selector
 
-Le principe de device code tourne autour de l'utilisation de kernel que fait DPC++.
-Un kernel est un bout de code que l'on envoie à un device comme un CPU, GPU ou FPGA.
-C'est dans l'envoie de ce bout de code que les queues rentres en considaration.
+The concept of device code revolves around the use of kernels in DPC++.
+A kernel is a piece of code that is sent to a device such as a CPU, GPU, or FPGA.
+Is at the moment to send this piece of code that queues come into play.
 
 #figure(
   caption: [SYCL `queue` initialization example],
@@ -114,16 +107,16 @@ q.submit([&](sycl::handler& h){
 ) <fig_code_sycl-queue>
 
 The queue has an associated device that any commands enqueued to it will target.
-The SYCL runtime will discover a set of platforms that are available in the system and their platforms.
+The SYCL runtime will discover a set of device and their platforms that are available in the system.
 
 To simplify the process of traversing the system topology SYCL provides device selectors.
 A device selector is is a callable C++ object which defines a heuristic for scoring devices.
-A device selector takes a parameter of type const device and gives it a "score".
-Used to query all devices and return the one with the highest "score".
-SYCL provides a number of standard device selectors, e.g. default_selector_v, gpu_selector_v, etc.
+A device selector takes a parameter of type `const device` and gives it a "score".
+It is used to query all devices and return the one with the highest "score".
+SYCL provides a number of standard device selectors, e.g. `default_selector_v`, `gpu_selector_v`, etc.
 
 #figure(
-  caption: [SYCL `queue` initialization example],
+  caption: [SYCL device selector example],
 
 ```cpp
 int my_gpu_selector(const device& dev) {
@@ -145,7 +138,7 @@ int main(int argc, char *argv[]) {
 
 A key feature of SYCL for enabling efficient parallel processing on heterogeneous hardware such as FPGA, CPU, and GPU is the `parallel_for` construct.
 This construct allows developers to express data-parallel computations in a straightforward manner, where the same kernel function is executed concurrently over a range of data elements.
-In the context of DNA sequence analysis or similarity joins, `parallel_for` enables the simultaneous processing of multiple sequences or sequence segments, significantly increasing throughput and reducing overall execution time.
+In the context of DNA sequence analysis or similarity joins, `parallel_for` enables the simultaneous processing of multiple sequences, significantly increasing throughput and reducing overall execution time.
 
 When targeting FPGA with DPC++, the `parallel_for` construct is mapped to hardware pipelines by the High-Level Synthesis (HLS) tools.
 This mapping allows FPGA resources to be used efficiently, exploiting spatial parallelism where independent operations are performed simultaneously on different data streams.
@@ -178,18 +171,32 @@ Here is a basic example of the use of USM :
   caption: [SYCL USM usage example],
 
 ```cpp
-int square_number(int x){
-
-  sycl::queue myQueue = queue{};
-
-  myQueue.submit([&](handler &cgh){
-    cgh.single_task<square_number>([=](){
-      // square some number
-    });
-  }).wait();
-
-  return x;
+float a[size], b[size], r[size];
+for (int i = 0; i < size; ++i) {
+  a[i] = static_cast<float>(i);
+  b[i] = static_cast<float>(i);
+  r[i] = 0.0f;
 }
+
+auto q = sycl::queue{usm_selector};
+
+auto ptrA = sycl::malloc_device<float>(size, q);
+auto ptrB = sycl::malloc_device<float>(size, q);
+auto ptrR = sycl::malloc_device<float>(size, q);
+
+usmQueue.memcpy(ptrA, a, sizeof(float) * size).wait();
+usmQueue.memcpy(ptrB, b, sizeof(float) * size).wait();
+
+q.parallel_for<vector_add>(sycl::range{size}, [=](sycl::id<1> idx) {
+    auto g_id = idx[0];
+    ptrR[g_id] = ptrA[g_id] + ptrB[g_id];
+}).wait();
+
+q.memcpy(r, ptrR, sizeof(float) * size).wait();
+
+sycl::free(ptrA, q);
+sycl::free(ptrB, q);
+sycl::free(ptrR, q);
 ```
 ) <fig_code_USM-example>
 
@@ -200,18 +207,22 @@ In DPC++ programming for FPGAs, pragma directives are special compiler hints use
 They help control how loops and other code structures are translated into FPGA hardware, allowing for better performance and efficient resource use.
 
 A common pragma is `#pragma unroll`, which tells the compiler to fully or partially unroll a loop.
-Loop unrolling can increase parallelism by generating multiple hardware operations for each loop iteration, reducing the loop overhead and improving throughput.
+Loop unrolling can increase parallelism by generating multiple hardware operations for each loop iteration.
 For example:
 
-#todo[where do I use it, example accordingly]
-
 #figure(
-  caption: [DPC++ basic Pragma usage],
+  caption: [Bitwise OR operations on integer 256 using pragma],
 
 ```cpp
-#pragma unroll
-for (int i = 0; i < N; ++i) {
-    // loop body
+DNABitVector256 operator|(const DNABitVector256& other) const {
+    DNABitVector256 result;
+
+    #pragma unroll
+    for (int i = 0; i < NUM_WORDS; i++) {
+        result.words[i] = words[i] | other.words[i];
+    }
+
+    return result;
 }
 ```
 ) <fig_code_USM-example>

@@ -2,6 +2,7 @@
 
 = Programming for Mixed Code with CPU and FPGA
 
+#todo[add compilation flow schema in 5.3]
 
 == Compiling for Mixed Device
 
@@ -31,7 +32,6 @@ Generally, this can take several hours.
 For this reason, the ahead-of-time (AOT) compilation flow is used for FPGAs.
 
 In the AOT compilation flow, the device code is translated to SPIR-V and then processed by the device-specific backend in the host compiler, with the resulting device code being embedded in the generated fat binary.
-
 In this process, the target device must be specified at compilation time, which provides less flexibility than the just-in-time (JIT) compilation used for CPUs and GPUs.
 This trade-off between compilation time and deployment flexibility is a fundamental characteristic of FPGA development workflows, where the lengthy synthesis process makes runtime compilation impractical for most applications.
 
@@ -46,7 +46,7 @@ There are four types of compilation for FPGAs, which are summarized in the table
 
 #figure(
   table(
-    columns: (1fr, 1fr, 2.5fr),
+    columns: (1fr, 1.75fr, 3.25fr),
     align: (left, left, left),
     table.header([*Target*], [*Output*], [*Description*]),
     [Emulator], [x86-64 binary (seconds)], [Compiles the FPGA device code to the CPU. Use the Intel® FPGA Emulation Platform for OpenCL™ software to verify your SYCL code's functional correctness.],
@@ -65,15 +65,17 @@ The typical workflow for FPGA development involves going through all the differe
 During compilation for both the CPU and FPGA, a separate compilation was performed.
 One reason for this is the incompatibility between the flags required for the CPU and those needed for the FPGA during compilation.
 Another reason is that if the FPGA kernel does not change (which is the case most of the time), it is not necessary to recompile it with the rest of the code if it has already been compiled separately.
-There is also an alternative using the `-reuse-exe` flag, but this method was not used.
+There is also another compilation style using the `-reuse-exe` flag, where the FPGA kernel is not recompile, but this method was not used.
 
 In this compilation flow, the device kernel is compiled first, and then the host source code is compiled and linked against the device kernel (provided as a library).
 Below is an example of separate compilation using `vector-add` example, where two kernel, one CPU and one FPGA, are compiled separately before being linked together.
 This type of compilation was used for compiling the OneJoin implementation, but not for OneMyers.
 Since OneMyers only uses a single queue, separate compilation was not necessary in that case.
 
-#todo[add compilation flow schema]
+// https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
+// ...
 
+// https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(
   caption: [Commands Lines of the Compilation Flow],
 

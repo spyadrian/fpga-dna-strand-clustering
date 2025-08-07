@@ -2,6 +2,13 @@
 
 = Algorithms: How to solve this Problems
 
+#todo[make illustrate where there is list point (LSH, EmbedJoin)]
+
+#todo[Params OneJoin, talk more about important param and consequence]
+
+#todo[make OneMyers]
+
+
 == Original Thoughs
 
 The first solution that was considered was to compare all the DNA sequences against each other.
@@ -18,7 +25,7 @@ For this reason, it was decided to use less naive methods with pre-filtering to 
 == OneJoin
 
 OneJoin is an edit similarity join algorithm designed to efficiently handle very large sets of sequences, such as DNA-encoded data.
-Unlike traditional approaches, which rely on exact calculations of the edit distance (Levenshtein distance) between all pairs of sequences.
+Unlike traditional approaches, which rely on exact calculations of the Levenshtein distance between all pairs of sequences.
 OneJoin relies on advanced embeddings and Locality Sensitive Hashing (LSH) techniques to drastically reduce the number of comparisons required.
 OneJoin works in three main stages: Embedding, LSH and the verification.
 
@@ -38,22 +45,17 @@ Using random walk theory, Chakraborty et al. demonstrated that the CGK embedding
 
 === Locality Sensitive Hashing (LSH)
 
-An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), are well defined for Hamming distance but not edit distance.
-And it can now be used to identify similar strings without doing an exhaustive pair wise search.
+An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), well defined for Hamming, can now be used to identify similar strings without doing an exhaustive pair wise search.
 
 Locality-Sensitive Hashing (LSH) for Hamming distance is a technique that efficiently groups similar strings by mapping them to the same “buckets”.
 The technique relies on bit-sampling: specific bit positions are selected from each string to generate hash values.
-In practice, this means that two strings with a low Hamming distance—meaning differ in only a few positions—are more likely to be hashed into the same bucket.
+In practice, this means that two strings with a low Hamming distance, meaning differ in only a few positions, are more likely to be hashed into the same bucket.
 For instance :
-
-#todo[make an illustration of this example]
 
 - Consider two 8-bit DNA sequences: $x = "ATCGATCG"$, $y = "ATCGATCA"$ (differs only in the last character).
 - A hash function sampling bit position 7 would place both in the same bucket since bit 7 is 1 in both.
 
-#todo[Clarify AND-OR]
-
-To balance precision and recall, LSH typically uses an AND-OR composition: the AND construction reduces false positives by requiring agreement on multiple sampled bits, while the OR construction reduces false negatives by considering multiple independent hash tables.
+To balance precision and recall, LSH typically uses an AND-OR composition: the AND construction reduces false positives by requiring agreement on multiple sampled bits, while the OR construction reduces false negatives by considering multiple independent hashes.
 
 The AND construction requires agreement on multiple sampled bits.
 For example :
@@ -61,33 +63,18 @@ For example :
 - Define a hash function $f_1(x) = ("bit"_3, "bit"_7)$.
 - $x$ and $y$ collide only if they match at both positions.
 
-It reduces false positives (dissimilar strings rarely match multiple bits).
-
-The OR construction uses multiple independent hash tables.
+The OR construction uses multiple independent hashes.
 For example:
 
 - Employ three hash tables: [g₁, g₂, g₃], each sampling different bits.
 - Strings collide if they match in any table (g₁ OR g₂ OR g₃).
 
-It reduces false negatives (similar strings likely collide in at least one table).
-
-LSH combines both strategies:
-
-- AND within tables: Each hash table g_j requires matches across k bits (e.g., k=2 → g_j(x) = (bitᵢ, bitⱼ)).
-- OR across tables: Strings collide if they match in any of L tables.
-
-This balances sensitivity and specificity, ensuring:
-
-- High recall: Similar strings (e.g., Hamming distance ≤ d) collide with tunable probability P ≥ 1 - (1 - (1 - d/n)^k)^L.
-- Low computational cost: Only colliding pairs undergo exact distance verification.
-
-In DNA sequence analysis (e.g., OneJoin), this allows scaling from O(N²) to near-linear comparisons, as >90% of dissimilar pairs are filtered before costly edit-distance calculations.
-
+This approach allows scaling from $Omicron(N^2)$ to near-linear comparisons, as more than 90% of dissimilar pairs are efficiently filtered out before expensive edit-distance calculations are performed.
+This synergy between embedding and LSH makes large-scale sequence analysis manageable.
 
 === EmbedJoin
 
-// rewrite this
-EmbedJoin is a sequential, CPU-based algorithm for edit similarity joins, leveraging CGK embedding and locality-sensitive hashing (LSH) to reduce the need for costly pairwise edit distance computations.
+EmbedJoin is a CPU-based, sequential algorithm designed for edit similarity joins that uses CGK embedding and locality-sensitive hashing (LSH) to minimize the number of expensive pairwise edit distance calculations.
 
 ==== Filtering
 
@@ -102,8 +89,6 @@ If the length difference between the current string and a candidate is less than
 Otherwise, the candidate is removed from the bucket to optimize subsequent comparisons.
 This process is repeated for all input strings, and duplicate pairs are eliminated to avoid redundant computations.
 
-#todo[add schema filtering]
-
 ==== Verification
 
 After the filtering phase, EmbedJoin has generated a candidate list of string pairs that are likely to be within the specified edit distance.
@@ -113,9 +98,6 @@ This step is much less computationally demanding than filtering, as the number o
 For each candidate pair, EmbedJoin employs a standard dynamic programming algorithm to compute the distance of Levenshtein.
 If the computed distance is below the user-defined threshold, the pair is included in the final output set.
 The verification phase is executed in a straightforward, sequential manner, with each thread or process handling a subset of the candidate list.
-
-Despite the simplicity of the verification step, the true power of EmbedJoin lies in its ability to drastically reduce the number of expensive edit distance computations through its efficient filtering mechanism.
-As a result, the verification phase contributes only a small fraction of the total execution time, making EmbedJoin highly effective for large-scale string similarity joins.
 
 
 === Parameters
@@ -143,13 +125,6 @@ The table below summarizes these parameters, their effects on critical metrics, 
   )
 )
 
-The parameters mainly act on two mechanisms:
-
-- CGK Embedding (via NUM_STR, SHIFT, NUM_REP): Transforms sequences into numeric representations to reduce the complexity of edit comparisons.
-- LSH (via NUM_HASH, NUM_BITS, --samplingrange): Probabilistic hashing to quickly group potentially similar sequences.
-
-The K_INPUT threshold and filters (--countfilter) adjust the strictness of the final check. The --batch_size optimizes hardware usage (CPU/GPU).
-
 The next table show their effects on critical metrics.
 It table serves as a reference for tailoring OneJoin to specific datasets, balancing speed and reliability according to application needs (e.g., large-scale DNA storage).
 
@@ -172,7 +147,14 @@ It table serves as a reference for tailoring OneJoin to specific datasets, balan
     [batch\_size], [↑ or ↓ (tune GPU)], [—], [—], [—], [—])
 )
 
-#todo[plus parler des param que je juge important]
+// Talk here about the params
+
+// The parameters mainly act on two mechanisms:
+//
+// - CGK Embedding (via NUM_STR, SHIFT, NUM_REP): Transforms sequences into numeric representations to reduce the complexity of edit comparisons.
+// - LSH (via NUM_HASH, NUM_BITS, --samplingrange): Probabilistic hashing to quickly group potentially similar sequences.
+//
+// The K_INPUT threshold and filters (--countfilter) adjust the strictness of the final check. The --batch_size optimizes hardware usage (CPU/GPU).
 
 
 === Times per steps
@@ -203,4 +185,8 @@ From paper in reality
 
 == OneMyers
 
-#todo[present onemyers; plus value; rapidité théorique; ressemblance avec onejoin; étapes (extraction bucket ID, find nearest, bucket creation, verification); parler unroll (ici ou sur SYCL ?);]
+- present onemyers
+- plus value
+- rapidité théorique
+- ressemblance avec onejoin
+- étapes (extraction bucket ID, find nearest, bucket creation, verification)

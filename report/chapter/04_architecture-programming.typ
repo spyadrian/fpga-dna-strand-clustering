@@ -2,6 +2,7 @@
 
 = FPGA : Hardware Architecture and Programming
 
+#todo[look to reduce repetition]
 
 == The Agilex 7 Starter Kits
 

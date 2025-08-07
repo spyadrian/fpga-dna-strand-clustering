@@ -1,1 +1,1 @@
-#outline(title: "List of code snippets", target: figure.where(kind: raw))
+#outline(title: "List of Code Snippets", target: figure.where(kind: raw))

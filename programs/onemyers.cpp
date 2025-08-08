@@ -1,6 +1,9 @@
+#include <map>
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <iomanip>
+#include <fstream>
 #include <cstring>
 #include <algorithm>
 #include <sycl/sycl.hpp>
@@ -8,19 +11,32 @@
 
 using namespace sycl;
 
-// DNA Algorithm Configuration
+/**
+ * @namespace DNAConfig
+ * @brief Configuration constants for A7SK FPGA DNA processing
+ * 
+ * Hardware-specific constants for Intel Agilex 7 Starter Kit optimizations
+ * including memory limits, tile sizes, and DNA encoding parameters.
+ */
 namespace DNAConfig {
-    static constexpr int MAX_DNA_LENGTH = 1024;
-    static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;
-    static constexpr size_t A7SK_DEVICE_MEMORY_MB = 1024;
-    static constexpr double SAFETY_MARGIN = 0.8;
-    static constexpr int MIN_QUERY_TILE = 64;
-    static constexpr int MIN_REF_TILE = 256;
+    static constexpr int MAX_DNA_LENGTH = 1024;                                 // Max DNA length in char (8 bits)
+    static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;          // Max bytes for a packed format DNA 
+    static constexpr size_t A7SK_DEVICE_MEMORY_MB = 1024 * 8;                   // A7SK device RAM ---------------------------------------- TO CHECK !!
+    static constexpr double SAFETY_MARGIN = 0.8;                                // Percentage max of RAM 
+    static constexpr int MIN_QUERY_TILE = 64;                                   // ??
+    static constexpr int MIN_REF_TILE = 256;                                    // ??
+    static constexpr int BUCKET_START_POS = 0;                                  // Start position for bucket ID extraction
+    static constexpr int BUCKET_END_POS = 26;                                   // End position for bucket ID extraction  
+    static constexpr int BUCKET_ID_LENGTH = BUCKET_END_POS - BUCKET_START_POS;  // Length of extracted bucket ID
+    static constexpr int LEVENSHTEIN_THRESHOLD = 3;                             // Maximum distance threshold for final verification
 }
 
 /**
- * @brief DNA base encoding: A=00, T=01, G=10, C=11
- * Allows packing 4 bases per byte instead of 1 base per byte
+ * @enum class DNABase
+ * @brief 2-bit DNA base encoding
+ * 
+ * Compact representation: A=00, T=01, G=10, C=11
+ * Enables 4x memory compression for FPGA optimization.
  */
 enum class DNABase : uint8_t {
     A = 0b00,
@@ -30,38 +46,46 @@ enum class DNABase : uint8_t {
 };
 
 /**
- * @brief Optimized BitVector for DNA (only need 4 Peq arrays instead of 256)
+ * @class DNABitVector256
+ * @brief FPGA-optimized 256-bit vector for Myers algorithm
+ * 
+ * Custom bit vector with vectorized operations, optimized memory layout,
+ * and unrolled loops for maximum A7SK FPGA performance.
  */
 class DNABitVector256 {
+
 private:
-    static constexpr int NUM_WORDS = 4;
-    static constexpr int BITS_PER_WORD = 64;
-    static constexpr int TOTAL_BITS = NUM_WORDS * BITS_PER_WORD;
-    
+    static constexpr int NUM_WORDS = 4;                                 // Number of words
+    static constexpr int BITS_PER_WORD = 64;                            // Bits per word
+    static constexpr int TOTAL_BITS = NUM_WORDS * BITS_PER_WORD;        // Total of bits contained
+
     uint64_t words[NUM_WORDS];
 
 public:
-    // Constructors
+
+    /**
+     * @brief Default constructor - initializes all bits to zero
+     * Creates a 256-bit vector optimized for DNA sequence operations with 4 64-bit words
+     */
     DNABitVector256() {
         clear();
     }
-    
-    explicit DNABitVector256(uint64_t val) {
-        words[0] = val;
-        for (int i = 1; i < NUM_WORDS; i++) {
-            words[i] = 0;
-        }
-    }
 
-    // Utility methods
+    /**
+     * @brief Clears all bits in the vector (sets to zero)
+     * Efficiently resets all 4 words using unrolled loop for FPGA optimization
+     */
     void clear() {
+        #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             words[i] = 0;
         }
     }
 
     /**
-     * @brief Initialize all words to a specific value
+     * @brief Initializes all words to a specific 64-bit value
+     * @param value The 64-bit value to replicate across all 4 words
+     * Used for bulk initialization operations with custom patterns
      */
     void fill_all_words(uint64_t value) {
         #pragma unroll
@@ -69,42 +93,71 @@ public:
             words[i] = value;
         }
     }
-    
+
     /**
-     * @brief Set all bits to 1 (equivalent to filling with 0xFFFFFFFFFFFFFFFFULL)
+     * @brief Sets all 256 bits to 1 (creates all-ones bit pattern)
+     * Optimized for Myers algorithm initialization where all positions start as matches
      */
     void set_all_bits() {
         fill_all_words(0xFFFFFFFFFFFFFFFFULL);
     }
 
-    // Bitwise operators (vectorized for performance)
+    /**
+     * @brief Bitwise OR operation between two bit vectors
+     * @param other The bit vector to OR with this vector
+     * @return New DNABitVector256 containing the OR result
+     * Performs element-wise OR across all 4 words with loop unrolling
+     */
     DNABitVector256 operator|(const DNABitVector256& other) const {
         DNABitVector256 result;
+
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             result.words[i] = words[i] | other.words[i];
         }
+
         return result;
     }
 
+    /**
+     * @brief Bitwise AND operation between two bit vectors
+     * @param other The bit vector to AND with this vector
+     * @return New DNABitVector256 containing the AND result
+     * Essential for Myers algorithm mask operations
+     */
     DNABitVector256 operator&(const DNABitVector256& other) const {
         DNABitVector256 result;
+
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             result.words[i] = words[i] & other.words[i];
         }
+
         return result;
     }
 
+    /**
+     * @brief Bitwise NOT operation (complement of all bits)
+     * @return New DNABitVector256 with all bits flipped
+     * Used in Myers algorithm for creating inverse masks
+     */
     DNABitVector256 operator~() const {
         DNABitVector256 result;
+
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             result.words[i] = ~words[i];
         }
+
         return result;
     }
 
+    /**
+     * @brief Bitwise XOR operation between two bit vectors
+     * @param other The bit vector to XOR with this vector
+     * @return New DNABitVector256 containing the XOR result
+     * Critical for Myers algorithm's bit manipulation steps
+     */
     DNABitVector256 operator^(const DNABitVector256& other) const {
         DNABitVector256 result;
         #pragma unroll
@@ -114,23 +167,37 @@ public:
         return result;
     }
 
+    /**
+     * @brief Left bit shift operation with multi-word handling
+     * @param shift Number of positions to shift left (0-255)
+     * @return New DNABitVector256 with bits shifted left
+     * Handles cross-word carries for shifts > 64 bits, essential for Myers progression
+     */
     DNABitVector256 operator<<(int shift) const {
         DNABitVector256 result;
         if (shift >= TOTAL_BITS) return result;
-        
+
         int word_shift = shift >> 6;  // shift / 64
         int bit_shift = shift & 63;   // shift % 64
-        
+
         #pragma unroll
         for (int i = NUM_WORDS - 1; i >= word_shift; i--) {
             result.words[i] = words[i - word_shift] << bit_shift;
+
             if (bit_shift > 0 && (i - word_shift - 1) >= 0) {
                 result.words[i] |= words[i - word_shift - 1] >> (BITS_PER_WORD - bit_shift);
             }
         }
+
         return result;
     }
 
+    /**
+     * @brief Binary addition of two bit vectors with carry propagation
+     * @param other The bit vector to add to this vector
+     * @return New DNABitVector256 containing the sum
+     * Used in Myers algorithm for score computation with overflow handling
+     */
     DNABitVector256 operator+(const DNABitVector256& other) const {
         DNABitVector256 result;
         uint64_t carry = 0;
@@ -141,10 +208,15 @@ public:
             result.words[i] = sum;
             carry = (sum < words[i]) ? 1 : 0;
         }
+
         return result;
     }
 
-    // Bit manipulation methods
+    /**
+     * @brief Sets a specific bit position to 1
+     * @param pos Bit position to set (0-255)
+     * Efficiently calculates word index and bit offset for FPGA-optimized access
+     */
     void set_bit(int pos) {
         if (pos < TOTAL_BITS) {
             int word_idx = pos >> 6;  // pos / 64
@@ -153,47 +225,40 @@ public:
         }
     }
 
+    /**
+     * @brief Tests if a specific bit position is set
+     * @param pos Bit position to test (0-255)
+     * @return true if bit is set, false otherwise
+     * Critical for Myers algorithm termination and score tracking
+     */
     bool test_bit(int pos) const {
         if (pos >= TOTAL_BITS) return false;
         
         int word_idx = pos >> 6;  // pos / 64
         int bit_idx = pos & 63;   // pos % 64
         uint64_t mask = 1ULL << bit_idx;
+
         return (words[word_idx] & mask) != 0;
     }
 };
 
+/**
+ * @namespace DNAEncoding
+ * @brief DNA sequence encoding and compression utilities
+ * 
+ * Provides functions for converting DNA sequences from ASCII representation to 
+ * optimized 2-bit packed format. This namespace handles the core data transformation
+ * that enables 4x memory compression (from 8 bits per base to 2 bits per base),
+ * critical for maximizing FPGA memory bandwidth and capacity utilization.
+ */
 namespace DNAEncoding {
-    /**
-     * @brief Encode DNA character to 2-bit representation
-     */
-    inline uint8_t encode_base(char base) {
-        switch (base) {
-            case 'A': case 'a': return static_cast<uint8_t>(DNABase::A);
-            case 'T': case 't': return static_cast<uint8_t>(DNABase::T);
-            case 'G': case 'g': return static_cast<uint8_t>(DNABase::G);
-            case 'C': case 'c': return static_cast<uint8_t>(DNABase::C);
-            default: return static_cast<uint8_t>(DNABase::A);  // Default fallback
-        }
-    }
 
     /**
-     * @brief Pack DNA string into 2-bit representation (4 bases per byte)
-     */
-    void pack_sequence(const char* dna_str, int length, uint8_t* packed, int& packed_length) {
-        packed_length = (length + 3) / 4;  // Round up to nearest byte
-        memset(packed, 0, packed_length);
-        
-        for (int i = 0; i < length; i++) {
-            uint8_t encoded = encode_base(dna_str[i]);
-            int byte_idx = i / 4;
-            int bit_pos = (i % 4) * 2;
-            packed[byte_idx] |= (encoded << bit_pos);
-        }
-    }
-
-    /**
-     * @brief Cache structure for optimized base extraction
+     * @struct PackedCache
+     * @brief Single-word cache for packed DNA access
+     * 
+     * Caches 4 DNA bases per access to reduce FPGA memory bandwidth
+     * requirements by up to 75%.
      */
     struct PackedCache {
         uint32_t cached_word;
@@ -206,12 +271,56 @@ namespace DNAEncoding {
     };
 
     /**
-     * @brief Optimized base extraction with 4-base prefetching
+     * @brief Encodes a single DNA character to 2-bit representation
+     * @param base DNA character ('A', 'T', 'G', 'C', case-insensitive)
+     * @return 2-bit encoded value (A=00, T=01, G=10, C=11)
+     * Provides 4x memory compression compared to ASCII storage
+     */
+    inline uint8_t encode_base(char base) {
+        switch (base) {
+            case 'A': case 'a': return static_cast<uint8_t>(DNABase::A);
+            case 'T': case 't': return static_cast<uint8_t>(DNABase::T);
+            case 'G': case 'g': return static_cast<uint8_t>(DNABase::G);
+            case 'C': case 'c': return static_cast<uint8_t>(DNABase::C);
+
+            default: return static_cast<uint8_t>(DNABase::A);  // default fallback
+        }
+    }
+
+    /**
+     * @brief Packs DNA string into compressed 2-bit format
+     * @param dna_str Input DNA sequence as null-terminated string
+     * @param length Length of the DNA sequence
+     * @param packed Output buffer for packed sequence (4 bases per byte)
+     * @param packed_length Output parameter containing packed data length in bytes
+     * Optimizes memory usage and cache performance for FPGA processing
+     */
+    void pack_sequence(const char* dna_str, int length, uint8_t* packed, int& packed_length) {
+        packed_length = (length + 3) / 4;  // round up to nearest byte
+        memset(packed, 0, packed_length);
+        
+        for (int i = 0; i < length; i++) {
+            uint8_t encoded = encode_base(dna_str[i]);
+
+            int byte_idx = i / 4;
+            int bit_pos = (i % 4) * 2;
+            packed[byte_idx] |= (encoded << bit_pos);
+        }
+    }
+
+    /**
+     * @brief Extracts a single base from packed format with caching optimization
+     * @param packed Pointer to packed DNA sequence data
+     * @param pos Position of base to extract
+     * @param cache Cache structure for 4-base prefetching optimization
+     * @return 2-bit encoded base value
+     * Uses word-aligned caching to minimize memory accesses on FPGA
      */
     inline uint8_t get_base_cached(const uint8_t* packed, int pos, PackedCache& cache) {
-        int word_start = (pos >> 2) << 2;  // Align to 4-base boundary
+        int word_start = (pos >> 2) << 2;  // align to 4-base boundary
         
         if (!cache.cache_valid || cache.cache_start_pos != word_start) {
+
             cache.cached_word = packed[pos >> 2];
             cache.cache_start_pos = word_start;
             cache.cache_valid = true;
@@ -222,7 +331,10 @@ namespace DNAEncoding {
     }
 
     /**
-     * @brief Vectorized unpacking for multiple bases
+     * @brief Vectorized unpacking of 4 bases from a single byte
+     * @param packed_byte Single byte containing 4 packed DNA bases
+     * @param bases Output array of 4 unpacked base values
+     * SIMD-style operation optimized for FPGA parallel processing
      */
     inline void unpack_4_bases(uint8_t packed_byte, uint8_t bases[4]) {
         #pragma unroll
@@ -233,7 +345,11 @@ namespace DNAEncoding {
 }
 
 /**
- * @brief Result structure for nearest match
+ * @struct NearestResult
+ * @brief DNA matching result container
+ * 
+ * Stores minimum Levenshtein distance and best match index.
+ * Initialized with sentinel values for proper error handling.
  */
 struct NearestResult {
     int32_t min_distance;
@@ -243,38 +359,99 @@ struct NearestResult {
 };
 
 /**
- * @brief Validation utilities
+ * @struct Bucket
+ * @brief Container for queries that match the same reference bucket ID
  */
-namespace DNAValidation {
-    bool is_valid_dna_char(char c) {
-        return (c == 'A' || c == 'T' || c == 'G' || c == 'C' ||
-                c == 'a' || c == 't' || c == 'g' || c == 'c');
-    }
+struct Bucket {
+    int32_t reference_index;        // Index of the reference this bucket corresponds to
+    std::vector<int32_t> query_indices; // Indices of queries in this bucket
+    
+    // Default constructor
+    Bucket() : reference_index(-1) {}
+    
+    // Parameterized constructor
+    Bucket(int32_t ref_idx) : reference_index(ref_idx) {}
+};
 
-    bool validate_sequences(char** sequences, int32_t* lengths, int32_t count) {
-        for (int i = 0; i < count; i++) {
-            if (lengths[i] > DNAConfig::MAX_DNA_LENGTH || lengths[i] <= 0) {
-                std::cerr << "Invalid sequence length: " << lengths[i] 
-                         << " at index " << i << std::endl;
-                return false;
-            }
-
-            for (int j = 0; j < lengths[i]; j++) {
-                if (!is_valid_dna_char(sequences[i][j])) {
-                    std::cerr << "Invalid DNA character '" << sequences[i][j] 
-                             << "' at sequence " << i << ", position " << j << std::endl;
-                    return false;
-                }
-            }
-        }
-        return true;
+/**
+ * @brief Extracts bucket ID from a DNA sequence
+ * @param sequence The DNA sequence to extract from
+ * @param length Length of the sequence
+ * @param extracted_id Output buffer for the extracted subsequence
+ * @param extracted_length Output length of extracted subsequence
+ * @return true if extraction successful, false if sequence too short
+ */
+bool extract_bucket_id(const char* sequence, int32_t length, char* extracted_id, int32_t& extracted_length) {
+    using namespace DNAConfig;
+    
+    if (length <= BUCKET_END_POS || BUCKET_START_POS < 0) {
+        return false; // Sequence too short or invalid positions
     }
+    
+    extracted_length = std::min(BUCKET_ID_LENGTH, length - BUCKET_START_POS);
+    memcpy(extracted_id, sequence + BUCKET_START_POS, extracted_length);
+    extracted_id[extracted_length] = '\0'; // Null terminate
+    
+    return true;
 }
 
 /**
- * @brief DNA-optimized Myers algorithm with 4-letter alphabet
+ * @brief Creates buckets by grouping queries with their nearest reference matches
+ * @param query_sequences Original query sequences
+ * @param reference_sequences Original reference sequences  
+ * @param results Results from nearest neighbor search
+ * @param num_queries Number of queries
+ * @return Vector of buckets grouped by reference match
  */
-event myers_dna_find_nearest_batch(
+std::vector<Bucket> create_buckets(
+    const std::vector<std::string>& query_sequences,
+    const std::vector<std::string>& reference_sequences,
+    const NearestResult* results,
+    int32_t num_queries) {
+    
+    std::map<int32_t, Bucket> bucket_map;
+    
+    // Group queries by their best matching reference
+    for (int32_t i = 0; i < num_queries; i++) {
+        if (results[i].best_match_index >= 0) {
+            int32_t ref_idx = results[i].best_match_index;
+            
+            if (bucket_map.find(ref_idx) == bucket_map.end()) {
+                bucket_map[ref_idx] = Bucket(ref_idx);
+            }
+            
+            bucket_map[ref_idx].query_indices.push_back(i);
+        }
+    }
+    
+    // Convert map to vector
+    std::vector<Bucket> buckets;
+    for (auto& pair : bucket_map) {
+        buckets.push_back(std::move(pair.second));
+    }
+    
+    return buckets;
+}
+
+/**
+ * @brief Batch DNA sequence matching using optimized Myers algorithm
+ * @param q SYCL queue for FPGA device execution
+ * @param query_dna Array of query DNA sequences
+ * @param query_lengths Array of query sequence lengths
+ * @param num_queries Number of query sequences
+ * @param reference_dna Array of reference DNA sequences
+ * @param reference_lengths Array of reference sequence lengths
+ * @param num_references Number of reference sequences
+ * @param results Output array for nearest match results
+ * @return SYCL event for asynchronous execution tracking
+ * 
+ * Implements Myers bit-parallel algorithm with DNA-specific optimizations:
+ * - 2-bit DNA encoding for 4x memory efficiency
+ * - Vectorized bit operations using 256-bit vectors
+ * - FPGA-optimized memory access patterns
+ * - Batch processing for high throughput
+ */
+event myers_find_nearest(
     queue& q,
     char** query_dna, int32_t* query_lengths, int32_t num_queries,
     char** reference_dna, int32_t* reference_lengths, int32_t num_references,
@@ -283,14 +460,14 @@ event myers_dna_find_nearest_batch(
     using namespace DNAConfig;
     using namespace DNAEncoding;
 
-    // Device memory allocation
+    // Device memory allocation in USM
     uint8_t* d_query_packed = malloc_device<uint8_t>(num_queries * MAX_PACKED_LENGTH, q);
     uint8_t* d_ref_packed = malloc_device<uint8_t>(num_references * MAX_PACKED_LENGTH, q);
     int32_t* d_query_lengths = malloc_device<int32_t>(num_queries, q);
     int32_t* d_ref_lengths = malloc_device<int32_t>(num_references, q);
     NearestResult* d_results = malloc_device<NearestResult>(num_queries, q);
 
-    // Host buffer preparation
+    // Host buffer preparation, used as tmp
     std::vector<uint8_t> host_query_buffer(num_queries * MAX_PACKED_LENGTH);
     std::vector<uint8_t> host_ref_buffer(num_references * MAX_PACKED_LENGTH);
 
@@ -318,11 +495,10 @@ event myers_dna_find_nearest_batch(
 
     // Launch optimized kernel
     auto kernel_event = q.submit([&](handler& h) {
-        h.depends_on(copy_events);
+        h.depends_on(copy_events); // wait for all memory copy
         
         h.parallel_for(
-            nd_range<1>(range<1>((num_queries + 3) / 4 * 4), range<1>(4)),
-            [=](nd_item<1> item) {
+            nd_range<1>(range<1>((num_queries + 3) / 4 * 4), range<1>(4)), [=](nd_item<1> item) { // Create enough work groupe (multiple of 4)
                 int global_id = item.get_global_id(0);
                 if (global_id >= num_queries) return;
 
@@ -365,7 +541,7 @@ event myers_dna_find_nearest_batch(
                     }
 
                     // Myers algorithm core
-                    DNABitVector256 Mv(0), Pv;
+                    DNABitVector256 Mv, Pv;
                     Pv.set_all_bits();
 
                     int32_t Score = ref_len;
@@ -416,64 +592,36 @@ event myers_dna_find_nearest_batch(
 }
 
 /**
- * @brief A7SK-optimized DNA sequence matcher
+ * @class A7SK_DNA_Matcher
+ * @brief High-level DNA matcher for Agilex 7 FPGA
+ * 
+ * Handles memory management, optimal tiling, and batch processing
+ * with automatic optimization for A7SK hardware constraints.
  */
 class A7SK_DNA_Matcher {
+
 private:
     queue& fpga_queue;
 
-public:
-    explicit A7SK_DNA_Matcher(queue& q) : fpga_queue(q) {}
-
     /**
-     * @brief Calculate optimal tile sizes for DNA sequences
+     * @brief Internal tiled processing implementation for large datasets
+     * @param query_dna Array of query DNA sequences
+     * @param query_lengths Array of query sequence lengths
+     * @param num_queries Number of query sequences
+     * @param reference_dna Array of reference DNA sequences
+     * @param reference_lengths Array of reference sequence lengths
+     * @param num_references Number of reference sequences
+     * @param results Output array for nearest match results
+     * @param query_tile_size Size of query processing tiles
+     * @param ref_tile_size Size of reference processing tiles
+     * @return SYCL event for execution tracking
+     * 
+     * Implements nested tiling strategy to handle datasets larger than FPGA memory:
+     * - Processes data in manageable chunks
+     * - Maintains global minimum distance tracking
+     * - Optimizes memory bandwidth utilization
      */
-    std::pair<int32_t, int32_t> calculate_optimal_tile_sizes(int32_t num_queries, int32_t num_references) {
-        using namespace DNAConfig;
-        
-        size_t available_memory = A7SK_DEVICE_MEMORY_MB * 1024 * 1024 * SAFETY_MARGIN;
-        
-        // Memory calculations (DNA encoding is 4x more efficient)
-        size_t memory_per_query = (MAX_DNA_LENGTH / 4) + sizeof(NearestResult) + sizeof(int32_t);
-        size_t memory_per_reference = (MAX_DNA_LENGTH / 4) + sizeof(int32_t);
-
-        // Calculate maximum tile sizes
-        int32_t max_query_tile = std::min(num_queries,
-            static_cast<int32_t>(available_memory / (memory_per_query + memory_per_reference * num_references)));
-        int32_t max_ref_tile = std::min(num_references,
-            static_cast<int32_t>((available_memory - max_query_tile * memory_per_query) / memory_per_reference));
-
-        // Apply minimum constraints
-        max_query_tile = std::max(MIN_QUERY_TILE, max_query_tile);
-        max_ref_tile = std::max(MIN_REF_TILE, max_ref_tile);
-
-        return {max_query_tile, max_ref_tile};
-    }
-
-    /**
-     * @brief Find nearest DNA matches with A7SK optimization
-     */
-    event find_nearest_optimized(
-        char** query_dna, int32_t* query_lengths, int32_t num_queries,
-        char** reference_dna, int32_t* reference_lengths, int32_t num_references,
-        NearestResult* results) {
-        
-        auto [optimal_query_tile, optimal_ref_tile] = calculate_optimal_tile_sizes(num_queries, num_references);
-        
-        std::cout << "A7SK DNA Optimization: Using query tiles of " << optimal_query_tile
-                  << " and reference tiles of " << optimal_ref_tile << std::endl;
-
-        return process_tiled_hybrid(
-            query_dna, query_lengths, num_queries,
-            reference_dna, reference_lengths, num_references,
-            results, optimal_query_tile, optimal_ref_tile);
-    }
-
-private:
-    /**
-     * @brief Process DNA matching using tiled approach
-     */
-    event process_tiled_hybrid(
+    event process_tiled(
         char** query_dna, int32_t* query_lengths, int32_t num_queries,
         char** reference_dna, int32_t* reference_lengths, int32_t num_references,
         NearestResult* results, int32_t query_tile_size, int32_t ref_tile_size) {
@@ -483,6 +631,19 @@ private:
             results[i] = NearestResult();
         }
 
+        // Calculate total number of comparisons needed
+        int64_t total_comparisons = static_cast<int64_t>(num_queries) * num_references;
+        int64_t completed_comparisons = 0;
+        
+        std::cout << "Processing with " << ((num_queries + query_tile_size - 1) / query_tile_size) 
+                  << " query tiles x " << ((num_references + ref_tile_size - 1) / ref_tile_size) 
+                  << " reference tiles" << std::endl;
+        std::cout << "Total comparisons needed: " << total_comparisons << std::endl;
+
+        int total_tiles = ((num_queries + query_tile_size - 1) / query_tile_size) * 
+                        ((num_references + ref_tile_size - 1) / ref_tile_size);
+        int processed_tiles = 0;
+
         // Process in nested tiles
         for (int query_start = 0; query_start < num_queries; query_start += query_tile_size) {
             int current_query_size = std::min(query_tile_size, num_queries - query_start);
@@ -490,9 +651,18 @@ private:
             for (int ref_start = 0; ref_start < num_references; ref_start += ref_tile_size) {
                 int current_ref_size = std::min(ref_tile_size, num_references - ref_start);
                 
+                // Calculate comparisons for this tile
+                int64_t tile_comparisons = static_cast<int64_t>(current_query_size) * current_ref_size;
+                
+                std::cout << "\nProcessing tile [" << (query_start / query_tile_size + 1) 
+                          << "," << (ref_start / ref_tile_size + 1) << "] - "
+                          << "Queries " << query_start << "-" << (query_start + current_query_size - 1)
+                          << " vs References " << ref_start << "-" << (ref_start + current_ref_size - 1)
+                          << " (" << tile_comparisons << " comparisons)" << std::endl;
+
                 std::vector<NearestResult> tile_results(current_query_size);
                 
-                myers_dna_find_nearest_batch(
+                myers_find_nearest(
                     fpga_queue,
                     query_dna + query_start, query_lengths + query_start, current_query_size,
                     reference_dna + ref_start, reference_lengths + ref_start, current_ref_size,
@@ -507,24 +677,239 @@ private:
                         results[global_query_idx].best_match_index = ref_start + tile_results[i].best_match_index;
                     }
                 }
+
+                // Update progress tracking
+                completed_comparisons += tile_comparisons;
+                processed_tiles++;
+                
+                double progress_percentage = (static_cast<double>(completed_comparisons) / total_comparisons) * 100.0;
+                int remaining_tiles = total_tiles - processed_tiles;
+                
+                std::cout << "✓ Tile completed - Progress: " << std::fixed << std::setprecision(1) 
+                          << progress_percentage << "% (" << completed_comparisons << "/" << total_comparisons 
+                          << " comparisons) - " << remaining_tiles << " tiles remaining" << std::endl;
             }
         }
 
+        std::cout << "\nProcessing Complete" << std::endl;
+
+        // Dummy task that return immediately a valid event, allowing to maintain the event-based synchronization
         return fpga_queue.submit([&](handler& h) {
             h.single_task([=]() {});
         });
     }
+
+public:
+
+    /**
+     * @brief Constructor for A7SK FPGA-optimized DNA matcher
+     * @param q SYCL queue configured for A7SK FPGA device
+     * Initializes matcher with device-specific optimizations for Agilex 7 architecture
+     */
+    explicit A7SK_DNA_Matcher(queue& q) : fpga_queue(q) {}
+
+    /**
+     * @brief Calculates optimal memory tile sizes for A7SK FPGA constraints
+     * @param num_queries Total number of query sequences
+     * @param num_references Total number of reference sequences
+     * @return Pair containing optimal query and reference tile sizes
+     * 
+     * Analyzes available FPGA memory (1GB with 80% safety margin) and computes
+     * optimal tile sizes to maximize throughput while preventing memory overflow
+     */
+    std::pair<int32_t, int32_t> calculate_optimal_tile_sizes(int32_t num_queries, int32_t num_references) {
+        using namespace DNAConfig;
+        
+        size_t available_memory = A7SK_DEVICE_MEMORY_MB * 1024 * 1024 * SAFETY_MARGIN;
+        
+        // Memory calculations
+        size_t memory_per_query = (MAX_DNA_LENGTH / 4) + sizeof(NearestResult) + sizeof(int32_t);
+        size_t memory_per_reference = (MAX_DNA_LENGTH / 4) + sizeof(int32_t);
+
+        // Calculate maximum tile sizes
+        int32_t max_query_tile = std::min(num_queries, static_cast<int32_t>(available_memory / (memory_per_query + memory_per_reference * num_references)));
+        int32_t max_ref_tile = std::min(num_references, static_cast<int32_t>((available_memory - max_query_tile * memory_per_query) / memory_per_reference));
+
+        // Apply minimum constraints
+        max_query_tile = std::max(MIN_QUERY_TILE, max_query_tile);
+        max_ref_tile = std::max(MIN_REF_TILE, max_ref_tile);
+
+        return {max_query_tile, max_ref_tile};
+    }
+
+    /**
+     * @brief Main entry point for A7SK-optimized DNA sequence matching
+     * @param query_dna Array of query DNA sequences
+     * @param query_lengths Array of query sequence lengths
+     * @param num_queries Number of query sequences
+     * @param reference_dna Array of reference DNA sequences
+     * @param reference_lengths Array of reference sequence lengths
+     * @param num_references Number of reference sequences
+     * @param results Output array for nearest match results
+     * @return SYCL event for execution tracking
+     * 
+     * Automatically determines optimal tiling strategy and executes tiled processing
+     * for maximum A7SK FPGA utilization and memory efficiency
+     */
+    event find_nearest_optimized(
+        char** query_dna, int32_t* query_lengths, int32_t num_queries,
+        char** reference_dna, int32_t* reference_lengths, int32_t num_references,
+        NearestResult* results) {
+        
+        auto [optimal_query_tile, optimal_ref_tile] = calculate_optimal_tile_sizes(num_queries, num_references);
+        
+        std::cout << "\n=== Find Nearest Match ===" << std::endl;
+        std::cout << "Using query tiles of " << optimal_query_tile
+                  << " and reference tiles of " << optimal_ref_tile << std::endl;
+
+        return process_tiled(
+            query_dna, query_lengths, num_queries,
+            reference_dna, reference_lengths, num_references,
+            results, optimal_query_tile, optimal_ref_tile);
+    }
 };
 
-int main() {
+/**
+ * @namespace DNAValidation
+ * @brief Input validation for DNA sequences
+ * 
+ * Validates DNA character sets, sequence lengths, and format requirements
+ * before FPGA processing.
+ */
+namespace DNAValidation {
+
+    /**
+     * @brief Validates if a character is a valid DNA base
+     * @param c Character to validate
+     * @return true if character is A, T, G, C (case-insensitive), false otherwise
+     * Input sanitization for robust DNA sequence processing
+     */
+    bool is_valid_dna_char(char c) {
+        return (c == 'A' || c == 'T' || c == 'G' || c == 'C' || 
+                c == 'a' || c == 't' || c == 'g' || c == 'c');
+    }
+
+    /**
+     * @brief Validates an array of DNA sequences for correctness
+     * @param sequences Array of DNA sequence strings
+     * @param lengths Array of sequence lengths
+     * @param count Number of sequences to validate
+     * @return true if all sequences are valid, false otherwise
+     * Comprehensive validation including length limits and character checking
+     */
+    bool validate_sequences(char** sequences, int32_t* lengths, int32_t count) {
+        for (int i = 0; i < count; i++) {
+
+            if (lengths[i] > DNAConfig::MAX_DNA_LENGTH || lengths[i] <= 0) {
+                std::cerr << "Invalid sequence length: " << lengths[i] << " at index " << i << std::endl;
+                return false;
+            }
+
+            for (int j = 0; j < lengths[i]; j++) {
+                if (!is_valid_dna_char(sequences[i][j])) {
+                    std::cerr << "Invalid DNA character '" << sequences[i][j] << "' at sequence " << i << ", position " << j << std::endl;
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
+namespace DNAFileIO {
+
+    /**
+     * @brief Reads DNA sequences from a text file
+     * @param filename Path to the input file
+     * @param sequences Output vector of DNA sequence strings
+     * @return true if file was read successfully, false otherwise
+     * 
+     * Expected file format:
+     * - One DNA sequence per line
+     * - Lines starting with '#' are treated as comments and ignored
+     * - Empty lines are ignored
+     */
+    bool read_dna_sequences_from_file(const std::string& filename, std::vector<std::string>& sequences) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Cannot open file " << filename << std::endl;
+            return false;
+        }
+        
+        std::string line;
+        sequences.clear();
+        
+        while (std::getline(file, line)) {
+            // Skip empty lines and comments
+            if (line.empty() || line[0] == '#') {
+                continue;
+            }
+            
+            // Remove any trailing whitespace
+            line.erase(line.find_last_not_of(" \t\r\n") + 1);
+            
+            // Validate sequence length
+            if (line.length() > DNAConfig::MAX_DNA_LENGTH) {
+                std::cerr << "Warning: Sequence too long (" << line.length() 
+                         << " chars), truncating to " << DNAConfig::MAX_DNA_LENGTH << std::endl;
+                line = line.substr(0, DNAConfig::MAX_DNA_LENGTH);
+            }
+            
+            sequences.push_back(line);
+        }
+        
+        file.close();
+        
+        if (sequences.empty()) {
+            std::cerr << "Error: No valid sequences found in " << filename << std::endl;
+            return false;
+        }
+        
+        std::cout << "Successfully loaded " << sequences.size() 
+                  << " sequences from " << filename << std::endl;
+        return true;
+    }
+
+    /**
+     * @brief Validates command line arguments for file paths
+     * @param argc Number of command line arguments
+     * @param argv Array of command line argument strings
+     * @param query_file Output parameter for query file path
+     * @param ref_file Output parameter for reference file path
+     * @return true if arguments are valid, false otherwise
+     */
+    bool parse_command_line_args(int argc, char* argv[], std::string& query_file, std::string& ref_file) {
+        if (argc != 3) {
+            std::cerr << "Usage: " << argv[0] << " <query_file.txt> <reference_file.txt>" << std::endl;
+            std::cerr << "Example: " << argv[0] << " queries.txt references.txt" << std::endl;
+            return false;
+        }
+        
+        query_file = argv[1];
+        ref_file = argv[2];
+        
+        return true;
+    }
+}
+
+int main(int argc, char* argv[]) {
     try {
-        // Initialize FPGA queue for A7SK
-        #if FPGA_HARDWARE
-        auto selector = sycl::ext::intel::fpga_selector_v;
-        std::cout << "Targeting A7SK FPGA hardware..." << std::endl;
-        #else
-        auto selector = sycl::ext::intel::fpga_emulator_selector_v;
-        std::cout << "Using FPGA emulator for testing..." << std::endl;
+
+        // Parse command line arguments
+        std::string query_file, reference_file;
+        if (!DNAFileIO::parse_command_line_args(argc, argv, query_file, reference_file)) {
+            return 1;
+        }
+
+        // Choose device
+        #if FPGA_SIMULATOR
+            auto selector = sycl::ext::intel::fpga_simulator_selector_v;
+        #elif FPGA_HARDWARE
+            auto selector = sycl::ext::intel::fpga_selector_v;
+        #elif FPGA_EMULATOR
+            auto selector = sycl::ext::intel::fpga_emulator_selector_v;
+        #else 
+            auto selector = cpu_selector;
         #endif
 
         queue q(selector, [](exception_list el) {
@@ -536,26 +921,52 @@ int main() {
         std::cout << "Running on device: " << q.get_device().get_info<info::device::name>() << std::endl;
 
         // Test data setup
-        std::vector<std::string> query_sequences = {
-            "ATCGATCGATCGATCG",
-            "GGCCTTAAGCCTTAGC", 
-            "AAATTTCCCGGGATCG",
-            "TTGGCCAATTGGCCAA",
-            "CGATCGATCGATCGAT"
-        };
+        std::cout << "\n=== Setup Data ===" << std::endl;
+        std::vector<std::string> query_sequences, reference_database;
+        
+        std::cout << "Loading query sequences..." << std::endl;
+        if (!DNAFileIO::read_dna_sequences_from_file(query_file, query_sequences)) {
+            return 1;
+        }
+        
+        std::cout << "Loading reference sequences..." << std::endl;
+        if (!DNAFileIO::read_dna_sequences_from_file(reference_file, reference_database)) {
+            return 1;
+        }
 
-        std::vector<std::string> reference_database = {
-            "ATCGATCGATCGATCG", "ATCGATCGATCGATCC", "GGCCTTAAGCCTTAGG",
-            "GGCCTTAAGCCTTACC", "AAATTTCCCGGGATCG", "AAATTTCCCGGGATCC",
-            "TTGGCCAATTGGCCAA", "TTGGCCAATTGGCCTT", "CGATCGATCGATCGAT",
-            "CGATCGATCGATCGAA"
-        };
+        // Extract bucket IDs from queries
+        std::cout << "Extracting bucket IDs from position " << DNAConfig::BUCKET_START_POS 
+                << " to " << DNAConfig::BUCKET_END_POS << " (length: " << DNAConfig::BUCKET_ID_LENGTH << ")" << std::endl;
+
+        std::vector<std::string> extracted_queries;
+        std::vector<int32_t> valid_query_indices; // Track which original queries are valid
+        
+        for (size_t i = 0; i < query_sequences.size(); i++) {
+            char extracted_id[DNAConfig::MAX_DNA_LENGTH];
+            int32_t extracted_length;
+            
+            if (extract_bucket_id(query_sequences[i].c_str(), query_sequences[i].length(), 
+                                extracted_id, extracted_length)) {
+                extracted_queries.push_back(std::string(extracted_id, extracted_length));
+                valid_query_indices.push_back(i);
+            } else {
+                std::cout << "Warning: Query " << i << " too short for bucket ID extraction" << std::endl;
+            }
+        }
+        
+        std::cout << "Successfully extracted " << extracted_queries.size() 
+                << " bucket IDs from " << query_sequences.size() << " queries" << std::endl;
+        
+        if (extracted_queries.empty()) {
+            std::cerr << "Error: No valid bucket IDs extracted!" << std::endl;
+            return 1;
+        }
 
         // Prepare data structures
         std::vector<char*> query_ptrs, ref_ptrs;
         std::vector<int32_t> query_lengths, ref_lengths;
         
-        for (auto& seq : query_sequences) {
+        for (auto& seq : extracted_queries) {
             query_ptrs.push_back(const_cast<char*>(seq.c_str()));
             query_lengths.push_back(seq.length());
         }
@@ -566,39 +977,55 @@ int main() {
         }
 
         // Validation
-        if (!DNAValidation::validate_sequences(query_ptrs.data(), query_lengths.data(), query_sequences.size()) ||
+        if (!DNAValidation::validate_sequences(query_ptrs.data(), query_lengths.data(), extracted_queries.size()) ||
             !DNAValidation::validate_sequences(ref_ptrs.data(), ref_lengths.data(), reference_database.size())) {
+            
             std::cerr << "Sequence validation failed!" << std::endl;
             return 1;
         }
 
         // Execute matching
-        std::vector<NearestResult> results(query_sequences.size());
+        std::vector<NearestResult> results(extracted_queries.size());
         A7SK_DNA_Matcher matcher(q);
 
         auto start_time = std::chrono::high_resolution_clock::now();
+
         matcher.find_nearest_optimized(
-            query_ptrs.data(), query_lengths.data(), query_sequences.size(),
+            query_ptrs.data(), query_lengths.data(), extracted_queries.size(),
             ref_ptrs.data(), ref_lengths.data(), reference_database.size(),
             results.data()
         ).wait();
+
+        auto end_time_matcher = std::chrono::high_resolution_clock::now();
+
+        // Create buckets based on matching results
+        std::cout << "\nCreating buckets..." << std::endl;
+    
+        std::vector<NearestResult> original_results(query_sequences.size());
+        for (size_t i = 0; i < valid_query_indices.size(); i++) {
+            original_results[valid_query_indices[i]] = results[i];
+        }
+        
+        std::vector<Bucket> buckets = create_buckets(query_sequences, reference_database, original_results.data(), query_sequences.size());
+
         auto end_time = std::chrono::high_resolution_clock::now();
 
         // Display results
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-        
-        std::cout << "\n=== Nearest Match Results ===" << std::endl;
-        for (size_t i = 0; i < query_sequences.size(); i++) {
-            std::cout << "Query " << i << ": " << query_sequences[i] << std::endl;
-            std::cout << " -> Best match: " << reference_database[results[i].best_match_index]
-                      << " (Index: " << results[i].best_match_index
-                      << ", Distance: " << results[i].min_distance << ")" << std::endl;
-        }
+        auto duration_matcher = std::chrono::duration_cast<std::chrono::microseconds>(end_time_matcher - start_time);
+        auto duration_bucket = std::chrono::duration_cast<std::chrono::microseconds>(end_time - end_time_matcher);
+
+        int64_t total_comparisons = static_cast<int64_t>(query_sequences.size()) * reference_database.size();
+        double avg_time_per_comparison = static_cast<double>(duration_matcher.count()) / total_comparisons;
 
         std::cout << "\n=== Performance Summary ===" << std::endl;
+        std::cout << "Total buckets created: " << buckets.size() << "\n" << std::endl;
         std::cout << "Total execution time: " << duration.count() << " microseconds" << std::endl;
-        std::cout << "Average time per query: " << duration.count() / query_sequences.size() << " µs" << std::endl;
-        std::cout << "A7SK FPGA utilization: Optimized for 2.7M logic elements" << std::endl;
+        std::cout << "Matcher execution time: " << duration_matcher.count() << " microseconds" << std::endl;
+        std::cout << "Bucket regroupement execution time: " << duration_bucket.count() << " microseconds" << std::endl;
+
+        std::cout << "\nAverage time per query: " << duration.count() / query_sequences.size() << " µs" << std::endl;
+        std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs\n" << std::endl;
 
         return 0;
 

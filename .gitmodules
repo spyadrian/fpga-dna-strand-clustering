@@ -1,3 +1,6 @@
 [submodule "external/dataset-generator"]
 	path = external/dataset-generator
 	url = https://gitlab.unige.ch/Michael.ElKharroubi/dataset-generator
+[submodule "oneoligo-a7sk"]
+	path = oneoligo-a7sk
+	url = ssh://git@ssh.hesge.ch:10572/adrian.spycher/oneoligo-a7sk.git

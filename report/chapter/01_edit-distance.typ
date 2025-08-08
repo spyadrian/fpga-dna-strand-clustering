@@ -2,10 +2,6 @@
 
 = The Edit Distance Algorithm
 
-#todo[modify Myers' electrical schematic (name bloc)]
-
-#todo[add wagner_fischer code in annexex (and link it somewhere)]
-
 
 == The distance of Levenshtein
 // - briefly explain what the Levenshtein distance is and why it’s necessary for DNA strand clustering
@@ -182,12 +178,15 @@ for j from 1 to n:
 
 As the algorithm only contains bitwise operations, it is quite easy to represent it with an actual electric schematic.
 Giving a better understanding of it.
+Below is a figure showing the schematic of Myers' algorithm.
+This comes from the paper #emph[High throughput edit distance computation on FPGA-based accelerators using HLS] and differs slightly from the implementation above, among other things in terms of naming conventions.
+It is included here primarily to give an idea of the components that the FPGA will recreate.
 
 // High throughout edit distance computation on FPGA-based accelerators using HLS
 #figure(
-  caption: [Schematic blocks diagram of the Levenshtein (top) and Myers (bottom) cells],
+  caption: [Schematic blocks diagram of Myers' algorithm],
 
-  image("../figure/levenshtein-myers-electrical.png", width: 65%),
+  image("../figure/myers-schematics.png", width: 75%),
 )
 
 Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n times m/w)$, with $w$ being the length of a machine word, and a space complexity of $Omicron(n)$.

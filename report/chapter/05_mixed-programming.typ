@@ -2,7 +2,6 @@
 
 = Programming for Mixed Code with CPU and FPGA
 
-#todo[add compilation flow schema in 5.3]
 
 == Compiling for Mixed Device
 
@@ -73,7 +72,11 @@ This type of compilation was used for compiling the OneJoin implementation, but 
 Since OneMyers only uses a single queue, separate compilation was not necessary in that case.
 
 // https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
-// ...
+#figure(
+  caption: [Schematic of the Compilation Flow],
+
+  image("../figure/compile-flow.png", width: 80%)
+)
 
 // https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(
@@ -83,7 +86,7 @@ Since OneMyers only uses a single queue, separate compilation was not necessary 
 #(1) Generate kernel-cpu.o (object file)
 icpx -fsycl -fPIC -fsycl-targets=spir64 -c kernel-cpu.cpp -o kernel-cpu.o
 #(2) Generate kernel-fpga.a (static lib)
-icpx -fsycl -fintelfpga -fsycl-link=image -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm kernel-fpga.cpp -o kernel-fpga-hw.a
+icpx -fsycl -fintelfpga -fsycl-link=image -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm kernel-fpga.cpp -o kernel-fpga.a
 #(3) Generate executable from main.cpp and both lib and object files
 icpx -fsycl -fintelfpga -o vector-add main.cpp kernel-cpu.o kernel-fpga-hw.a
 ```

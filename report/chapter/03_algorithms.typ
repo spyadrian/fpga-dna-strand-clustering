@@ -2,8 +2,6 @@
 
 = Algorithms: How to solve this Problems
 
-#todo[make illustrate where there is list point (LSH, EmbedJoin)]
-
 #todo[Params OneJoin, talk more about important param and consequence]
 
 #todo[make OneMyers]
@@ -37,6 +35,12 @@ The Hamming distance only counts the number of substitutions, but unlike the Lev
 The CGK embedding, developed by Chakraborty et al., is a method that transforms strings into a different metric space.
 When applied to DNA sequence datasets, the algorithm takes as input a string of length $N$ composed of the four nucleotides $A$, $C$, $G$, and $T$.
 The output of the CGK embedding is a new string three times longer, with length $3N$, which includes the original nucleotide characters along with multiple occurrences of a special padding character $P$.
+
+#figure(
+  caption: [CGK Embedding Example],
+
+  image("../figure/cgk-embedding-example.png", width: 75%),
+)
 
 At each step of the process, the algorithm appends either a character from the input string or the padding character to the output.
 This results in some input characters appearing only once in the output, while others may be repeated randomly several times.

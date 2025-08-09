@@ -1,2 +1,12 @@
 # -- report --
 report/report.pdf
+
+# -- programs --
+*.o
+*.a
+*.cpu
+*.gpu
+*.fpga_emu
+*.fpga_sim
+*.fpga_hw
+*.prj

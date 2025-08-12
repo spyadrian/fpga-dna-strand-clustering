@@ -6,18 +6,17 @@
 == The distance of Levenshtein
 // - briefly explain what the Levenshtein distance is and why it’s necessary for DNA strand clustering
 
-In computer science, the edit distance is a metric that measures the difference between two strings.
-This is done by counting the minimum number of operations needed to transform one string $a$ into another string $b$.
+In computer science, the edit distance is a metric used to measure the difference between two strings by counting the minimum number of operations required to transform one string $a$ into another string $b$.
 This metric is commonly applied in spelling correction tools, where it helps identify and suggest the closest correct word when a misspelling is detected.
 Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different RNA or DNA sequences.
 By doing so, it enables researchers to detect, analyze and study mutations.
 
-There are several types of editing distance that can be categorized according to the operations they support and allow.
-You can see some of those different types on the @fig_tab_edit_distance_types.
+There are several types of edit distance that can be categorized according to the operations they support and allow.
+Some of these types are shown in @fig_tab_edit_distance_types.
 
 // source: link("https://en.wikipedia.org/wiki/Edit_distance", [from en.wikipedia.org, ref. URL04]),
 #figure(
-  caption: [Different types of edit distance and which operations they allowed],
+  caption: [Different types of edit distance and which operations they allow],
 
   table(
     columns: (1fr, auto, auto, auto, auto),
@@ -34,12 +33,12 @@ You can see some of those different types on the @fig_tab_edit_distance_types.
 
 As mentioned in the introduction, DNA is subject to three types of operations: insertion, deletion and substitution.
 These are due to the variability introduced throughout the DNA processing pipeline.
-Only two of these last edit distances achieve the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
+Only two of these edit distances produce the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
 These two differ by the fact that the Damerau-Levenshtein include transpositions in addition to the classical edit operations.
-An operation that does not appear in the modifications that a DNA strands can suffer.
-Thus, it goes without saying that Levenshtein distance is the most appropriate edit distance for our project.
+An operation that does not occur in the modifications DNA strands can undergo.
+Therefore, the Levenshtein distance is the most appropriate edit distance for our project.
 
-The naive recursive approach to compute the Levenshtein distance is given by the @eq_lev_naive.
+The naive recursive approach for computing the Levenshtein distance is given by the @eq_lev_naive.
 
 $
   op("lev")(a, b) = cases(
@@ -56,13 +55,14 @@ $
   )
 $ <eq_lev_naive>
 
-Knowing that $n$ and $m$ are respectively the length of the strings $a$ and $b$.
-That the $op("head")$ function return the first character of a string, and that the $op("tail")$ function return the remaining part of a string after removing the first character.
+Here, $n$ and $m$ are the length of the strings $a$ and $b$, respectively.
+The $op("head")$ function returns the first character of a string, while the $op("tail")$ function returns the remaining part of a string after removing the first character.
 
-As an example, let's consider the following task : correct the word "party" to form the word "park".
-One can easily notice that the Levenshtein distance between these two words is two, meaning it takes two operations to convert one word into the other.
-Here it require to substitute the "t" in "party" with an "k" and to delete the "y" in "parky".
-The next figure represent that.
+// is switching a good word ?
+As an example, let's consider the following task : switching the word "party" to form the word "park".
+The Levenshtein distance between these two words is two, meaning it takes two operations to convert one word into the other.
+In this case, we substitute the "t" in "party" with a "k" and delete the "y" in "parky".
+The figure below illustrates this process.
 
 // https://www.scaler.com/topics/levenshtein-distance-python
 #figure(
@@ -83,11 +83,11 @@ By leveraging bitwise operations, the algorithm efficiently simulates the dynami
 To explain Myers’ algorithm, it is helpful to start with the Wagner-Fischer algorithm.
 The Wagner-Fischer algorithm is the standard dynamic programming technique for calculating the edit distance.
 Dynamic programming works by breaking the problem into smaller sub-problems and solving them one after the other to retrieve the solution from the original problem.
-In Wagner-Fischer, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full string.
+In Wagner-Fischer, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full strings.
 
-The matrix in the @fig_grid_wagner-fischer represents the matrix filled by the Wagner-Fischer algorithm between the words "sitting" and "kitten".
-The highlighted path shows the most optimized path for moving from one string to the other.
-If we want to correct the word "sitting" to "kitten", we can think of a diagonal movement as a substitution (or no operation if the letters are identical), movements to the right as an insertion, and movements downward as a deletion.
+The matrix in @fig_grid_wagner-fischer shows the result of the Wagner-Fischer algorithm applied to the words "sitting" and "kitten".
+The highlighted path shows the most optimized path for transforming one string into the other.
+If we want to correct the word "sitting" to "kitten", a diagonal movement represents substitutions (or no operation if the letters are identical), movements to the right represents insertions, and movements downward represent deletions.
 
 #let path_color = rgb("#C6DBEF");
 // source: link("https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm", [from en.wikipedia.org, ref. URL05]),
@@ -127,8 +127,8 @@ Now, let's look at how Myers went from computing the $n times m$ Wagner-Fischer 
 To do this, we need to understand several key principles derived from the traditional $n times m$ matrix.
 In the Wagner-Fischer algorithm, when optimizing memory space, we note that a column $C_j$ of the matrix can be computed using only the column $C_(j-1)$ that precedes it.
 A related observation is that the difference between adjacent entries in any row or column is either $+1$, $0$, or $-1$.
-Those two observation present a new way of thinking the problem : storing the difference between the columns instead of the value itself.
-This way was found in the 4-Russians algorithm for string comparison.
+Those two observations present a new way of approaching the problem : storing the differences between the columns instead of the values themselves.
+This approach originates from the 4-Russians algorithm for string comparison.
 
 Formally, we have the _horizontal delta_ $Delta h[i, j]$ as $C[i, j] - C[i, j - 1]$ and the _vertical delta_ $Delta v[i, j]$ as $C[i, j] - C[i - 1, j]$ for all $(i, j) in [1, m] times [1, n]$, $C$ being the dynamic programming matrix $C[0 ... m, 0 ... n]$.
 $Delta v$ and $Delta h$ are matrices that represent the traditional Wagner-Fischer matrix, but relative to the preceding cells, vertically or horizontally.

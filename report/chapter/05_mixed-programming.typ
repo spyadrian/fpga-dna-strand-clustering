@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Programming for Mixed Code with CPU and FPGA
+= Heterogeneous Programming with CPU and FPGA
 
 
 == Compiling for Mixed Device
@@ -15,7 +15,7 @@ This requires two compilation passes; one for the host code and one for the devi
   image("../figure/sycl-compiling.png", width: 75%)
 )
 
-This requires having the appropriate backend for the device being programmed.
+Thus, it is necessary to have the appropriate backend for the device being programmed.
 Currently, SYCL supports backends such as OpenCL, CUDA, HIP, OpenMP, and others.
 
 When writing code for multiple different devices, careful attention must be paid to compilation, because some features are not compatible from one backend to another.
@@ -67,7 +67,7 @@ Another reason is that if the FPGA kernel does not change (which is the case mos
 There is also another compilation style using the `-reuse-exe` flag, where the FPGA kernel is not recompile, but this method was not used.
 
 In this compilation flow, the device kernel is compiled first, and then the host source code is compiled and linked against the device kernel (provided as a library).
-Below is an example of separate compilation using `vector-add` example, where two kernel, one CPU and one FPGA, are compiled separately before being linked together.
+Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are compiled separately before being linked together.
 This type of compilation was used for compiling the OneJoin implementation, but not for OneMyers.
 Since OneMyers only uses a single queue, separate compilation was not necessary in that case.
 

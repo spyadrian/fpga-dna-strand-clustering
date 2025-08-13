@@ -70,7 +70,7 @@ To balance precision and recall, LSH typically uses an AND-OR composition: the A
 The AND construction requires agreement on multiple sampled bits.
 For example :
 
-- Define a hash function $f_1(x) = ("bit"_3, "bit"_7)$.
+- Define a hash function $H_1(x) = ("bit"_3, "bit"_7)$.
 - $x$ and $y$ collide only if they match at both positions.
 
 The OR construction uses multiple independent hashes.
@@ -81,6 +81,16 @@ For example:
 
 This approach allows scaling from $Omicron(N^2)$ to near-linear comparisons, as more than 90% of dissimilar pairs are efficiently filtered out before expensive edit-distance calculations are performed.
 This synergy between embedding and LSH makes large-scale sequence analysis manageable.
+
+#figure(
+  caption: [LSH example],
+
+  image("../figure/lsh-schema.png", width: 95%),
+)
+
+The figure above show how the LSH algorithm works.
+A embedded DNA is hash multiple time (AND) giving subsequence of the strand.
+These are compare to others subsequence from other strand, if one of them are equal (OR), the algorithm call a match and put them inside the same bucket.
 
 === EmbedJoin
 

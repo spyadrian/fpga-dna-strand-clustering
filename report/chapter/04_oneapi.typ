@@ -105,10 +105,10 @@ q.submit([&](sycl::handler& h){
 ) <fig_code_sycl-queue>
 
 A queue has an associated device, and any commands enqueued to it will target that device.
-The SYCL runtime will discovers the devices and their platforms that are available in the system.
+The SYCL runtime discovers the set of devices and their platforms that are available in the system.
 
 To simplify the process of traversing the system topology SYCL provides device selectors.
-A device selector is is a callable C++ object that defines a heuristic for scoring devices.
+A device selector is a callable C++ object that defines a heuristic for scoring devices.
 A device selector takes a parameter of type `const device` and assigns it a "score".
 It is used to query all devices and return the one with the highest "score".
 SYCL provides a number of standard device selectors, such as `default_selector_v`, `gpu_selector_v`, etc.

@@ -26,9 +26,8 @@ This microfactory would only be finished after implementing the six steps that c
 )
 
 One of many difficulties this project encounters is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
-After storing the synthetic DNA for the necessary time, it must be read.
-This is done using a nanopore, like the MinION in the @fig_img_MinION, a technology that can read 100 to 200 strands of DNA simultaneously at a cost of 10 percent error.
-In addition to errors due to reading, DNA can also undergo mutations.
+The reading of DNA strands is performed using a nanopore device, such as the MinION shown in @fig_img_MinION, a technology capable of reading 100 to 200 DNA strands simultaneously with an error rate of about 10 percent.
+In addition those errors, DNA can also undergo mutations.
 These errors must then be corrected to maintain data integrity.
 
 // source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),
@@ -40,7 +39,7 @@ These errors must then be corrected to maintain data integrity.
 
 #todo[Is this still real]
 
-To address this issue, engineers at DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
+To address this issue, engineers of DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
 At this stage of the project, sequence assembly becomes essential.
 This seemingly small but crucial step is responsible for clustering strands originating from the same initial sequence.
 
@@ -52,7 +51,7 @@ This seemingly small but crucial step is responsible for clustering strands orig
 
 DNA strand clustering is a well-known problem that generates a lot of scientific debate due to its complexity and importance in the field of DNA data storage and sequencing.
 To achieve clustering, researchers draw parallels with techniques used in spell-checking tools, where differences between two text entries are calculated.
-This metric can be viewed as a score, where a lower value indicates a better result.
+This metric can be viewed as a score, where a lower value indicates a closer match.
 Unlike spell-checking tools, where simple differences can be sufficient, DNA strand clustering faces other challenges.
 Due to the variability introduced throughout the pipeline, DNA strands are not only prone to substitution errors (where one nucleotide is replaced by another) but also to deletion (where one or more nucleotides are missing) and insertion (where extra nucleotides are added).
 To address these alterations, more advanced distance measures must be employed, in our case, the Levenshtein distance.
@@ -68,7 +67,7 @@ This advancement would enable researchers to process and classify vast datasets 
 // - define what was the goal of my semester project
 // - define my new goals/approach
 
-During my semester project, the goal was to find and start implementing the most relevant algorithms for this problems in Very High Speed Integrated Circuit (VHSIC) Hardware Description Language (VHDL).
+During my semester project, the goal was to find and start implementing the most relevant algorithms for this problem in Very High Speed Integrated Circuit (VHSIC) Hardware Description Language (VHDL).
 To achieve this, we began with an initial research phase, which allowed us to identify the most suitable algorithm for calculating the Levenshtein distance: Myers' Bit-parallel Algorithm.
 After fully understanding the algorithm and implementing it in C, the next objective was to implement it in VHDL as part of my Bachelor’s project.
 
@@ -76,6 +75,8 @@ However, one of the main problems with this approach was that, regardless of how
 This poses a significant issue, because as the number of DNA strands $N$ grows large, it quickly becomes impossible to carry out this many comparisons.
 In other words, this approach does not scale well.
 Therefore, another method was implemented instead: the approach used in the OneJoin algorithm, which utilizes a pre-processing step to limit the number of comparisons.
+
+// ADD HERE YERATA
 
 // --- State Objectives or Contributions ---
 // - clearly define the main objectives

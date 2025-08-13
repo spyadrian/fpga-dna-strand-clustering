@@ -24,10 +24,10 @@
     Grouping these copies requires calculating their Levenshtein distance.
     A metric that gives the number of operations required to get from one string $a$ to another string $b$.
     These operations are the same as those that can occur in DNA mutations: substitution, addition, and deletion.
-    In order to handle the largest possible amount of data, the greatest possible speed is required.
+    In order to handle the largest possible amount of data, the highest possible speed is required.
     The goal of this project is to leverage the speed of FPGAs to accelerate this calculation.
     The first step in this project was to find the most viable algorithm for this task.
-    The Myers' bit-parallel algorithm was at first chosen, but after seen a problems caused by this one, the OneJoin algorithm have been choose.
-    This algorithm is implemented in SYCL, a C++ framework that let the user use FPGAs device to optimized some function.
+    The Myers' bit-parallel algorithm was at first chosen, but after having identified a problems caused by this one, the OneJoin algorithm have been chosen.
+    This algorithm is implemented in SYCL, a C++ framework that let the user program FPGAs device to optimized some function thanks to the High-Level Synthesis (HLS) tools.
   ],
 )

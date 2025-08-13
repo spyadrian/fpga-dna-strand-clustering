@@ -8,7 +8,7 @@
 
 In computer science, the edit distance is a metric used to measure the difference between two strings by counting the minimum number of operations required to transform one string $a$ into another string $b$.
 This metric is commonly applied in spelling correction tools, where it helps identify and suggest the closest correct word when a misspelling is detected.
-Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different RNA or DNA sequences.
+Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different DNA sequences.
 By doing so, it enables researchers to detect, analyze and study mutations.
 
 There are several types of edit distance that can be categorized according to the operations they support and allow.

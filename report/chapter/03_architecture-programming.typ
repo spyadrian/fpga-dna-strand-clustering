@@ -56,7 +56,7 @@ It provides root of trust and authentication to verify that bitstreams come from
 The oneAPI Accelerator Support Package (ASP) is a collection of hardware and software components enabling High-Level Design (HLD) workload support.
 HLD abstracts the FPGA hardware and design flow, enabling users to design FPGA custom hardware using familiar programming languages like SYCL and development environments.
 
-This is particularly relevant for the project since it use SYCL to implement the algorithms talk earlier.
+This is particularly relevant for the project since it uses SYCL to implement the algorithms talk earlier.
 The ASP provides the necessary abstraction layer between the SYCL code and the underlying FPGA hardware, allowing to focus on the algorithm implementation rather than low-level hardware details.
 
 === Infrastructure Software

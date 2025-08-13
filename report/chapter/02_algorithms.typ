@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Algorithms: How to solve this Problems
+= Algorithms: How to solve this Problem
 
 #todo[Params OneJoin, talk more about important param and consequence]
 
@@ -11,27 +11,26 @@
 
 == Original Thoughs
 
-The first solution that was considered was to compare all the DNA sequences against each other.
+The first solution considered was to compare all the DNA sequences against each other.
 To do this, Myers' algorithm would be used to obtain the Levenshtein distance.
 If it was below a certain threshold, the two DNA strands being compared would be considered identical (from the same original strand).
 This would group the copies together.
 
-The problem with this approach is that, despite the speed of the comparison itself, it requires performing $(n times (n-1))/2$ comparisons.
-This number of comparisons is simply not scalable, because when dealing with a gigabytes of data, the number of comparisons would explode becoming approximately $5 times 10^14$.
+The problem with this approach is that, despite the speed of each comparisons, it still requires performing $(n times (n-1))/2$ pairwise evaluations.
+This is not scalable, because when working with a gigabytes of data, the number of evaluations would explode becoming approximately $5 times 10^14$.
 
-Let's say we run at $200"Mhz"$, an average FPGA speed, and that we compute one comparison in $Omicron(n)$ using the Myers' algorithm.
-Therefore, a comparison taking $250$ cycles, we will end-up making $1.25 * 10^17$ cycles to compute all the comparisons.
+Let's say we run at $200"Mhz"$, an average FPGA speed, and compute each comparison in $Omicron(n)$ using the Myers' algorithm.
+If one comparison takes $250$ clock cycles, then processing all pairs would require $1.25 * 10^17$ clock cycles.
 It would take : $625'000'000$ seconds, $10'416'666$ minutes, $173'611$ hours, $7'233$ days or about $20$ years.
-Even parallelizing this with a factor of $5$, we would still have to wait $4$ years, which is far too long.
-For this reason, it was decided to use less naive methods with pre-filtering to limit the number of comparisons, while still keeping the comparison step necessary.
+Even by parallelizing this with a factor of $5$, we would still have to wait $4$ years, which is far too long.
 
 
 == OneJoin
 
 OneJoin is an edit similarity join algorithm designed to efficiently handle very large sets of sequences, such as DNA-encoded data.
 Unlike traditional approaches, which rely on exact calculations of the Levenshtein distance between all pairs of sequences.
-OneJoin relies on advanced embeddings and Locality Sensitive Hashing (LSH) techniques to drastically reduce the number of comparisons required.
-OneJoin works in three main stages: Embedding, LSH and the verification.
+OneJoin relies on advanced embeddings and Locality Sensitive Hashing (LSH) techniques to drastically reduce the number of required comparisons.
+OneJoin operates in three main stages: Embedding, LSH and the verification.
 
 === CGK Embedding
 
@@ -40,7 +39,7 @@ The Hamming distance only counts the number of substitutions, but unlike the Lev
 
 The CGK embedding, developed by Chakraborty et al., is a method that transforms strings into a different metric space.
 When applied to DNA sequence datasets, the algorithm takes as input a string of length $N$ composed of the four nucleotides $A$, $C$, $G$, and $T$.
-The output of the CGK embedding is a new string three times longer, with length $3N$, which includes the original nucleotide characters along with multiple occurrences of a special padding character $P$.
+The output of the CGK embedding is a new string three times longer, with length $3N$, containing the original nucleotide characters along with multiple occurrences of a special padding character $P$.
 
 #figure(
   caption: [CGK Embedding Example],
@@ -49,7 +48,7 @@ The output of the CGK embedding is a new string three times longer, with length 
 )
 
 At each step of the process, the algorithm appends either a character from the input string or the padding character to the output.
-This results in some input characters appearing only once in the output, while others may be repeated randomly several times.
+As a result, some input characters appear only once in the output, while others may be repeated randomly several times.
 Using random walk theory, Chakraborty et al. demonstrated that the CGK embedding guarantees that the Hamming distance between the embedded strings is bounded by the square of the edit distance between the original strings.
 
 

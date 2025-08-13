@@ -123,7 +123,7 @@ Another drawback is the memory requirement, as the algorithm needs to store a ma
 This can be optimized to $Omicron(n)$ by storing only the current and previous columns of the matrix.
 Note that the memory will, in any case, become significant when comparing a lot of data simultaneously.
 
-Now, let's look at how Myers went from computing the $n times m$ Wagner-Fischer matrix, to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$, which encodes the divers operation.
+Now, let's look at how Myers went from computing the $n times m$ Wagner-Fischer matrix, to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$, which encodes the various operations.
 To do this, we need to understand several key principles derived from the traditional $n times m$ matrix.
 In the Wagner-Fischer algorithm, when optimizing memory space, we note that a column $C_j$ of the matrix can be computed using only the column $C_(j-1)$ that precedes it.
 A related observation is that the difference between adjacent entries in any row or column is either $+1$, $0$, or $-1$.
@@ -176,14 +176,13 @@ for j from 1 to n:
 
 Since the algorithm only contains bitwise operations, it can be easily represented using an actual electric schematic, which helps in understanding its operation.
 Below is a figure showing the schematic of Myers' algorithm.
-This comes from the paper #emph[High throughput edit distance computation on FPGA-based accelerators using HLS] and differs slightly from the implementation described above, like the naming conventions.
 It is presented here primarily to give an idea of the components that the FPGA will recreate.
 
 // High throughout edit distance computation on FPGA-based accelerators using HLS
 #figure(
-  caption: [Schematic blocks diagram of Myers' algorithm],
+  caption: [Schematic blocks diagram of Myers' algorithm main loop],
 
-  image("../figure/myers-schematics.png", width: 75%),
+  image("../figure/myers-circuit.png", width: 50%),
 )
 
 Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n times m/w)$, where $w$ is the length of a machine word, and a space complexity of $Omicron(n)$.

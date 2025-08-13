@@ -27,7 +27,7 @@ This microfactory would only be finished after implementing the six steps that c
 
 One of many difficulties this project encounters is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
 The reading of DNA strands is performed using a nanopore device, such as the MinION shown in @fig_img_MinION, a technology capable of reading 100 to 200 DNA strands simultaneously with an error rate of about 10 percent.
-In addition those errors, DNA can also undergo mutations.
+In addition to those errors, DNA can also undergo mutations.
 These errors must then be corrected to maintain data integrity.
 
 // source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),

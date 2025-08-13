@@ -24,6 +24,14 @@ Those features are offered thanks to the use of modern C++ features and the help
 Within the oneAPI ecosystem, Intel provides FPGA programming support through tools like the Intel FPGA SDK for OpenCL and the Intel FPGA Add-on for the oneAPI Base Toolkit.
 These tools allow developers to program FPGAs using the DPC++ language.
 Once development is complete, the DPC++ (Data Parallel C++) compiler, in combination with Intel Quartus software and the relevant board support package, efficiently compiles and deploys the code onto the FPGA hardware.
+Below is a level design that show some the design level between oneAPI and Open FPGA Stack.
+
+// https://ofs.github.io/ofs-2024.1-1/hw/common/user_guides/oneapi_asp/ug_oneapi_asp/#12-terminology
+#figure(
+  caption: [High Level Design Tool on OFS Platforms],
+
+  image("../figure/HLD_IntelOFS_Model.png", width: 90%)
+)
 
 
 == SYCL and Data Parallel C++ (DPC++) Overview
@@ -135,13 +143,13 @@ int main(int argc, char *argv[]) {
 === Parrallel For
 
 A key feature of SYCL for enabling efficient parallel processing on heterogeneous hardware such as FPGA, CPU, and GPU is the `parallel_for` construct.
-This construct allows developers to express data-parallel computations in a straightforward manner, where the same kernel function is executed concurrently over a range of data elements.
+This construct allows developers to express data-parallel computations in a straightforward manner, where the same kernel function is executed concurrently across a range of data elements.
 In the context of DNA sequence analysis or similarity joins, `parallel_for` enables the simultaneous processing of multiple sequences, significantly increasing throughput and reducing overall execution time.
 
 When targeting FPGA with DPC++, the `parallel_for` construct is mapped to hardware pipelines by the High-Level Synthesis (HLS) tools.
 This mapping allows FPGA resources to be used efficiently, exploiting spatial parallelism where independent operations are performed simultaneously on different data streams.
 Additionally, SYCL’s memory management features, such as buffers and accessors, ensure that data is automatically transferred between host and device memory, further simplifying the integration of `parallel_for` into complex pipelines.
-You can see how it's being used in the @fig_img_basic-code.
+@fig_img_basic-code illustrates how this construct is used.
 
 === Memory Management
 
@@ -150,13 +158,12 @@ SYCL simplifies this by providing high-level abstractions for data movement and 
 In SYCL there are two models for managing data.
 
 SYCL’s buffer and accessor model enables seamless data sharing between host and device.
-Buffers manage data on the host, and the SYCL runtime automatically handles transfers to and from the device.
-When a kernel is launched, entire runtime ensures all required data is available on the device and synchronizes results back to the host.
-The example @fig_img_basic-code use a memory management with buffers.
+Buffers manage data on the host, while the SYCL runtime automatically handles transfers to and from the device.
+When a kernel is launched, the entire runtime ensures that all required data is available on the device and synchronizes the results back to the host.
+The example in @fig_img_basic-code demonstrates memory management using buffers.
 
-There are multiple type of initiate an accessor according to the ways we want it to access data.
-An accessor is always associated with a command group.
-Thus, we end up with the following connexion :
+There are multiple ways to initialize an accessor, depending on how the data need to be accessed.
+An accessor is always associated with a command group, leading to the following connection :
 
 // source: syclacademy Lesson Materials: Managing Memory
 #figure(
@@ -165,8 +172,8 @@ Thus, we end up with the following connexion :
   image("../figure/buffer-hostmemory-accessor-cg.png", width: 80%)
 )
 
-The buffer being accessed is connected to the accessor according to the way we use data.
-The accessor is connected to the command group using it, to, finally, being connected to the device.
+The buffer being accessed is connected to the accessor based on how the data is used.
+The accessor is linked to the command group that uses it, and finally to the device.
 
 Unified shared memory (USM) provides an alternative pointer-based data management model to the accessor-buffer model.
 USM memory allocations return pointers which are consistent between the host application and kernel functions on a device.
@@ -182,10 +189,6 @@ Its pointer-based API is more familiar to C or C++ programmers.
 The diagram above illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
 This allow pointers to USM allocations to reference the same memory addresses on both sides. 
 USM can be allocated in three different ways : host, device and shared.
-
-- A host allocation is allocated in host memory
-- A device allocation is allocation in device memory
-- A shared allocation is allocated in shared memory and can migrate back and forth
 
 #figure(
   caption: [USM Allocation Types],
@@ -234,8 +237,8 @@ sycl::free(ptrR, q);
 
 === Pragma
 
-In DPC++ programming for FPGAs, pragma directives are special compiler hints used to optimize the hardware implementation of your code.
-They help control how loops and other code structures are translated into FPGA hardware, allowing for better performance and efficient resource use.
+In DPC++ programming for FPGAs, pragma directives are special hints given to the compiler used to optimize the hardware implementation of your code.
+They help control how loops and other code structures are translated into FPGA hardware, allowing for better performance and more efficient use of resources.
 
 A common pragma is `#pragma unroll`, which tells the compiler to fully or partially unroll a loop.
 Loop unrolling can increase parallelism by generating multiple hardware operations for each loop iteration.
@@ -259,4 +262,69 @@ DNABitVector256 operator|(const DNABitVector256& other) const {
 ) <fig_code_USM-example>
 
 This instructs the compiler to replicate the loop body multiple times, effectively executing iterations in parallel on the FPGA.
-Using pragmas strategically is essential for tuning your FPGA design to meet performance goals without wasting resources.
+Using pragmas strategically is essential for tuning an FPGA design to meet performance goals without wasting resources.
+
+A second pragma useful for those type of project is the `#pragma HLS PIPELINE`.
+This pragma is responsible for reducing the initiation interval (II) for a function or loop by permitting multiple operations to run at the same time.
+Let's say we have a function `func` doing three operations: `op_read`, `op_compute` and `op_write`.
+Below is an example of how it would be with and without the pipeline.
+
+// source: https://docs.amd.com/r/en-US/ug1399-vitis-hls (same for dataflow)
+#figure(
+  caption: [Example code for the pipeline pragma],
+
+```cpp
+void func(m, n, o) {
+  #pragma HLS PIPELINE II=1
+
+  for (i = 2; i >= 0; i--) {
+    op_read;
+    op_compute;
+    op_write;
+  }
+}
+```
+)
+
+#figure(
+  caption: [Schema of an Example Code being Execute With and Without the Pipeline Pragma],
+
+  image("../figure/pipeline-schema.png", width: 90%)
+) <fig_img_pipeline-schema>
+
+In @fig_img_pipeline-schema, (A) shows the execution timeline of the `func` function without the pipeline pragma where three clock cycles separate each loop (`II=3`).
+Using the pragma, (B) shows that the clock cycles are now reduce to one (`II=1`).
+
+The DATAFLOW pragma implements task-level pipelining by enabling functions and loops to execute concurrently.
+Thereby increasing the parallelism in the RTL implementation and boosting overall design throughput.
+
+// source: https://docs.amd.com/r/en-US/ug1399-vitis-hls (same for pipeline)
+#figure(
+  caption: [Example code for the dataflow pragma],
+
+```cpp
+void top(a, b, c, d) {
+  #pragma HLS DATAFLOW
+
+  for (i = 2; i >= 0; i--) {
+    func_A(a, b);
+    func_B(c);
+    func_C(d);
+  }
+}
+```
+) <fig_code_dataflow-pragma>
+
+#figure(
+  caption: [Schema of an Example Code being Execute With and Without the dataflow Pragma],
+
+  image("../figure/dataflow-schema.png", width: 90%)
+)
+
+Above, the Figure shows the difference between the execution of the code in @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
+Enabling the dataflow, the code win easily three clock cycles per loop.
+It's important to note that the data dependencies between the function could restrict this.
+For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` completes, which introduces a two-clock-cycle delay per loop iteration.
+This mechanism creates latency between functions but ensures that functions or loops only access data after it has been properly processed.
+
+// say if I use it or not

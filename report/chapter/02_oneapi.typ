@@ -2,15 +2,13 @@
 
 = OneAPI
 
-#todo[Is chapter 2.3 to much a repetition of the rest ?]
-
-Traditionally, programming FPGAs relies on hardware description languages like Verilog HDL or VHDL, which require specifying low-level circuit structure and functionality.
+Traditionally, programming FPGAs relies on hardware description languages like Verilog HDL or VHDL, which require specifying low-level circuit structures and functionalities.
 While powerful, these languages are complex and challenging for most developers, leading to high development costs and steep learning curves.
 High-Level Synthesis (HLS) has emerged as a solution, allowing developers to describe hardware behavior using more familiar languages like C or C++.
 HLS tools then translate this high-level code into register-transfer level designs, simplifying hardware development.
 
-Initially, the task of this project was to implement an algorithm (e.g. The Myers’ Bit-parallel) entirely in VHDL.
-However, because maintaining and transferring this low-level code proved challenging for the client, we decided to shift to an HLS-based approach using oneAPI, making the project more accessible and manageable for future development.
+Initially, the goal of this project was to implement an algorithm (e.g. The Myers’ Bit-parallel) entirely in VHDL.
+However, maintaining and transferring this low-level code proved challenging for the client, so we decided to shift to an HLS-based approach using oneAPI, making the project more accessible and manageable for future development.
 
 
 == oneAPI Overview
@@ -41,14 +39,14 @@ SYCL is designed to enable efficient execution on a wide range of hardware, incl
 )
 
 SYCL works by expressing parallelism through kernels, which are functions executed on the device (such as a GPU or FPGA).
-The runtime manages data transfer between host and device, as well as the scheduling of kernels.
+The runtime manages data transfer between the host and device, as well as the scheduling of kernels.
 SYCL uses modern C++ features, such as templates and lambdas, to define kernels and data management abstractions.
 The programmer writes a single codebase, and SYCL ensures that the appropriate hardware is targeted at runtime, depending on the available devices and configuration.
 
 The Intel® oneAPI DPC++/C++ Compiler is Intel’s implementation of the SYCL standard.
 It optimizes applications for Intel® 64 architectures on Linux and Windows, supporting the latest C and C++ standards.
-Builds upon SYCL by introducing additional extensions and features aimed at optimizing performance and increasing productivity for developers targeting Intel architectures.
-We can say that the DPC++/C++ is contained in the oneAPI framework.
+It builds upon SYCL by introducing additional extensions and features aimed at optimizing performance and increasing productivity for developers targeting Intel architectures.
+The DPC++/C++ Compiler is included as part of the oneAPI framework.
 
 // source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [from khronos.org, ref. URL05]),
 #figure(
@@ -77,9 +75,9 @@ This approach streamlines the adoption of FPGA technology and reduces developmen
 
 == Programming with DPC++
 
-As DPC++ is based on C++ programming language, its syntax and usage look exactly like those in C++.
-The difference occurs when programming with different types of devices.
-Here is a first example of SYCL code, the different elements will be explained in coming sections.
+Since DPC++ is based on the C++ programming language, its syntax and usage are very similar to standard C++.
+The differences arise when programming for different types of devices.
+Below is a first example of SYCL code, with its various elements explained in the following sections.
 
 // source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [ADD SOURCE]),
 #figure(
@@ -90,9 +88,9 @@ Here is a first example of SYCL code, the different elements will be explained i
 
 === Queues and Device Selector
 
-The concept of device code revolves around the use of kernels in DPC++.
+In DPC++, the concept of device code revolves around the use of kernels.
 A kernel is a piece of code that is sent to a device such as a CPU, GPU, or FPGA.
-Is at the moment to send this piece of code that queues come into play.
+It is at the moment of sending this code that queues come into play.
 
 #figure(
   caption: [SYCL `queue` initialization example],
@@ -106,14 +104,14 @@ q.submit([&](sycl::handler& h){
 ```
 ) <fig_code_sycl-queue>
 
-The queue has an associated device that any commands enqueued to it will target.
-The SYCL runtime will discover a set of device and their platforms that are available in the system.
+A queue has an associated device, and any commands enqueued to it will target that device.
+The SYCL runtime will discovers the devices and their platforms that are available in the system.
 
 To simplify the process of traversing the system topology SYCL provides device selectors.
-A device selector is is a callable C++ object which defines a heuristic for scoring devices.
-A device selector takes a parameter of type `const device` and gives it a "score".
+A device selector is is a callable C++ object that defines a heuristic for scoring devices.
+A device selector takes a parameter of type `const device` and assigns it a "score".
 It is used to query all devices and return the one with the highest "score".
-SYCL provides a number of standard device selectors, e.g. `default_selector_v`, `gpu_selector_v`, etc.
+SYCL provides a number of standard device selectors, such as `default_selector_v`, `gpu_selector_v`, etc.
 
 #figure(
   caption: [SYCL device selector example],
@@ -149,22 +147,59 @@ You can see how it's being used in the @fig_img_basic-code.
 
 Memory management is essential for accelerating applications on FPGA and other heterogeneous hardware.
 SYCL simplifies this by providing high-level abstractions for data movement and access, allowing data to be transferred efficiently between the CPU and FPGA without requiring low-level code from the developer.
+In SYCL there are two models for managing data.
 
 SYCL’s buffer and accessor model enables seamless data sharing between host and device.
 Buffers manage data on the host, and the SYCL runtime automatically handles transfers to and from the device.
 When a kernel is launched, entire runtime ensures all required data is available on the device and synchronizes results back to the host.
 The example @fig_img_basic-code use a memory management with buffers.
 
+There are multiple type of initiate an accessor according to the ways we want it to access data.
+An accessor is always associated with a command group.
+Thus, we end up with the following connexion :
+
+// source: syclacademy Lesson Materials: Managing Memory
+#figure(
+  caption: [Buffer Host Memory Accessor CG],
+
+  image("../figure/buffer-hostmemory-accessor-cg.png", width: 80%)
+)
+
+The buffer being accessed is connected to the accessor according to the way we use data.
+The accessor is connected to the command group using it, to, finally, being connected to the device.
+
 Unified shared memory (USM) provides an alternative pointer-based data management model to the accessor-buffer model.
 USM memory allocations return pointers which are consistent between the host application and kernel functions on a device.
 Its pointer-based API is more familiar to C or C++ programmers.
-USM has three different kinds of memory allocation :
+
+// source: syclacademy Lesson Materials: Introduction to USM
+#figure(
+  caption: [Host CPU and Co-processor Sharing a Single Address Space for USM Allocations],
+
+  image("../figure/unified_virtual_address_space.png", width: 75%)
+)
+
+The diagram above illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
+This allow pointers to USM allocations to reference the same memory addresses on both sides. 
+USM can be allocated in three different ways : host, device and shared.
 
 - A host allocation is allocated in host memory
 - A device allocation is allocation in device memory
 - A shared allocation is allocated in shared memory and can migrate back and forth
 
-With our FPGA, only USM was able to work.
+#figure(
+  caption: [USM Allocation Types],
+
+  table(
+    columns: 5,
+    align: (left, left, center + horizon, center + horizon, left),
+    table.header(align(center)[*Type*], align(center)[*Description*], [*Access Host*], [*Access Device*], align(center)[*Nominal Location*]),
+    [device], [device global allocations], [X], [✓], [device],
+    [host], [host allocation], [✓], [✓], [host],
+    [shared], [allocations shared between both], [✓], [✓], [migrates as required],
+  ),
+)
+
 Here is a basic example of the use of USM :
 
 #figure(
@@ -172,11 +207,7 @@ Here is a basic example of the use of USM :
 
 ```cpp
 float a[size], b[size], r[size];
-for (int i = 0; i < size; ++i) {
-  a[i] = static_cast<float>(i);
-  b[i] = static_cast<float>(i);
-  r[i] = 0.0f;
-}
+// init a, b and r with values...
 
 auto q = sycl::queue{usm_selector};
 

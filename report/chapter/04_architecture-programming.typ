@@ -9,6 +9,7 @@
 The Agilex 7 Starter Kit, abbreviated as A7SK, is a development board created by Terasic.
 It leverages the latest Intel (formerly Altera) Agilex 7 SoC FPGA F-Series device, featuring 2.7 million logic elements.
 The board offers multiple interfaces including PCI Express 4.0 x8 and up to 16GB of DDR4 memory to provide optimal acceleration.
+In top of that it provide $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory.
 Additionally, the board includes an FMC+ expansion connector, enabling compatibility with a variety of daughter cards for extended functionality.
 
 The Agilex 7 FPGA fabric delivers 50% higher performance and 40% lower power consumption compared to previous generation devices, making it ideal for demanding workloads.
@@ -80,9 +81,10 @@ Finally, the configuration I used is very close to the one recommended by OFS fo
 Here is a summary table:
 
 #figure(
+  caption: [Versions of components and tools used for FPGA development],
+
   table(
     columns: 2,
-    stroke: 0.5pt,
     align: left,
     table.header([*Component / Tool*], [*Version*]),
     [FPGA Platform], [Agilex® 7 FPGA F-Series Development Kit (2x F-Tile)],
@@ -94,8 +96,7 @@ Here is a summary table:
     [Quartus Prime Pro Edition], [Version 23.2 Pro Edition],
     [Intel® oneAPI Base Toolkit], [2025.0.1],
     [FPGA Support Package], [2025.0.1]
-  ),
-  caption: [Versions of components and tools used for FPGA development]
+  )
 )
 
 These versions were specifically chosen to be compatible with FPGA.

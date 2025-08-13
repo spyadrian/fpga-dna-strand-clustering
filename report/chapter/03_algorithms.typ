@@ -16,7 +16,11 @@ This would group the copies together.
 
 The problem with this approach is that, despite the speed of the comparison itself, it requires performing $(n times (n-1))/2$ comparisons.
 This number of comparisons is simply not scalable, because when dealing with a gigabytes of data, the number of comparisons would explode becoming approximately $5 times 10^14$.
-Let's say we run $100'000$ comparison per seconds, computing every comparisons would take : $5'000'000'000$ seconds, $83'333'333$ minutes, $1'388'888$ hours, $57870$ days or about $158,5$ years.
+
+Let's say we run at $200"Mhz"$, an average FPGA speed, and that we compute one comparison in $Omicron(n)$ using the Myers' algorithm.
+Therefore, a comparison taking $250$ cycles, we will end-up making $1.25 * 10^17$ cycles to compute all the comparisons.
+It would take : $625'000'000$ seconds, $10'416'666$ minutes, $173'611$ hours, $7'233$ days or about $20$ years.
+Even parallelizing this with a factor of $5$, we would still have to wait $4$ years, which is far too long.
 For this reason, it was decided to use less naive methods with pre-filtering to limit the number of comparisons, while still keeping the comparison step necessary.
 
 

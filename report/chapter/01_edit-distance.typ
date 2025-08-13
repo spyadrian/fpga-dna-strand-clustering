@@ -141,16 +141,14 @@ Using several theorems, Myers manages to transform the problem of calculating th
   image("../figure/myers_matrices.png"),
 ) <fig_img_myers_matrices>
 
-To understand where are the bit vectors from, let's see the @fig_img_myers_matrices.
-On the left, the traditional matrix found in Wagner-Fischer and, on the right, the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
-The illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$.
-They represent whether an addition (P) or subtraction (M) of $1$ occurs on a cell.
+To understand the origin of the bit vectors, let's look at @fig_img_myers_matrices.
+On the left, the traditional matrix from the Wagner-Fischer algorithm, and on the right the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
+The illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$, which indicated whether a cell's value should be increased (P) or decreased (M) by $1$.
 They cannot both be true (be equal to $1$) at the same time.
-To represent a row, simply create a bit vector, hence the bit vectors $\Pv$, $\Ph$, $\Mv$, and $\Mh$, where $v$ and $h$ represent the axes where the operation is performed (vertical or horizontal).
+To represent a row, a bit vector is created resulting in the bit vectors $\Pv$, $\Ph$, $\Mv$, and $\Mh$, where $v$ and $h$ represent the axes where the operation is performed (vertical or horizontal).
 To correctly calculate these bit vectors, it is necessary to know whether the current characters are similar or not.
-$\Eq$, a bit vector, is responsible for doing so.
-It represents equality between the characters.
-$\Eq$ can be calculated with a simple comparison, but to save time on the computation of a column of $Omicron(1)$, it is clever to precompile it into a matrix named $P\eq[sigma]$, with $sigma$ being the alphabet over which the two strings originate.
+The bit vector $\Eq$ is responsible for this, representing equality between characters.
+While $\Eq$ can be obtained through a simple comparison, it is more efficient to precompute it in $Omicron(1)$ time for each column by storing it in a matrix $P\eq[sigma]$, where $sigma$ is the alphabet from which the two strings originate.
 
 #figure(
   caption: [Myers' bit-parallel algorithm pseudo-code JS style],
@@ -176,11 +174,10 @@ for j from 1 to n:
 ```
 )
 
-As the algorithm only contains bitwise operations, it is quite easy to represent it with an actual electric schematic.
-Giving a better understanding of it.
+Since the algorithm only contains bitwise operations, it can be easily represented using an actual electric schematic, which helps in understanding its operation.
 Below is a figure showing the schematic of Myers' algorithm.
-This comes from the paper #emph[High throughput edit distance computation on FPGA-based accelerators using HLS] and differs slightly from the implementation above, among other things in terms of naming conventions.
-It is included here primarily to give an idea of the components that the FPGA will recreate.
+This comes from the paper #emph[High throughput edit distance computation on FPGA-based accelerators using HLS] and differs slightly from the implementation described above, like the naming conventions.
+It is presented here primarily to give an idea of the components that the FPGA will recreate.
 
 // High throughout edit distance computation on FPGA-based accelerators using HLS
 #figure(
@@ -189,9 +186,9 @@ It is included here primarily to give an idea of the components that the FPGA wi
   image("../figure/myers-schematics.png", width: 75%),
 )
 
-Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n times m/w)$, with $w$ being the length of a machine word, and a space complexity of $Omicron(n)$.
-As FPGA don't really have limit about the length of a machine word, `w` can be set to the value of `m`, letting the time complexity of the algorithm to $Omicron(n)$.
+Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n times m/w)$, where $w$ is the length of a machine word, and a space complexity of $Omicron(n)$.
+Since FPGA do not have strict limits on the length of a machine word, `w` can be set to the value of `m`, reducing the time complexity to $Omicron(n)$.
 This value is one of the reason we used this algorithm.
-Another reason is the use of binary operations which simplify the complexity of the implementation on FPGA.
-And which speeds up computations since these operations can generally be performed in a single clock cycle.
+Another reason is the use of binary operations which simplify the implementation on FPGA.
+And speed up computations, as these operations can generally be performed in a single clock cycle.
 

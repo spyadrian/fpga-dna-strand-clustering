@@ -6,6 +6,8 @@
 
 #todo[make OneMyers]
 
+#todo[Change link between OneJoin and OneMyers]
+
 
 == Original Thoughs
 

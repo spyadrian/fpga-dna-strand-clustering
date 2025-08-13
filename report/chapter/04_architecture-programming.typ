@@ -8,6 +8,7 @@
 
 The Agilex 7 Starter Kit, abbreviated as A7SK, is a development board created by Terasic.
 It leverages the latest Intel (formerly Altera) Agilex 7 SoC FPGA F-Series device, featuring 2.7 million logic elements.
+It comes with an Hard Processor System (HPS) ARM Cortex-A53 quad-core 64 bits working up to 1,5GHz.
 The board offers multiple interfaces including PCI Express 4.0 x8 and up to 16GB of DDR4 memory to provide optimal acceleration.
 In top of that it provide $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory.
 Additionally, the board includes an FMC+ expansion connector, enabling compatibility with a variety of daughter cards for extended functionality.

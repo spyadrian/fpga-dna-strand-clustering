@@ -36,11 +36,11 @@
 
 #include "chapter/01_edit-distance.typ"
 
-#include "chapter/02_oneapi.typ"
+#include "chapter/02_algorithms.typ"
 
-#include "chapter/03_algorithms.typ"
+#include "chapter/03_architecture-programming.typ"
 
-#include "chapter/04_architecture-programming.typ"
+#include "chapter/04_oneapi.typ"
 
 #include "chapter/05_mixed-programming.typ"
 

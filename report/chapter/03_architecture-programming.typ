@@ -2,8 +2,6 @@
 
 = FPGA : Hardware Architecture and Programming
 
-#todo[look to reduce repetition]
-
 == The Agilex 7 Starter Kits
 
 The Agilex 7 Starter Kit, abbreviated as A7SK, is a development board created by Terasic.

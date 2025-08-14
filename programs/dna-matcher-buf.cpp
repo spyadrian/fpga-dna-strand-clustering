@@ -19,9 +19,10 @@ using namespace sycl;
  * including memory limits, tile sizes, and DNA encoding parameters.
  */
 namespace DNAConfig {
-    static constexpr int MAX_DNA_LENGTH = 1024;                                 // Max DNA length in char (8 bits)
-    static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;          // Max bytes for a packed format DNA 
-    static constexpr int LEVENSHTEIN_THRESHOLD = 3;                             // Maximum distance threshold for final verification
+    static constexpr int MAX_DNA_LENGTH = 1024;                         // Max DNA length in char (8 bits)
+    static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;  // Max bytes for a packed format DNA 
+    static constexpr int MAX_LEVENSHTEIN_DISTANCE = 20;                 // Distance maximale acceptée
+    static constexpr int MIN_LEVENSHTEIN_DISTANCE = 0;                  // Distance minimale pour arrêt précoce}
 }
 
 /**
@@ -346,10 +347,62 @@ namespace DNAEncoding {
  */
 struct NearestResult {
     int32_t min_distance;
-    int32_t best_match_index;
+    int32_t match_count;                // Number of equidistant matches
+    int32_t best_match_indices[16];     // Fixed-size array for matches (adjust size as needed)
+    bool early_termination;             // Ajouter ce flag pour indiquer l'arrêt précoce
+
+    NearestResult() : min_distance(INT_MAX), match_count(0), early_termination(false) {
+        for (int i = 0; i < 16; i++) {
+            best_match_indices[i] = -1;
+        }
+    }
     
-    NearestResult() : min_distance(INT_MAX), best_match_index(-1) {}
+    // Helper method for host-side processing
+    void add_match(int32_t distance, int32_t match_index) {
+        if (distance < min_distance) {
+            min_distance = distance;
+            match_count = 1;
+            best_match_indices[0] = match_index;
+            for (int i = 1; i < 16; i++) {
+                best_match_indices[i] = -1;
+            }
+        } else if (distance == min_distance && match_count < 16) {
+            best_match_indices[match_count] = match_index;
+            match_count++;
+        }
+    }
 };
+
+/**
+* @brief Creates query-reference pairs from equidistant matching results
+* @param bucket_ids Original bucket ID sequences
+* @param reference_sequences Original reference sequences  
+* @param results Results with multiple equidistant matches
+* @param num_bucket_ids Number of bucket IDs
+* @return Vector of query-reference pairs in the format "query;reference"
+*/
+std::vector<std::string> create_query_reference_pairs(
+    const std::vector<std::string>& bucket_ids,
+    const std::vector<std::string>& reference_sequences,
+    const NearestResult* results,
+    int32_t num_bucket_ids) {
+    
+    std::vector<std::string> pairs;
+    
+    for (int32_t i = 0; i < num_bucket_ids; i++) {
+        const auto& result = results[i];
+        
+        // Pour chaque match équidistant, créer une paire
+        for (int32_t j = 0; j < result.match_count && j < 16; j++) {
+            int32_t ref_idx = result.best_match_indices[j];
+            if (ref_idx >= 0 && ref_idx < static_cast<int32_t>(reference_sequences.size())) {
+                pairs.push_back(reference_sequences[ref_idx] + ";" + bucket_ids[i]);
+            }
+        }
+    }
+    
+    return pairs;
+}
 
 /**
  * @struct Bucket
@@ -374,33 +427,33 @@ struct Bucket {
  * @param num_bucket_ids Number of bucket IDs
  * @return Vector of buckets grouped by reference match
  */
-std::vector<Bucket> create_buckets(
-    const std::vector<std::string>& bucket_ids,
-    const std::vector<std::string>& reference_sequences,
-    const NearestResult* results,
-    int32_t num_bucket_ids) {
+// std::vector<Bucket> create_buckets(
+//     const std::vector<std::string>& bucket_ids,
+//     const std::vector<std::string>& reference_sequences,
+//     const NearestResult* results,
+//     int32_t num_bucket_ids) {
 
-    std::map<int32_t, Bucket> bucket_map;
+//     std::map<int32_t, Bucket> bucket_map;
 
-    // Group bucket IDs by their best matching reference
-    for (int32_t i = 0; i < num_bucket_ids; i++) {
-        if (results[i].best_match_index >= 0) {
-            int32_t ref_idx = results[i].best_match_index;
-            if (bucket_map.find(ref_idx) == bucket_map.end()) {
-                bucket_map[ref_idx] = Bucket(ref_idx);
-            }
-            bucket_map[ref_idx].query_indices.push_back(i);
-        }
-    }
+//     // Group bucket IDs by their best matching reference
+//     for (int32_t i = 0; i < num_bucket_ids; i++) {
+//         if (results[i].best_match_index >= 0) {
+//             int32_t ref_idx = results[i].best_match_index;
+//             if (bucket_map.find(ref_idx) == bucket_map.end()) {
+//                 bucket_map[ref_idx] = Bucket(ref_idx);
+//             }
+//             bucket_map[ref_idx].query_indices.push_back(i);
+//         }
+//     }
 
-    // Convert map to vector
-    std::vector<Bucket> buckets;
-    for (auto& pair : bucket_map) {
-        buckets.push_back(std::move(pair.second));
-    }
+//     // Convert map to vector
+//     std::vector<Bucket> buckets;
+//     for (auto& pair : bucket_map) {
+//         buckets.push_back(std::move(pair.second));
+//     }
 
-    return buckets;
-}
+//     return buckets;
+// }
 
 
 /**
@@ -467,7 +520,7 @@ event myers_find_nearest(
         accessor query_lengths_acc = query_lengths_buf.get_access<access::mode::read>(h);
         accessor ref_lengths_acc = ref_lengths_buf.get_access<access::mode::read>(h);
         accessor results_acc = results_buf.get_access<access::mode::write>(h);
-        
+
         h.parallel_for(
             nd_range<1>(range<1>((num_queries + 3) / 4 * 4), range<1>(4)), 
             [=](nd_item<1> item) {
@@ -481,7 +534,13 @@ event myers_find_nearest(
                 int32_t query_len = query_lengths_acc[global_id];
                 
                 int32_t min_distance = INT_MAX;
-                int32_t best_match_idx = -1;
+                int32_t equidistant_matches[16];
+                int32_t match_count = 0;
+                
+                #pragma unroll
+                for (int i = 0; i < 16; i++) {
+                    equidistant_matches[i] = -1;
+                }
                 
                 // Process all references for this query
                 for (int ref_idx = 0; ref_idx < num_references; ref_idx++) {
@@ -557,14 +616,39 @@ event myers_find_nearest(
                         Mv = Ph & Xv;
                     }
                     
-                    if (Score < min_distance) {
-                        min_distance = Score;
-                        best_match_idx = ref_idx;
+                    // Collecter les matches équidistants
+                    if (Score <= min_distance && Score <= MAX_LEVENSHTEIN_DISTANCE) {
+
+                        if (Score == min_distance && match_count < 16) {
+                            // Match équidistant trouvé
+                            equidistant_matches[match_count] = ref_idx;
+                            match_count++;
+                        } else {
+
+                            // Nouvelle distance minimale trouvée
+                            min_distance = Score;
+                            match_count = 1;
+                            equidistant_matches[0] = ref_idx;
+                            // Reset du reste du tableau
+                            #pragma unroll
+                            for (int i = 1; i < 16; i++) {
+                                equidistant_matches[i] = -1;
+                            }
+
+                            if (Score <= MIN_LEVENSHTEIN_DISTANCE) {
+                                break;
+                            }
+                        }
                     }
                 }
                 
                 results_acc[global_id].min_distance = min_distance;
-                results_acc[global_id].best_match_index = best_match_idx;
+                results_acc[global_id].match_count = match_count;
+                results_acc[global_id].early_termination = (min_distance <= MIN_LEVENSHTEIN_DISTANCE);
+                #pragma unroll
+                for (int i = 0; i < 16; i++) {
+                    results_acc[global_id].best_match_indices[i] = equidistant_matches[i];
+                }
             });
     });
     
@@ -617,7 +701,7 @@ public:
         
         std::cout << "\n=== Find Nearest Match ===" << std::endl;
         std::cout << "Processing " << num_queries << " queries against " 
-                << num_references << " references without tiling" << std::endl;
+                << num_references << " references" << std::endl;
         
         return myers_find_nearest(
             fpga_queue,
@@ -855,7 +939,7 @@ int main(int argc, char* argv[]) {
         }
         avg_bucket_size /= bucket_ids.size();
         
-        std::cout << "Bucket ID statistics:" << std::endl;
+        std::cout << "Queries statistics:" << std::endl;
         std::cout << "  Count: " << bucket_ids.size() << std::endl;
         std::cout << "  Min length: " << min_bucket_size << std::endl;
         std::cout << "  Max length: " << max_bucket_size << std::endl;
@@ -896,10 +980,10 @@ int main(int argc, char* argv[]) {
         
         auto end_time_matcher = std::chrono::high_resolution_clock::now();
 
-        // Create buckets based on matching results
-        std::cout << "\nCreating buckets..." << std::endl;
-        std::vector<Bucket> buckets = create_buckets(bucket_ids, reference_database, results.data(), bucket_ids.size());
-        
+        std::cout << "\nCreating query-reference pairs..." << std::endl;
+        std::vector<std::string> pairs = create_query_reference_pairs(
+            bucket_ids, reference_database, results.data(), bucket_ids.size());
+
         auto end_time = std::chrono::high_resolution_clock::now();
 
         // Display results
@@ -910,13 +994,53 @@ int main(int argc, char* argv[]) {
         int64_t total_comparisons = static_cast<int64_t>(bucket_ids.size()) * reference_database.size();
         double avg_time_per_comparison = static_cast<double>(duration_matcher.count()) / total_comparisons;
 
+        int32_t total_references_found = 0;
+        int32_t early_terminations = 0;
+        int32_t queries_without_matches = 0;
+
+        for (size_t i = 0; i < bucket_ids.size(); i++) {
+            total_references_found += results[i].match_count;
+            if (results[i].early_termination) {
+                early_terminations++;
+            }
+            if (results[i].match_count == 0) {
+                queries_without_matches++;
+            }
+        }
+
         std::cout << "\n=== Performance Summary ===" << std::endl;
-        std::cout << "Total buckets created: " << buckets.size() << "\n" << std::endl;
         std::cout << "Total execution time: " << duration.count() << " microseconds" << std::endl;
         std::cout << "Matcher execution time: " << duration_matcher.count() << " microseconds" << std::endl;
         std::cout << "Bucket regroupement execution time: " << duration_bucket.count() << " microseconds" << std::endl;
-        std::cout << "\nAverage time per bucket ID: " << duration.count() / bucket_ids.size() << " µs" << std::endl;
-        std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs\n" << std::endl;
+        std::cout << "Total references found: " << total_references_found << std::endl;
+        std::cout << "Queries with early termination: " << early_terminations << std::endl;
+        std::cout << "Queries without valid matches: " << queries_without_matches << std::endl;
+        std::cout << "\nAverage time per bucket ID: " << duration_matcher.count() / bucket_ids.size() << " µs" << std::endl;
+        std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs" << std::endl;
+
+        std::cout << "\n=== Displaying Results ===" << std::endl;
+        std::cout << "Do you want to display all query-reference pairs? (y/n):";
+        std::string user_input;
+        std::getline(std::cin, user_input);
+
+        if (user_input == "y" || user_input == "Y") {            
+            int displayed_count = 0;
+            
+            for (size_t i = 0; i < bucket_ids.size(); i++) {
+                
+                if (results[i].match_count > 0) {
+                    for (int32_t j = 0; j < results[i].match_count && j < 16; j++) {
+                        int32_t ref_idx = results[i].best_match_indices[j];
+                        if (ref_idx >= 0 && ref_idx < static_cast<int32_t>(reference_database.size())) {
+                            std::cout << reference_database[ref_idx] << ";" << bucket_ids[i] << std::endl;
+                            displayed_count++;
+                        }
+                    }
+                }
+            }
+            
+            std::cout << "Total pairs displayed: " << displayed_count << std::endl;
+        }
 
         return 0;
         

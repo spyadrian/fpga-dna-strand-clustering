@@ -1,3 +1,5 @@
+.vscode
+
 # -- report --
 report/report.pdf
 
@@ -10,3 +12,4 @@ report/report.pdf
 *.fpga_sim
 *.fpga_hw
 *.prj
+.venv

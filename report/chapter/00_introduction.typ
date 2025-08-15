@@ -7,12 +7,10 @@
 // - introduce project
 // - why is DNA strand clustering important?
 
-#todo[why better for DNAMIC + context + yareta]
-
 In recent years, the amount of data has continued to increase to the point where, today, we have huge infrastructures dedicated to information storage.
 These infrastructures are the cause of enormous energy waste.
 However, it's difficult to eliminate them given that sectors such as education, medicine, and others depend on them.
-With today's technology, we are now capable of storing data in synthetic DNA (Deoxyribonucleic acid).
+With today's technology, we are now capable of storing data in synthetic Deoxyribonucleic acid (DNA).
 This method overcomes many of the problems that come with traditional data storage, especially knowing that all data on earth can be stored in a small test tube.
 
 A European project called DNAMIC aims to replace these infrastructures by a mobile, self-contained, future-proof microfactory for DNA data archiving.
@@ -25,6 +23,10 @@ This microfactory would only be finished after implementing the six steps that c
   image("../figure/micro-factory_steps.png")
 )
 
+The first goal of DNAMIC is to archive some of the data from Yareta, the archive portal for Geneva's institutions of higher learning.
+It provides a comprehensive solution for archiving, preserving, and sharing research data for researchers from all Geneva's higher education institutions, including the University of Geneva (UNIGE) and HES-SO Geneva.
+As they are archive and preserve data in the long term, stocking their data in the DNA would be a more sustainable and environmentally friendly solution, replacing much of the energy waste caused by their current data center.
+
 One of many difficulties this project encounters is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
 The reading of DNA strands is performed using a nanopore device, such as the MinION shown in @fig_img_MinION, a technology capable of reading 100 to 200 DNA strands simultaneously with an error rate of about 10 percent.
 In addition to those errors, DNA can also undergo mutations.
@@ -36,8 +38,6 @@ These errors must then be corrected to maintain data integrity.
 
   image("../figure/minION_nanopore.png", width: 50%)
 ) <fig_img_MinION>
-
-#todo[Is this still real]
 
 To address this issue, engineers of DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
 At this stage of the project, sequence assembly becomes essential.
@@ -76,27 +76,19 @@ This poses a significant issue, because as the number of DNA strands $N$ grows l
 In other words, this approach does not scale well.
 Therefore, another method was implemented instead: the approach used in the OneJoin algorithm, which utilizes a pre-processing step to limit the number of comparisons.
 
-// ADD HERE YERATA
-
 // --- State Objectives or Contributions ---
 // - clearly define the main objectives
 // - increase the number of strands handled
 
-#todo[change the part below according to what I'm gonna write]
+This document is organized into three main parts.
+The first part introduces the key technical concepts needed to understand the project.
+The first chapter covers fundamental algorithms like the Levenshtein edit distance and Myers’ Bit-parallel algorithm while the second chapter presents the theoretical solutions for the DNAMIC challenges, including the OneJoin and OneMyers approaches.
 
-To accomplish this goal, the first step is to make an initial research phase.
-This phase will focus on investigating and analyzing various algorithms to determine which one is the most suitable for calculating the Levenshtein distance, taking into account the compatibility of the algorithm with hardware acceleration.
-// It will be explained all along the @chap_algorithm_selection.
+The second part focuses on the technologies used.
+The Chapter three and four details the FPGA hardware architecture and setup, and explains the OneAPI programming framework, highlighting SYCL and the Data Parallel C++.
+A dedicated chapter discusses the practical usage, and the program’s compilation process involving both CPU and FPGA.
 
-The second part of the project involves implementing the most relevant algorithms in C to evaluate their performance.
-This implementation not only allows for in-depth testing, but also allows for benchmarking on real data.
-This makes it easier to analyze the effectiveness of algorithms, compare their performance, and identify potential optimizations.
-// It will be discussed in @chap_implementation_c.
-
-The third part discusses the Very High Speed Integrated Circuit (VHSIC) Hardware Description Language (VHDL) implementation of these algorithms.
-It introduces the general architecture of the project and describes most of the modules.
-For this semester project, only the core module of the project was implemented and therefore described in detail.
-Similarly, the section concerning parallelization will be discussed but has not yet been implemented.
-// This information can be found in the @chap_implementation_vhdl.
-
+The final part presents the project’s implementation and performance results.
+Those last two chapters describe how the algorithms were applied, optimized and analyze.
+The results are discussed in detail and illustrated with graphs to clearly demonstrate the impact of the various optimizations.
 

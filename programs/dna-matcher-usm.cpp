@@ -19,7 +19,7 @@ using namespace sycl;
  * including memory limits, tile sizes, and DNA encoding parameters.
  */
 namespace DNAConfig {
-    static constexpr int MAX_DNA_LENGTH = 1024;                                 // Max DNA length in char (8 bits)
+    static constexpr int MAX_DNA_LENGTH = 32;                                 // Max DNA length in char (8 bits)
     static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;          // Max bytes for a packed format DNA 
     static constexpr size_t A7SK_DEVICE_MEMORY_MB = 1024 * 8;                   // A7SK device RAM ---------------------------------------- TO CHECK !!
     static constexpr double SAFETY_MARGIN = 0.8;                                // Percentage max of RAM 
@@ -45,16 +45,16 @@ enum class DNABase : uint8_t {
 };
 
 /**
- * @class DNABitVector256
+ * @class DNABitVector128
  * @brief FPGA-optimized 256-bit vector for Myers algorithm
  * 
  * Custom bit vector with vectorized operations, optimized memory layout,
  * and unrolled loops for maximum A7SK FPGA performance.
  */
-class DNABitVector256 {
+class DNABitVector128 {
 
 private:
-    static constexpr int NUM_WORDS = 4;                                 // Number of words
+    static constexpr int NUM_WORDS = 2;                                 // Number of words
     static constexpr int BITS_PER_WORD = 64;                            // Bits per word
     static constexpr int TOTAL_BITS = NUM_WORDS * BITS_PER_WORD;        // Total of bits contained
 
@@ -66,7 +66,7 @@ public:
      * @brief Default constructor - initializes all bits to zero
      * Creates a 256-bit vector optimized for DNA sequence operations with 4 64-bit words
      */
-    DNABitVector256() {
+    DNABitVector128() {
         clear();
     }
 
@@ -104,11 +104,11 @@ public:
     /**
      * @brief Bitwise OR operation between two bit vectors
      * @param other The bit vector to OR with this vector
-     * @return New DNABitVector256 containing the OR result
+     * @return New DNABitVector128 containing the OR result
      * Performs element-wise OR across all 4 words with loop unrolling
      */
-    DNABitVector256 operator|(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator|(const DNABitVector128& other) const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -121,11 +121,11 @@ public:
     /**
      * @brief Bitwise AND operation between two bit vectors
      * @param other The bit vector to AND with this vector
-     * @return New DNABitVector256 containing the AND result
+     * @return New DNABitVector128 containing the AND result
      * Essential for Myers algorithm mask operations
      */
-    DNABitVector256 operator&(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator&(const DNABitVector128& other) const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -137,11 +137,11 @@ public:
 
     /**
      * @brief Bitwise NOT operation (complement of all bits)
-     * @return New DNABitVector256 with all bits flipped
+     * @return New DNABitVector128 with all bits flipped
      * Used in Myers algorithm for creating inverse masks
      */
-    DNABitVector256 operator~() const {
-        DNABitVector256 result;
+    DNABitVector128 operator~() const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -154,11 +154,11 @@ public:
     /**
      * @brief Bitwise XOR operation between two bit vectors
      * @param other The bit vector to XOR with this vector
-     * @return New DNABitVector256 containing the XOR result
+     * @return New DNABitVector128 containing the XOR result
      * Critical for Myers algorithm's bit manipulation steps
      */
-    DNABitVector256 operator^(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator^(const DNABitVector128& other) const {
+        DNABitVector128 result;
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             result.words[i] = words[i] ^ other.words[i];
@@ -169,11 +169,11 @@ public:
     /**
      * @brief Left bit shift operation with multi-word handling
      * @param shift Number of positions to shift left (0-255)
-     * @return New DNABitVector256 with bits shifted left
+     * @return New DNABitVector128 with bits shifted left
      * Handles cross-word carries for shifts > 64 bits, essential for Myers progression
      */
-    DNABitVector256 operator<<(int shift) const {
-        DNABitVector256 result;
+    DNABitVector128 operator<<(int shift) const {
+        DNABitVector128 result;
         if (shift >= TOTAL_BITS) return result;
 
         int word_shift = shift >> 6;  // shift / 64
@@ -194,11 +194,11 @@ public:
     /**
      * @brief Binary addition of two bit vectors with carry propagation
      * @param other The bit vector to add to this vector
-     * @return New DNABitVector256 containing the sum
+     * @return New DNABitVector128 containing the sum
      * Used in Myers algorithm for score computation with overflow handling
      */
-    DNABitVector256 operator+(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator+(const DNABitVector128& other) const {
+        DNABitVector128 result;
         uint64_t carry = 0;
         
         #pragma unroll
@@ -410,58 +410,6 @@ std::vector<std::string> create_query_reference_pairs(
 }
 
 /**
- * @struct Bucket
- * @brief Container for queries that match the same reference bucket ID
- */
-struct Bucket {
-    int32_t reference_index;        // Index of the reference this bucket corresponds to
-    std::vector<int32_t> query_indices; // Indices of queries in this bucket
-    
-    // Default constructor
-    Bucket() : reference_index(-1) {}
-    
-    // Parameterized constructor
-    Bucket(int32_t ref_idx) : reference_index(ref_idx) {}
-};
-
-/**
- * @brief Creates buckets by grouping bucket IDs with their nearest reference matches
- * @param bucket_ids Original bucket ID sequences
- * @param reference_sequences Original reference sequences
- * @param results Results from nearest neighbor search
- * @param num_bucket_ids Number of bucket IDs
- * @return Vector of buckets grouped by reference match
- */
-// std::vector<Bucket> create_buckets(
-//     const std::vector<std::string>& bucket_ids,
-//     const std::vector<std::string>& reference_sequences,
-//     const NearestResult* results,
-//     int32_t num_bucket_ids) {
-
-//     std::map<int32_t, Bucket> bucket_map;
-
-//     // Group bucket IDs by their best matching reference
-//     for (int32_t i = 0; i < num_bucket_ids; i++) {
-//         if (results[i].best_match_index >= 0) {
-//             int32_t ref_idx = results[i].best_match_index;
-//             if (bucket_map.find(ref_idx) == bucket_map.end()) {
-//                 bucket_map[ref_idx] = Bucket(ref_idx);
-//             }
-//             bucket_map[ref_idx].query_indices.push_back(i);
-//         }
-//     }
-
-//     // Convert map to vector
-//     std::vector<Bucket> buckets;
-//     for (auto& pair : bucket_map) {
-//         buckets.push_back(std::move(pair.second));
-//     }
-
-//     return buckets;
-// }
-
-
-/**
  * @brief Batch DNA sequence matching using optimized Myers algorithm
  * @param q SYCL queue for FPGA device execution
  * @param query_dna Array of query DNA sequences
@@ -553,7 +501,7 @@ event myers_find_nearest(
                     query_cache.invalidate();
 
                     // Build Peq arrays
-                    DNABitVector256 Peq[4];
+                    DNABitVector128 Peq[4];
                     for (int i = 0; i < ref_len; i += 4) {
                         int bases_to_process = std::min(4, ref_len - i);
                         
@@ -575,19 +523,19 @@ event myers_find_nearest(
                     }
 
                     // Myers algorithm core
-                    DNABitVector256 Mv, Pv;
+                    DNABitVector128 Mv, Pv;
                     Pv.set_all_bits();
 
                     int32_t Score = ref_len;
 
                     for (int i = 0; i < query_len; i++) {
                         uint8_t query_base = get_base_cached(query_packed, i, query_cache);
-                        DNABitVector256 Eq = Peq[query_base];
+                        DNABitVector128 Eq = Peq[query_base];
                         
-                        DNABitVector256 Xv = Eq | Mv;
-                        DNABitVector256 Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;
-                        DNABitVector256 Ph = Mv | ~(Xh | Pv);
-                        DNABitVector256 Mh = Pv & Xh;
+                        DNABitVector128 Xv = Eq | Mv;
+                        DNABitVector128 Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;
+                        DNABitVector128 Ph = Mv | ~(Xh | Pv);
+                        DNABitVector128 Mh = Pv & Xh;
 
                         if (Ph.test_bit(ref_len - 1)) Score++;
                         if (Mh.test_bit(ref_len - 1)) Score--;
@@ -1172,11 +1120,11 @@ int main(int argc, char* argv[]) {
         std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs" << std::endl;
 
         std::cout << "\n=== Displaying Results ===" << std::endl;
-        std::cout << "Do you want to display all query-reference pairs? (y/n):";
-        std::string user_input;
-        std::getline(std::cin, user_input);
+        // std::cout << "Do you want to display all query-reference pairs? (y/n):";
+        // std::string user_input;
+        // std::getline(std::cin, user_input);
 
-        if (user_input == "y" || user_input == "Y") {            
+        // if (user_input == "y" || user_input == "Y") {            
             int displayed_count = 0;
             
             for (size_t i = 0; i < bucket_ids.size(); i++) {
@@ -1193,7 +1141,7 @@ int main(int argc, char* argv[]) {
             }
             
             std::cout << "Total pairs displayed: " << displayed_count << std::endl;
-        }
+        // }
         
         return 0;
         

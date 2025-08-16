@@ -19,7 +19,7 @@ using namespace sycl;
  * including memory limits, tile sizes, and DNA encoding parameters.
  */
 namespace DNAConfig {
-    static constexpr int MAX_DNA_LENGTH = 1024;                         // Max DNA length in char (8 bits)
+    static constexpr int MAX_DNA_LENGTH = 32;                         // Max DNA length in char (8 bits)
     static constexpr int MAX_PACKED_LENGTH = (MAX_DNA_LENGTH + 3) / 4;  // Max bytes for a packed format DNA 
     static constexpr int MAX_LEVENSHTEIN_DISTANCE = 20;                 // Distance maximale acceptée
     static constexpr int MIN_LEVENSHTEIN_DISTANCE = 0;                  // Distance minimale pour arrêt précoce}
@@ -40,16 +40,16 @@ enum class DNABase : uint8_t {
 };
 
 /**
- * @class DNABitVector256
+ * @class DNABitVector128
  * @brief FPGA-optimized 256-bit vector for Myers algorithm
  * 
  * Custom bit vector with vectorized operations, optimized memory layout,
  * and unrolled loops for maximum A7SK FPGA performance.
  */
-class DNABitVector256 {
+class DNABitVector128 {
 
 private:
-    static constexpr int NUM_WORDS = 4;                                 // Number of words
+    static constexpr int NUM_WORDS = 2;                                 // Number of words
     static constexpr int BITS_PER_WORD = 64;                            // Bits per word
     static constexpr int TOTAL_BITS = NUM_WORDS * BITS_PER_WORD;        // Total of bits contained
 
@@ -61,7 +61,7 @@ public:
      * @brief Default constructor - initializes all bits to zero
      * Creates a 256-bit vector optimized for DNA sequence operations with 4 64-bit words
      */
-    DNABitVector256() {
+    DNABitVector128() {
         clear();
     }
 
@@ -89,7 +89,7 @@ public:
     }
 
     /**
-     * @brief Sets all 256 bits to 1 (creates all-ones bit pattern)
+     * @brief Sets all 128 bits to 1 (creates all-ones bit pattern)
      * Optimized for Myers algorithm initialization where all positions start as matches
      */
     void set_all_bits() {
@@ -99,11 +99,11 @@ public:
     /**
      * @brief Bitwise OR operation between two bit vectors
      * @param other The bit vector to OR with this vector
-     * @return New DNABitVector256 containing the OR result
+     * @return New DNABitVector128 containing the OR result
      * Performs element-wise OR across all 4 words with loop unrolling
      */
-    DNABitVector256 operator|(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator|(const DNABitVector128& other) const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -116,11 +116,11 @@ public:
     /**
      * @brief Bitwise AND operation between two bit vectors
      * @param other The bit vector to AND with this vector
-     * @return New DNABitVector256 containing the AND result
+     * @return New DNABitVector128 containing the AND result
      * Essential for Myers algorithm mask operations
      */
-    DNABitVector256 operator&(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator&(const DNABitVector128& other) const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -132,11 +132,11 @@ public:
 
     /**
      * @brief Bitwise NOT operation (complement of all bits)
-     * @return New DNABitVector256 with all bits flipped
+     * @return New DNABitVector128 with all bits flipped
      * Used in Myers algorithm for creating inverse masks
      */
-    DNABitVector256 operator~() const {
-        DNABitVector256 result;
+    DNABitVector128 operator~() const {
+        DNABitVector128 result;
 
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
@@ -149,11 +149,11 @@ public:
     /**
      * @brief Bitwise XOR operation between two bit vectors
      * @param other The bit vector to XOR with this vector
-     * @return New DNABitVector256 containing the XOR result
+     * @return New DNABitVector128 containing the XOR result
      * Critical for Myers algorithm's bit manipulation steps
      */
-    DNABitVector256 operator^(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator^(const DNABitVector128& other) const {
+        DNABitVector128 result;
         #pragma unroll
         for (int i = 0; i < NUM_WORDS; i++) {
             result.words[i] = words[i] ^ other.words[i];
@@ -164,11 +164,11 @@ public:
     /**
      * @brief Left bit shift operation with multi-word handling
      * @param shift Number of positions to shift left (0-255)
-     * @return New DNABitVector256 with bits shifted left
+     * @return New DNABitVector128 with bits shifted left
      * Handles cross-word carries for shifts > 64 bits, essential for Myers progression
      */
-    DNABitVector256 operator<<(int shift) const {
-        DNABitVector256 result;
+    DNABitVector128 operator<<(int shift) const {
+        DNABitVector128 result;
         if (shift >= TOTAL_BITS) return result;
 
         int word_shift = shift >> 6;  // shift / 64
@@ -189,11 +189,11 @@ public:
     /**
      * @brief Binary addition of two bit vectors with carry propagation
      * @param other The bit vector to add to this vector
-     * @return New DNABitVector256 containing the sum
+     * @return New DNABitVector128 containing the sum
      * Used in Myers algorithm for score computation with overflow handling
      */
-    DNABitVector256 operator+(const DNABitVector256& other) const {
-        DNABitVector256 result;
+    DNABitVector128 operator+(const DNABitVector128& other) const {
+        DNABitVector128 result;
         uint64_t carry = 0;
         
         #pragma unroll
@@ -404,77 +404,190 @@ std::vector<std::string> create_query_reference_pairs(
     return pairs;
 }
 
-/**
- * @struct Bucket
- * @brief Container for queries that match the same reference bucket ID
- */
-struct Bucket {
-    int32_t reference_index;        // Index of the reference this bucket corresponds to
-    std::vector<int32_t> query_indices; // Indices of queries in this bucket
-    
-    // Default constructor
-    Bucket() : reference_index(-1) {}
-    
-    // Parameterized constructor
-    Bucket(int32_t ref_idx) : reference_index(ref_idx) {}
-};
+namespace DNAPipeline {
+    using namespace DNAConfig;
+    using namespace DNAEncoding;
 
-/**
- * @brief Creates buckets by grouping bucket IDs with their nearest reference matches
- * @param bucket_ids Original bucket ID sequences
- * @param reference_sequences Original reference sequences
- * @param results Results from nearest neighbor search
- * @param num_bucket_ids Number of bucket IDs
- * @return Vector of buckets grouped by reference match
- */
-// std::vector<Bucket> create_buckets(
-//     const std::vector<std::string>& bucket_ids,
-//     const std::vector<std::string>& reference_sequences,
-//     const NearestResult* results,
-//     int32_t num_bucket_ids) {
+    /**
+     * @struct PrecomputedPeq
+     * @brief Structure contenant les Peq précomputés pour une référence
+     */
+    struct PrecomputedPeq {
+        DNABitVector128 Peq[4];  // Peq pour A, T, G, C
+        int32_t length;
+    };
 
-//     std::map<int32_t, Bucket> bucket_map;
+    /**
+     * @brief Étape 1: Décodage et précomputation des Peq pour toutes les références
+     * @param ref_packed_acc Accesseur vers les références packées
+     * @param ref_lengths_acc Accesseur vers les longueurs des références
+     * @param num_references Nombre de références
+     * @param precomputed_peq Buffer de sortie pour les Peq précomputés
+     */
+    inline void decode_references_and_build_peq(
+        const accessor<uint8_t, 1, access::mode::read>& ref_packed_acc,
+        const accessor<int32_t, 1, access::mode::read>& ref_lengths_acc,
+        int32_t num_references,
+        const accessor<PrecomputedPeq, 1, access::mode::write>& precomputed_peq) {
+        
+        // [[intel::initiation_interval(1)]] // #pragma pipeline II=1
+        for (int ref_idx = 0; ref_idx < num_references; ref_idx++) {
+            PrecomputedPeq peq_data;
+            size_t ref_base_offset = ref_idx * MAX_PACKED_LENGTH;
+            int32_t ref_len = ref_lengths_acc[ref_idx];
+            
+            // Initialiser les Peq
+            for (int base = 0; base < 4; base++) {
+                peq_data.Peq[base].clear();
+            }
+            peq_data.length = ref_len;
+            
+            PackedCache ref_cache;
+            
+            // Construire les Peq pour cette référence
+            // [[intel::initiation_interval(1)]] // #pragma pipeline II=1
+            for (int i = 0; i < ref_len; i += 4) {
+                int bases_to_process = std::min(4, ref_len - i);
+                
+                if (bases_to_process == 4) {
+                    uint8_t packed_byte = ref_packed_acc[ref_base_offset + (i >> 2)];
+                    uint8_t bases[4];
+                    unpack_4_bases(packed_byte, bases);
+                    
+                    #pragma unroll
+                    for (int j = 0; j < 4; j++) {
+                        peq_data.Peq[bases[j]].set_bit(i + j);
+                    }
+                } else {
+                    for (int j = 0; j < bases_to_process; j++) {
+                        int pos = i + j;
+                        int word_start = (pos >> 2) << 2;
+                        
+                        if (!ref_cache.cache_valid || ref_cache.cache_start_pos != word_start) {
+                            ref_cache.cached_word = ref_packed_acc[ref_base_offset + (pos >> 2)];
+                            ref_cache.cache_start_pos = word_start;
+                            ref_cache.cache_valid = true;
+                        }
+                        
+                        int bit_pos = (pos & 3) << 1;
+                        uint8_t base = (ref_cache.cached_word >> bit_pos) & 0b11;
+                        peq_data.Peq[base].set_bit(pos);
+                    }
+                }
+            }
+            
+            precomputed_peq[ref_idx] = peq_data;
+        }
+    }
 
-//     // Group bucket IDs by their best matching reference
-//     for (int32_t i = 0; i < num_bucket_ids; i++) {
-//         if (results[i].best_match_index >= 0) {
-//             int32_t ref_idx = results[i].best_match_index;
-//             if (bucket_map.find(ref_idx) == bucket_map.end()) {
-//                 bucket_map[ref_idx] = Bucket(ref_idx);
-//             }
-//             bucket_map[ref_idx].query_indices.push_back(i);
-//         }
-//     }
+    /**
+     * @brief Étape 2: Décodage d'une query
+     * @param query_packed_acc Accesseur vers les queries packées
+     * @param query_base_offset Offset de base pour cette query
+     * @param query_len Longueur de la query
+     * @param decoded_query Buffer de sortie pour la query décodée
+     */
+    inline void decode_query(
+        const accessor<uint8_t, 1, access::mode::read>& query_packed_acc,
+        size_t query_base_offset,
+        int32_t query_len,
+        uint8_t* decoded_query) {
+        
+        PackedCache query_cache;
+        
+        // [[intel::initiation_interval(1)]] // #pragma pipeline II=1
+        for (int i = 0; i < query_len; i++) {
+            int pos = i;
+            int word_start = (pos >> 2) << 2;
+            
+            if (!query_cache.cache_valid || query_cache.cache_start_pos != word_start) {
+                query_cache.cached_word = query_packed_acc[query_base_offset + (pos >> 2)];
+                query_cache.cache_start_pos = word_start;
+                query_cache.cache_valid = true;
+            }
+            
+            int bit_pos = (pos & 3) << 1;
+            decoded_query[i] = (query_cache.cached_word >> bit_pos) & 0b11;
+        }
+    }
 
-//     // Convert map to vector
-//     std::vector<Bucket> buckets;
-//     for (auto& pair : bucket_map) {
-//         buckets.push_back(std::move(pair.second));
-//     }
+    /**
+     * @brief Étape 3: Exécution de l'algorithme Myers
+     * @param peq Peq précomputé pour la référence
+     * @param decoded_query Query décodée
+     * @param query_len Longueur de la query
+     * @return Distance de Levenshtein calculée
+     */
+    inline int32_t execute_myers_algorithm(
+        const PrecomputedPeq& peq,
+        const uint8_t* decoded_query,
+        int32_t query_len) {
+        
+        DNABitVector128 Mv, Pv;
+        Pv.set_all_bits();
+        int32_t Score = peq.length;
 
-//     return buckets;
-// }
+        // [[intel::initiation_interval(2)]] // #pragma pipeline II=2
+        for (int i = 0; i < query_len; i++) {
+            uint8_t query_base = decoded_query[i];
+            DNABitVector128 Eq = peq.Peq[query_base];
+            
+            DNABitVector128 Xv = Eq | Mv;
+            DNABitVector128 Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;
+            DNABitVector128 Ph = Mv | ~(Xh | Pv);
+            DNABitVector128 Mh = Pv & Xh;
+            
+            if (Ph.test_bit(peq.length - 1)) Score++;
+            if (Mh.test_bit(peq.length - 1)) Score--;
+            
+            Ph = (Ph << 1);
+            Ph.set_bit(0);
+            Mh = Mh << 1;
+            
+            Pv = Mh | ~(Xv | Ph);
+            Mv = Ph & Xv;
+        }
+        
+        return Score;
+    }
 
+    /**
+     * @brief Étape 4: Collection et mise à jour des résultats
+     * @param distance Distance calculée
+     * @param ref_idx Index de la référence
+     * @param result Structure de résultat à mettre à jour
+     */
+    inline void collect_result(
+        int32_t distance,
+        int32_t ref_idx,
+        NearestResult& result) {
+        
+        if (distance <= MAX_LEVENSHTEIN_DISTANCE) {
+            if (distance < result.min_distance) {
+                // Nouvelle distance minimale
+                result.min_distance = distance;
+                result.match_count = 1;
+                result.best_match_indices[0] = ref_idx;
+                
+                #pragma unroll
+                for (int i = 1; i < 16; i++) {
+                    result.best_match_indices[i] = -1;
+                }
+            } else if (distance == result.min_distance && result.match_count < 16) {
+                // Match équidistant
+                result.best_match_indices[result.match_count] = ref_idx;
+                result.match_count++;
+            }
+            
+            if (distance <= MIN_LEVENSHTEIN_DISTANCE) {
+                result.early_termination = true;
+            }
+        }
+    }
 
-/**
-* @brief Batch DNA sequence matching using optimized Myers algorithm with buffers/accessors
-* @param q SYCL queue for FPGA device execution
-* @param query_dna Array of query DNA sequences
-* @param query_lengths Array of query sequence lengths
-* @param num_queries Number of query sequences
-* @param reference_dna Array of reference DNA sequences
-* @param reference_lengths Array of reference sequence lengths
-* @param num_references Number of reference sequences
-* @param results Output array for nearest match results
-* @return SYCL event for asynchronous execution tracking
-*
-* Implements Myers bit-parallel algorithm with DNA-specific optimizations using buffers/accessors:
-* - 2-bit DNA encoding for 4x memory efficiency
-* - Vectorized bit operations using 256-bit vectors
-* - FPGA-optimized memory access patterns
-* - Batch processing for high throughput
-*/
-event myers_find_nearest(
+}
+
+event myers_find_nearest_with_dataflow(
     queue& q,
     char** query_dna, int32_t* query_lengths, int32_t num_queries,
     char** reference_dna, int32_t* reference_lengths, int32_t num_references,
@@ -482,183 +595,114 @@ event myers_find_nearest(
     
     using namespace DNAConfig;
     using namespace DNAEncoding;
-    
-    // Host buffer preparation for packed data
+    using namespace DNAPipeline;
+
+    // Préparation des buffers hosts
     std::vector<uint8_t> host_query_buffer(num_queries * MAX_PACKED_LENGTH);
     std::vector<uint8_t> host_ref_buffer(num_references * MAX_PACKED_LENGTH);
     std::vector<int32_t> host_query_lengths(num_queries);
     std::vector<int32_t> host_ref_lengths(num_references);
-    
-    // Pack all queries
+
+    // Empaquetage des données
     for (int i = 0; i < num_queries; i++) {
         uint8_t* dest = host_query_buffer.data() + i * MAX_PACKED_LENGTH;
         int packed_length;
         pack_sequence(query_dna[i], query_lengths[i], dest, packed_length);
         host_query_lengths[i] = query_lengths[i];
     }
-    
-    // Pack all references
+
     for (int i = 0; i < num_references; i++) {
         uint8_t* dest = host_ref_buffer.data() + i * MAX_PACKED_LENGTH;
         int packed_length;
         pack_sequence(reference_dna[i], reference_lengths[i], dest, packed_length);
         host_ref_lengths[i] = reference_lengths[i];
     }
-    
-    // Create SYCL buffers
+
+    // Création des buffers SYCL
     buffer<uint8_t, 1> query_packed_buf(host_query_buffer.data(), range<1>(num_queries * MAX_PACKED_LENGTH));
     buffer<uint8_t, 1> ref_packed_buf(host_ref_buffer.data(), range<1>(num_references * MAX_PACKED_LENGTH));
     buffer<int32_t, 1> query_lengths_buf(host_query_lengths.data(), range<1>(num_queries));
     buffer<int32_t, 1> ref_lengths_buf(host_ref_lengths.data(), range<1>(num_references));
     buffer<NearestResult, 1> results_buf{range<1>(num_queries)};
-    
-    // Launch optimized kernel with buffers/accessors
-    auto kernel_event = q.submit([&](handler& h) {
-        // Create accessors
-        accessor query_packed_acc = query_packed_buf.get_access<access::mode::read>(h);
+    buffer<PrecomputedPeq, 1> precomputed_peq_buf{range<1>(num_references)};
+
+    // Étape 1: Précomputation des Peq
+    auto precompute_event = q.submit([&](handler& h) {
         accessor ref_packed_acc = ref_packed_buf.get_access<access::mode::read>(h);
-        accessor query_lengths_acc = query_lengths_buf.get_access<access::mode::read>(h);
         accessor ref_lengths_acc = ref_lengths_buf.get_access<access::mode::read>(h);
+        accessor precomputed_peq_acc = precomputed_peq_buf.get_access<access::mode::write>(h);
+
+        h.single_task([=]() {
+            decode_references_and_build_peq(
+                ref_packed_acc, ref_lengths_acc, num_references, precomputed_peq_acc);
+        });
+    });
+
+    // Étape 2-5: Pipeline principal pour chaque query
+    auto pipeline_event = q.submit([&](handler& h) {
+        h.depends_on(precompute_event);
+        
+        accessor query_packed_acc = query_packed_buf.get_access<access::mode::read>(h);
+        accessor query_lengths_acc = query_lengths_buf.get_access<access::mode::read>(h);
+        accessor precomputed_peq_acc = precomputed_peq_buf.get_access<access::mode::read>(h);
         accessor results_acc = results_buf.get_access<access::mode::write>(h);
 
         h.parallel_for(
-            nd_range<1>(range<1>((num_queries + 3) / 4 * 4), range<1>(4)), 
+            nd_range<1>(range<1>((num_queries + 3) / 4 * 4), range<1>(4)),
             [=](nd_item<1> item) {
                 int global_id = item.get_global_id(0);
                 if (global_id >= num_queries) return;
-                
-                PackedCache query_cache, ref_cache;
-                
-                // Calculate base pointer for this query (simulate pointer arithmetic)
+
                 size_t query_base_offset = global_id * MAX_PACKED_LENGTH;
                 int32_t query_len = query_lengths_acc[global_id];
                 
-                int32_t min_distance = INT_MAX;
-                int32_t equidistant_matches[16];
-                int32_t match_count = 0;
+                // Buffer local pour la query décodée
+                uint8_t decoded_query[MAX_DNA_LENGTH];
+                
+                // Étape 2: Décodage de la query
+                decode_query(query_packed_acc, query_base_offset, query_len, decoded_query);
+                
+                // Initialisation du résultat
+                NearestResult result;
+                result.min_distance = INT_MAX;
+                result.match_count = 0;
+                result.early_termination = false;
                 
                 #pragma unroll
                 for (int i = 0; i < 16; i++) {
-                    equidistant_matches[i] = -1;
+                    result.best_match_indices[i] = -1;
                 }
-                
-                // Process all references for this query
+
+                // Pipeline dataflow pour toutes les références
+                #pragma dataflow
                 for (int ref_idx = 0; ref_idx < num_references; ref_idx++) {
-                    size_t ref_base_offset = ref_idx * MAX_PACKED_LENGTH;
-                    int32_t ref_len = ref_lengths_acc[ref_idx];
+                    // Les Peq sont déjà précomputés et stockés en mémoire FPGA
+                    const PrecomputedPeq& peq = precomputed_peq_acc[ref_idx];
                     
-                    // Reset caches for new reference
-                    ref_cache.invalidate();
-                    query_cache.invalidate();
+                    // Étape 3: Exécution de Myers
+                    int32_t distance = execute_myers_algorithm(peq, decoded_query, query_len);
                     
-                    // Build Peq arrays
-                    DNABitVector256 Peq[4];
+                    // Étape 4: Collection des résultats
+                    collect_result(distance, ref_idx, result);
                     
-                    for (int i = 0; i < ref_len; i += 4) {
-                        int bases_to_process = std::min(4, ref_len - i);
-                        if (bases_to_process == 4) {
-                            uint8_t packed_byte = ref_packed_acc[ref_base_offset + (i >> 2)];
-                            uint8_t bases[4];
-                            unpack_4_bases(packed_byte, bases);
-                            #pragma unroll
-                            for (int j = 0; j < 4; j++) {
-                                Peq[bases[j]].set_bit(i + j);
-                            }
-                        } else {
-                            for (int j = 0; j < bases_to_process; j++) {
-                                // Simulate get_base_cached with accessor access
-                                int pos = i + j;
-                                int word_start = (pos >> 2) << 2;
-                                if (!ref_cache.cache_valid || ref_cache.cache_start_pos != word_start) {
-                                    ref_cache.cached_word = ref_packed_acc[ref_base_offset + (pos >> 2)];
-                                    ref_cache.cache_start_pos = word_start;
-                                    ref_cache.cache_valid = true;
-                                }
-                                int bit_pos = (pos & 3) << 1;
-                                uint8_t base = (ref_cache.cached_word >> bit_pos) & 0b11;
-                                Peq[base].set_bit(i + j);
-                            }
-                        }
-                    }
-                    
-                    // Myers algorithm core
-                    DNABitVector256 Mv, Pv;
-                    Pv.set_all_bits();
-                    int32_t Score = ref_len;
-                    
-                    for (int i = 0; i < query_len; i++) {
-                        // Simulate get_base_cached with accessor access for query
-                        int pos = i;
-                        int word_start = (pos >> 2) << 2;
-                        if (!query_cache.cache_valid || query_cache.cache_start_pos != word_start) {
-                            query_cache.cached_word = query_packed_acc[query_base_offset + (pos >> 2)];
-                            query_cache.cache_start_pos = word_start;
-                            query_cache.cache_valid = true;
-                        }
-                        int bit_pos = (pos & 3) << 1;
-                        uint8_t query_base = (query_cache.cached_word >> bit_pos) & 0b11;
-                        
-                        DNABitVector256 Eq = Peq[query_base];
-                        DNABitVector256 Xv = Eq | Mv;
-                        DNABitVector256 Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;
-                        
-                        DNABitVector256 Ph = Mv | ~(Xh | Pv);
-                        DNABitVector256 Mh = Pv & Xh;
-                        
-                        if (Ph.test_bit(ref_len - 1)) Score++;
-                        if (Mh.test_bit(ref_len - 1)) Score--;
-                        
-                        Ph = (Ph << 1);
-                        Ph.set_bit(0);
-                        Mh = Mh << 1;
-                        
-                        Pv = Mh | ~(Xv | Ph);
-                        Mv = Ph & Xv;
-                    }
-                    
-                    // Collecter les matches équidistants
-                    if (Score <= min_distance && Score <= MAX_LEVENSHTEIN_DISTANCE) {
-
-                        if (Score == min_distance && match_count < 16) {
-                            // Match équidistant trouvé
-                            equidistant_matches[match_count] = ref_idx;
-                            match_count++;
-                        } else {
-
-                            // Nouvelle distance minimale trouvée
-                            min_distance = Score;
-                            match_count = 1;
-                            equidistant_matches[0] = ref_idx;
-                            // Reset du reste du tableau
-                            #pragma unroll
-                            for (int i = 1; i < 16; i++) {
-                                equidistant_matches[i] = -1;
-                            }
-
-                            if (Score <= MIN_LEVENSHTEIN_DISTANCE) {
-                                break;
-                            }
-                        }
+                    // Arrêt précoce si distance minimale atteinte
+                    if (result.early_termination) {
+                        break;
                     }
                 }
-                
-                results_acc[global_id].min_distance = min_distance;
-                results_acc[global_id].match_count = match_count;
-                results_acc[global_id].early_termination = (min_distance <= MIN_LEVENSHTEIN_DISTANCE);
-                #pragma unroll
-                for (int i = 0; i < 16; i++) {
-                    results_acc[global_id].best_match_indices[i] = equidistant_matches[i];
-                }
+
+                // Sauvegarde du résultat final
+                results_acc[global_id] = result;
             });
     });
-    
-    // Copy results back to host
+
+    // Copie des résultats vers l'host
     auto copy_event = q.submit([&](handler& h) {
-        h.depends_on(kernel_event);
+        h.depends_on(pipeline_event);
         accessor results_acc = results_buf.get_access<access::mode::read>(h);
         h.copy(results_acc, results);
     });
-    
+
     return copy_event;
 }
 
@@ -670,40 +714,23 @@ event myers_find_nearest(
  * with automatic optimization for A7SK hardware constraints.
  */
 class A7SK_DNA_Matcher {
-
 private:
     queue& fpga_queue;
 
 public:
-
-    /**
-     * @brief Constructor for A7SK FPGA-optimized DNA matcher
-     * @param q SYCL queue configured for A7SK FPGA device
-     * Initializes matcher with device-specific optimizations for Agilex 7 architecture
-     */
     explicit A7SK_DNA_Matcher(queue& q) : fpga_queue(q) {}
 
-    /**
-     * @brief Main entry point for A7SK-optimized DNA sequence matching
-     * @param query_dna Array of query DNA sequences
-     * @param query_lengths Array of query sequence lengths
-     * @param num_queries Number of query sequences
-     * @param reference_dna Array of reference DNA sequences
-     * @param reference_lengths Array of reference sequence lengths
-     * @param num_references Number of reference sequences
-     * @param results Output array for nearest match results
-     * @return SYCL event for execution tracking
-     */
     event find_nearest_optimized(
         char** query_dna, int32_t* query_lengths, int32_t num_queries,
         char** reference_dna, int32_t* reference_lengths, int32_t num_references,
         NearestResult* results) {
         
-        std::cout << "\n=== Find Nearest Match ===" << std::endl;
-        std::cout << "Processing " << num_queries << " queries against " 
-                << num_references << " references" << std::endl;
+        std::cout << "\n=== Find Nearest Match with Dataflow Pipeline ===" << std::endl;
+        std::cout << "Processing " << num_queries << " queries against "
+                  << num_references << " references" << std::endl;
         
-        return myers_find_nearest(
+        // Utilisation de la nouvelle fonction avec pipeline dataflow
+        return myers_find_nearest_with_dataflow(
             fpga_queue,
             query_dna, query_lengths, num_queries,
             reference_dna, reference_lengths, num_references,
@@ -1019,11 +1046,11 @@ int main(int argc, char* argv[]) {
         std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs" << std::endl;
 
         std::cout << "\n=== Displaying Results ===" << std::endl;
-        std::cout << "Do you want to display all query-reference pairs? (y/n):";
-        std::string user_input;
-        std::getline(std::cin, user_input);
+        // std::cout << "Do you want to display all query-reference pairs? (y/n):";
+        // std::string user_input;
+        // std::getline(std::cin, user_input);
 
-        if (user_input == "y" || user_input == "Y") {            
+        // if (user_input == "y" || user_input == "Y") {            
             int displayed_count = 0;
             
             for (size_t i = 0; i < bucket_ids.size(); i++) {
@@ -1040,7 +1067,7 @@ int main(int argc, char* argv[]) {
             }
             
             std::cout << "Total pairs displayed: " << displayed_count << std::endl;
-        }
+        // }
 
         return 0;
         

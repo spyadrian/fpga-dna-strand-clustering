@@ -45,28 +45,28 @@ dna-matcher-usm.fpga_emu: $(USM_SRC)
 fpga-reports: dna-matcher-buf.a dna-matcher-usm.a
 
 dna-matcher-buf.a: $(BUF_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -fsycl-link=early -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -fsycl-link=early -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk -Xsauto-pipeline $< -o $@
 
 dna-matcher-usm.a: $(USM_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -fsycl-link=early -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk_usm $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -fsycl-link=early -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk_usm -Xsauto-pipeline $< -o $@
 
 # FPGA Simulator targets
 fpga_sim: dna-matcher-buf.fpga_sim dna-matcher-usm.fpga_sim
 
 dna-matcher-buf.fpga_sim: $(BUF_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_SIMULATOR -Xsghdl -Xssimulation -Xstarget=a7sk $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_SIMULATOR -Xsghdl -Xssimulation -Xstarget=a7sk -Xsauto-pipeline $< -o $@
 
 dna-matcher-usm.fpga_sim: $(USM_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_SIMULATOR -Xsghdl -Xssimulation -Xstarget=a7sk_usm $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_SIMULATOR -Xsghdl -Xssimulation -Xstarget=a7sk_usm -Xsauto-pipeline $< -o $@
 
 # FPGA Hardware targets (A7SK)
 fpga_hw: dna-matcher-buf.fpga_hw dna-matcher-usm.fpga_hw
 
 dna-matcher-buf.fpga_hw: $(BUF_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_HARDWARE -Xshardware -Xsboard=a7sk -Xsauto-pipeline $< -o $@
 
 dna-matcher-usm.fpga_hw: $(USM_SRC)
-	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm $< -o $@
+	$(CXX) $(BASE_FLAGS) -fintelfpga -DFPGA_HARDWARE -Xshardware -Xstarget=a7sk_usm -Xsauto-pipeline $< -o $@
 
 # Individual file targets
 buf-cpu: dna-matcher-buf.cpu

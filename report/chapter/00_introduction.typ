@@ -31,6 +31,7 @@ One of many difficulties this project encounters is located at a sub-step betwee
 The reading of DNA strands is performed using a nanopore device, such as the MinION shown in @fig_img_MinION, a technology capable of reading 100 to 200 DNA strands simultaneously with an error rate of about 10 percent.
 In addition to those errors, DNA can also undergo mutations.
 These errors must then be corrected to maintain data integrity.
+To address this issue, engineers of DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
 
 // source: link("https://nanoporetech.com/products/sequence/minion", [from nanoporetech.com, ref. URL03]),
 #figure(
@@ -39,7 +40,9 @@ These errors must then be corrected to maintain data integrity.
   image("../figure/minION_nanopore.png", width: 50%)
 ) <fig_img_MinION>
 
-To address this issue, engineers of DNAMIC have chosen to use the PCR technique to generate multiple copies of each DNA strand, enabling error correction in subsequent steps.
+In addition to sequencing errors and mutations, another challenge arises from the order in which the DNA strands are read.
+During the reading process, the fragments can be retrieved in a shuffled or incorrect order, making it impossible to directly reconstruct the original sequence.
+Therefore, before error correction can be applied, the data must first be reassembled to recover the correct sequence.
 At this stage of the project, sequence assembly becomes essential.
 This seemingly small but crucial step is responsible for clustering strands originating from the same initial sequence.
 

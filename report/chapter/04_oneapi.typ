@@ -305,9 +305,9 @@ Thereby increasing the parallelism in the RTL implementation and boosting overal
 ```cpp
 void top(a, b, c, d) {
   for (i = 2; i >= 0; i--) {
-    func_A(a, b);
-    func_B(c);
-    func_C(d);
+    func_A(a, b, i1);
+    func_B(c, i1, i2);
+    func_C(d, i2);
   }
 }
 ```
@@ -321,6 +321,8 @@ void top(a, b, c, d) {
 
 Above, the Figure shows the difference between the execution of the code in @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
 Enabling the dataflow, the code win easily three clock cycles per loop.
+When the dataflow pragma is applied, the HLS tool examines the flow of data between sequential functions or loops and introduces channels (implemented with ping-pong RAMs or FIFOs).
+These channels enable consumer functions or loops to begin execution before the corresponding producer functions or loops have fully completed.
 It's important to note that the data dependencies between the function could restrict this.
 For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` completes, which introduces a two-clock-cycle delay per loop iteration.
 This mechanism creates latency between functions but ensures that functions or loops only access data after it has been properly processed.

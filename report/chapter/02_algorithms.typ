@@ -116,7 +116,7 @@ The verification phase is executed in a straightforward, sequential manner, with
 === Parameters
 
 OneJoin effectiveness depends heavily on several configurable parameters that influence key tradeoffs between performance, accuracy, and coverage.
-The table below summarizes these parameters, their effects on critical metrics, and their default values on the OneJoin paper.
+The table below summarizes these parameters, their effects on critical metrics, and their default values from the OneJoin paper.
 
 #figure(
   caption: [Description of the OneJoin algorithm parameters],
@@ -139,7 +139,7 @@ The table below summarizes these parameters, their effects on critical metrics, 
 )
 
 The next table show their effects on critical metrics.
-It table serves as a reference for tailoring OneJoin to specific datasets, balancing speed and reliability according to application needs (e.g., large-scale DNA storage).
+It serves as a reference for tailoring OneJoin to specific datasets, balancing speed and reliability according to application needs (e.g., large-scale DNA storage).
 
 #figure(
   caption: [Impacts of parameters on algorithm performance and quality],
@@ -205,7 +205,7 @@ make update PARAMS="-DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_N
 )
 
 #emph[Note] : It is worth mentioning that some tests were also performed on larger datasets.
-However, these attempts systematically resulted in one of the following outcomes, suggesting that the work should be limited to the `dna-little-processed` dataset for the moment :
+However, even using the original #emph[oneoligo] code, these attempts systematically resulted in one of the following outcomes, suggesting that the work should be limited to the `dna-little-processed` dataset for the moment :
 - Extremely low coverage
 - No buckets generated
 - System crash, potentially due to an out-of-memory condition

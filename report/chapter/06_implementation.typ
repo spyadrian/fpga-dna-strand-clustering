@@ -107,7 +107,7 @@ DNABitVector128 operator|(const DNABitVector128& other) const {
 === Levenshtein Distance Consideration <chap_imp-levenshtein-dist>
 
 During the comparisons between input tags and reference tags, an early-stopping mechanism was implemented.
-When a comparison return a Levenshtein distance lower than the threshold defined by the constant MIN_LEVENSHTEIN_DISTANCE, the tag is considered to have found its corresponding reference.
+When a comparison return a Levenshtein distance lower than the threshold defined by the constant `MIN_LEVENSHTEIN_DISTANCE`, the tag is considered to have found its corresponding reference.
 At this point, the algorithm stops comparing this tag against the remaining references and moves on to the next tag.
 This slightly speeds up the execution.
 
@@ -130,10 +130,9 @@ In addition to the previously discussed dataflow, two pragmas were added in this
 The unroll pragma was applied to expand loops, such as those used in the DNAEncoding class.
 An example of the use of `#pragma unroll` is shown in @fig_overwritten-or.
 
-Le pragma pipeline est très utile pour réduire la latence de certaine boucle, ainsi que d'optimiser l'utilisation du matériel.
-En activant les pipeline sur Non-task Kernels (`parallel_for`), ...
-
-#todo[voir rapport pour dire quel boucle on été optimisé]
+The pipeline pragma is very useful for reducing the latency of certain loops, as well as for optimizing hardware utilization.
+By enabling pipelining on Non-task Kernels (parallel_for) using the -Xsauto-pipeline flag, several loops were successfully pipelined.
+Those are listed in @chap_res-dna-tag-usage.
 
 
 == OneJoin

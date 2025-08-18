@@ -264,7 +264,7 @@ DNABitVector256 operator|(const DNABitVector256& other) const {
 This instructs the compiler to replicate the loop body multiple times, effectively executing iterations in parallel on the FPGA.
 Using pragmas strategically is essential for tuning an FPGA design to meet performance goals without wasting resources.
 
-A second pragma useful for those type of project is the `#pragma HLS PIPELINE`.
+A second pragma useful for those type of project is the pipeline pragma.
 This pragma is responsible for reducing the initiation interval (II) for a function or loop by permitting multiple operations to run at the same time.
 Let's say we have a function `func` doing three operations: `op_read`, `op_compute` and `op_write`.
 Below is an example of how it would be with and without the pipeline.
@@ -275,8 +275,6 @@ Below is an example of how it would be with and without the pipeline.
 
 ```cpp
 void func(m, n, o) {
-  #pragma HLS PIPELINE II=1
-
   for (i = 2; i >= 0; i--) {
     op_read;
     op_compute;
@@ -294,8 +292,10 @@ void func(m, n, o) {
 
 In @fig_img_pipeline-schema, (A) shows the execution timeline of the `func` function without the pipeline pragma where three clock cycles separate each loop (`II=3`).
 Using the pragma, (B) shows that the clock cycles are now reduce to one (`II=1`).
+To tell the oneAPI DPC++/C++ Compiler to compile the design trying to pipeline loop, the flag `-Xsauto-pipeline` need to be add at the compilation.
+Another way to do it, is by using the `[[intel::initiation_interval(n)]]` attribute to direct the compiler to attempt to set the initiation interval to `n`.
 
-The DATAFLOW pragma implements task-level pipelining by enabling functions and loops to execute concurrently.
+The dataflow pragma implements task-level pipelining by enabling functions and loops to execute concurrently.
 Thereby increasing the parallelism in the RTL implementation and boosting overall design throughput.
 
 // source: https://docs.amd.com/r/en-US/ug1399-vitis-hls (same for pipeline)
@@ -304,8 +304,6 @@ Thereby increasing the parallelism in the RTL implementation and boosting overal
 
 ```cpp
 void top(a, b, c, d) {
-  #pragma HLS DATAFLOW
-
   for (i = 2; i >= 0; i--) {
     func_A(a, b);
     func_B(c);
@@ -327,4 +325,6 @@ It's important to note that the data dependencies between the function could res
 For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` completes, which introduces a two-clock-cycle delay per loop iteration.
 This mechanism creates latency between functions but ensures that functions or loops only access data after it has been properly processed.
 
-// say if I use it or not
+To take advantage of this pragma with the oneAPI DPC++/C++ Compiler, it is not a matter of simply adding a flag or a `#pragma` before a loop, but rather of designing the code in a way that avoids unnecessary data transfers.
+The use of memory buffers/accessors also helps in this regard, as they provide automated and optimized memory access.
+

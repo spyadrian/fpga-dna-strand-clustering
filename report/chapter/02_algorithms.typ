@@ -10,7 +10,7 @@ To do this, Myers' algorithm would be used to obtain the Levenshtein distance.
 If it was below a certain threshold, the two DNA strands being compared would be considered identical (from the same original strand).
 This would group the copies together.
 
-The problem with this approach is that, despite the speed of each comparisons, it still requires performing $(n times (n-1))/2$ pairwise evaluations.
+The problem with this approach is that, despite the speed of each comparison, it still requires performing $(n times (n-1))/2$ pairwise evaluations.
 This is not scalable, because when working with a gigabytes of data, the number of evaluations would explode becoming approximately $5 times 10^14$.
 
 Let's say we run at $200"Mhz"$, an average FPGA speed, and compute each comparison in $Omicron(n)$ using the Myers' algorithm.
@@ -19,7 +19,7 @@ It would take : $625'000'000$ seconds, $10'416'666$ minutes, $173'611$ hours, $7
 Even by parallelizing this with a factor of $5$, we would still have to wait $4$ years, which is far too long.
 
 
-== OneJoin
+== OneJoin <cha_algo-onejoin>
 
 OneJoin is an edit similarity join algorithm designed to efficiently handle very large sets of sequences, such as DNA-encoded data.
 Unlike traditional approaches, which rely on exact calculations of the Levenshtein distance between all pairs of sequences.
@@ -48,11 +48,11 @@ Using random walk theory, Chakraborty et al. demonstrated that the CGK embedding
 
 === Locality Sensitive Hashing (LSH)
 
-An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), well defined for Hamming, can now be used to identify similar strings without doing an exhaustive pair wise search.
+An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), well defined for Hamming, can now be used to identify similar strings without doing an exhaustive pairwise search.
 
 Locality-Sensitive Hashing (LSH) for Hamming distance is a technique that efficiently groups similar strings by mapping them to the same “buckets”.
 The technique relies on bit-sampling: specific bit positions are selected from each string to generate hash values.
-In practice, this means that two strings with a low Hamming distance, meaning differ in only a few positions, are more likely to be hashed into the same bucket.
+In practice, this means that two strings with a low Hamming distance, meaning they differ in only a few positions, are more likely to be hashed into the same bucket.
 For instance :
 
 - Consider two 8-bit DNA sequences: $x = "ATCGATCG"$, $y = "ATCGATCA"$ (differs only in the last character).
@@ -81,9 +81,9 @@ This synergy between embedding and LSH makes large-scale sequence analysis manag
   image("../figure/lsh-schema.png", width: 95%),
 )
 
-The figure above show how the LSH algorithm works.
-A embedded DNA is hash multiple time (AND) giving subsequence of the strand.
-These are compare to others subsequence from other strand, if one of them are equal (OR), the algorithm call a match and put them inside the same bucket.
+The figure above shows how the LSH algorithm works.
+An embedded DNA strand hashed multiple times (AND) giving subsequence of the strand.
+These subsequences are then compared to those from other strands, and if some of them are equal (OR), the algorithm identifies a match and places them in the same bucket.
 
 === EmbedJoin
 
@@ -180,9 +180,8 @@ The details of this dataset are presented in the table below.
     [Substitution %],            [4.63],
     [Deletion %],                [4.22],
     [Insertion %],               [1.47],
-    [Avg. segment length (bp)],  [199.00],
   )
-)
+) <fig_tab-dataset-param>
 
 According to the parameters of this dataset, several parameters of the algorithm were defined, such as NUM_CHAR and $K$.
 The choice of $K$ is critical:
@@ -241,7 +240,7 @@ From paper in reality
 
 Despite the acceleration provided by OneJoin, it was observed during the project that it is not fast enough when it comes to clustering large volumes of data.
 An idea emerged during discussions with the DNAMIC team at UNIGE: namely, to add a large pre-filtering step to the data, in order to divide it into several groups, each containing up to $65,000$ distinct strands.
-These groups would generally contain data originating from the same file, which was archive in DNA format.
+These groups would generally contain data originating from the same file, archived in DNA format.
 
 To achieve this pre-division, the technique involves adding tags at the beginning of the DNA strands.
 These tags must be sufficiently separated in terms of Levenshtein distance so that they can still be identified even in the presence of DNA sequencing errors.
@@ -256,12 +255,12 @@ This script is designed in accordance with the error rate that can be encountere
 The second and final step involves matching each noisy tag to its reference tag, thereby creating a tag pair.
 This comparison is performed between the noisy tag and all reference tags using a SYCL implementation of the Myers’ algorithm.
 During this process, it is possible for a noisy tag to be equidistant from several reference tags.
-In order not to lose information in such cases, all equidistant reference tags are considered as potential candidates.
+To avoid losing information in such cases, all equidistant reference tags are considered as potential candidates.
 Several pairs are thus created and forwarded to the next processing stage.
 Incorrect pairs are generally filtered out later by the OneJoin algorithm.
 
 The final pipeline, combining the Tag Matcher and OneJoin, is illustrated in the diagram below.
-Note that the clustering and recover data step are not discuss in this project.
+Note that the clustering and data recovery steps are not discussed in this project.
 
 #figure(
   caption: [Overall Algorithm Diagram],

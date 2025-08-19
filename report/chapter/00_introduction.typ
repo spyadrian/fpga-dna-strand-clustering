@@ -25,7 +25,7 @@ This microfactory would only be finished after implementing the six steps that c
 
 The first goal of DNAMIC is to archive some of the data from Yareta, the archive portal for Geneva's institutions of higher learning.
 It provides a comprehensive solution for archiving, preserving, and sharing research data for researchers from all Geneva's higher education institutions, including the University of Geneva (UNIGE) and HES-SO Geneva.
-As they are archive and preserve data in the long term, stocking their data in the DNA would be a more sustainable and environmentally friendly solution, replacing much of the energy waste caused by their current data center.
+Since Yareta's mission is to archive and preserve data in the long term, storing their data in the DNA would be a more sustainable and environmentally friendly solution, reducing much of the energy waste caused by their current data center.
 
 One of many difficulties this project encounters is located at a sub-step between the sequencing and decoding steps, that we can call the sequence assembly.
 The reading of DNA strands is performed using a nanopore device, such as the MinION shown in @fig_img_MinION, a technology capable of reading 100 to 200 DNA strands simultaneously with an error rate of about 10 percent.

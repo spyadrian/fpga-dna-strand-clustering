@@ -24,7 +24,7 @@ Those features are offered thanks to the use of modern C++ features and the help
 Within the oneAPI ecosystem, Intel provides FPGA programming support through tools like the Intel FPGA SDK for OpenCL and the Intel FPGA Add-on for the oneAPI Base Toolkit.
 These tools allow developers to program FPGAs using the DPC++ language.
 Once development is complete, the DPC++ (Data Parallel C++) compiler, in combination with Intel Quartus software and the relevant board support package, efficiently compiles and deploys the code onto the FPGA hardware.
-Below is a level design that show some the design level between oneAPI and Open FPGA Stack.
+Below is a diagram illustrating some of the design layers between oneAPI and the Open FPGA Stack.
 
 // https://ofs.github.io/ofs-2024.1-1/hw/common/user_guides/oneapi_asp/ug_oneapi_asp/#12-terminology
 #figure(
@@ -264,8 +264,8 @@ DNABitVector256 operator|(const DNABitVector256& other) const {
 This instructs the compiler to replicate the loop body multiple times, effectively executing iterations in parallel on the FPGA.
 Using pragmas strategically is essential for tuning an FPGA design to meet performance goals without wasting resources.
 
-A second pragma useful for those type of project is the pipeline pragma.
-This pragma is responsible for reducing the initiation interval (II) for a function or loop by permitting multiple operations to run at the same time.
+A second pragma useful for this type of project is the pipeline pragma.
+This pragma is responsible for reducing the initiation interval (II) for a function or loop by allowing multiple operations to run at the same time.
 Let's say we have a function `func` doing three operations: `op_read`, `op_compute` and `op_write`.
 Below is an example of how it would be with and without the pipeline.
 
@@ -285,7 +285,7 @@ void func(m, n, o) {
 )
 
 #figure(
-  caption: [Schema of an Example Code being Execute With and Without the Pipeline Pragma],
+  caption: [Schema of an Example Code being Executed With and Without the Pipeline Pragma],
 
   image("../figure/pipeline-schema.png", width: 90%)
 ) <fig_img_pipeline-schema>
@@ -314,17 +314,17 @@ void top(a, b, c, d) {
 ) <fig_code_dataflow-pragma>
 
 #figure(
-  caption: [Schema of an Example Code being Execute With and Without the dataflow Pragma],
+  caption: [Schema of an Example Code being Executed With and Without the dataflow Pragma],
 
   image("../figure/dataflow-schema.png", width: 90%)
 )
 
-Above, the Figure shows the difference between the execution of the code in @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
-Enabling the dataflow, the code win easily three clock cycles per loop.
+The Figure above shows the difference between the execution of the code in @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
 When the dataflow pragma is applied, the HLS tool examines the flow of data between sequential functions or loops and introduces channels (implemented with ping-pong RAMs or FIFOs).
 These channels enable consumer functions or loops to begin execution before the corresponding producer functions or loops have fully completed.
-It's important to note that the data dependencies between the function could restrict this.
-For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` completes, which introduces a two-clock-cycle delay per loop iteration.
+Here it save up to three clock cycles per loop.
+It's important to note that the data dependencies between functions can limit this optimization.
+For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` has completed, introducing a two-clock-cycle delay per loop iteration.
 This mechanism creates latency between functions but ensures that functions or loops only access data after it has been properly processed.
 
 To take advantage of this pragma with the oneAPI DPC++/C++ Compiler, it is not a matter of simply adding a flag or a `#pragma` before a loop, but rather of designing the code in a way that avoids unnecessary data transfers.

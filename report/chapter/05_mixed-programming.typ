@@ -16,9 +16,9 @@ This requires two compilation passes; one for the host code and one for the devi
 )
 
 Thus, it is necessary to have the appropriate backend for the device being programmed.
-Currently, SYCL supports backends such as OpenCL, CUDA, HIP, OpenMP, and others.
+SYCL currently supports backends such as OpenCL, CUDA, HIP, OpenMP, and others.
 
-When writing code for multiple different devices, careful attention must be paid to compilation, because some features are not compatible from one backend to another.
+When writing code for multiple devices, it is important to ensure proper compilation, since some features are not compatible from one backend to another.
 Sometimes, it is necessary to separate the compilation processes in order to produce static or dynamic libraries, which are then assembled to create a fat binary.
 A fat binary is a host executable that includes embedded device code for one or more target devices.
 This is especially the case for FPGA compilation.
@@ -61,15 +61,13 @@ The typical workflow for FPGA development involves going through all the differe
 
 == Compilation Flow
 
-During compilation for both the CPU and FPGA, a separate compilation was performed.
-One reason for this is the incompatibility between the flags required for the CPU and those needed for the FPGA during compilation.
-Another reason is that if the FPGA kernel does not change (which is the case most of the time), it is not necessary to recompile it with the rest of the code if it has already been compiled separately.
-There is also another compilation style using the `-reuse-exe` flag, where the FPGA kernel is not recompile, but this method was not used.
+To compile both CPU and FPGA, it was necessary to separate the code in two different files.
+One reason for this is the incompatibility between the compilation flags required for the CPU and those needed for the FPGA.
+Another reason is efficiency: if the FPGA kernel does not change (which is often the case most), it is not necessary to recompile it with the rest of the code.
 
-In this compilation flow, the device kernel is compiled first, and then the host source code is compiled and linked against the device kernel (provided as a library).
-Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are compiled separately before being linked together.
-This type of compilation was used for compiling the OneJoin implementation, but not for OneMyers.
-Since OneMyers only uses a single queue, separate compilation was not necessary in that case.
+In this compilation flow, the devices kernel are build first, after which the host source code is compiled and linked with the device kernel (provided as a library).
+Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are build separately before being linked together.
+This type of compilation was used for compiling the OneJoin implementation, but not for the DNA Tag Matcher, since it only uses a single queue.
 
 // https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(

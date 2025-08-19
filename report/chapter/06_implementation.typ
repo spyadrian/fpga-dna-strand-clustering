@@ -169,6 +169,8 @@ This fork enabled the development of a hybrid CPU–FPGA architecture, and is in
 
 === Part Parralelisé
 
+#todo[TODO]
+
 - quelle partie
 - pourquoi
 - montrer tableau ?

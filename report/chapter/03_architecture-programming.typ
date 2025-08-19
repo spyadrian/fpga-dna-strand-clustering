@@ -8,8 +8,8 @@ The Agilex 7 Starter Kit, abbreviated as A7SK, is a development board created by
 It leverages the latest Intel (formerly Altera) Agilex 7 SoC FPGA F-Series device, featuring 2.7 million logic elements.
 It comes with an Hard Processor System (HPS) ARM Cortex-A53 quad-core 64 bits working up to 1,5GHz.
 The board offers multiple interfaces including PCI Express 4.0 x8 and up to 16GB of DDR4 memory to provide optimal acceleration.
-In top of that it provide $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory.
-Additionally, the board includes an FMC+ expansion connector, enabling compatibility with a variety of daughter cards for extended functionality.
+In top of that it provides $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory.
+Additionally, the board includes an FMC+ expansion connector, ensuring compatibility with a variety of daughter cards for extended functionality.
 
 The Agilex 7 FPGA fabric delivers 50% higher performance and 40% lower power consumption compared to previous generation devices, making it ideal for demanding workloads.
 The board also supports Intel's oneAPI and OpenCL frameworks, allowing developers to easily customize hardware acceleration workloads.
@@ -43,26 +43,26 @@ Think of the FIM as the operating system for the FPGA, it handles all the low-le
 These reference FIMs are provided as working examples to help users develop their own custom platforms.
 
 The Accelerator Functional Unit (AFU) is the dedicated region where custom workload implementations are deployed.
-This is where the OneJoin algorithm would be implement.
+This is where the OneJoin algorithm would be implemented.
 The AFU includes partial reconfiguration (PR) regions for dynamic programming, meaning you can update your algorithm implementation without reconfiguring the entire FPGA.
 
-Essentially, the AFU is the computational heart of your FPGA design, it performs the actual data processing work, while the FIM handles all the platform-specific interfaces and communication protocols.
+Essentially, the AFU is the computational heart of the FPGA design, performing the actual data processing work, while the FIM handles all the platform-specific interfaces and communication protocols.
 
-The Board Management Controller (BMC) is responsible for controlling, monitoring, and granting access to board features like power management, thermal monitoring, and others.
-It provides root of trust and authentication to verify that bitstreams come from a trusted source.
+The Board Management Controller (BMC) is responsible for controlling, monitoring, and granting access to board features such as power management, thermal monitoring, and more.
+It provides a root of trust and conducts authentication to verify that bitstreams come from a trusted source.
 
 The oneAPI Accelerator Support Package (ASP) is a collection of hardware and software components enabling High-Level Design (HLD) workload support.
-HLD abstracts the FPGA hardware and design flow, enabling users to design FPGA custom hardware using familiar programming languages like SYCL and development environments.
+HLD abstracts the FPGA hardware and design flow, allowing users to create custom FPGA custom hardware using familiar programming languages like SYCL and development environments.
 
-This is particularly relevant for the project since it uses SYCL to implement the algorithms talk earlier.
+This is particularly relevant for the project since it uses SYCL to implement the algorithms discussed earlier.
 The ASP provides the necessary abstraction layer between the SYCL code and the underlying FPGA hardware, allowing to focus on the algorithm implementation rather than low-level hardware details.
 
 === Infrastructure Software
 
-The open-source kernel drivers provide a layer that decomposes implemented functionality into sets of individual device features.
-These drivers handle the low-level communication between your host system and the FPGA hardware.
+The open-source kernel drivers provide a layer that decomposes the implemented functionality into sets of individual device features.
+These drivers handle the low-level communication between the host system and the FPGA hardware.
 The DFL kernel drivers represent a specialized layer of the Linux kernel.
-It defines a list structure of feature headers within the device MMIO (Memory-Mapped Input/Output) space, creating an extensible way of adding and discovering FPGA features.
+They define a structured list of feature headers within the device's MMIO (Memory-Mapped Input/Output) space, creating an extensible way of adding and discovering FPGA features.
 
 The Open Programmable Acceleration Engine (OPAE) libraries and APIs are lightweight, user-space libraries that provide abstraction for FPGA resources.
 OPAE installs tools to expedite development, providing useful functions such as displaying FPGA information, implementing secure firmware updates, enabling virtualization, downloading new images to the board, and more.
@@ -71,13 +71,14 @@ These tools are essential for debugging and monitoring the implementation of the
 
 == Setup
 
-While working on the project, I encountered many errors related to incompatible versions of different tools.
+While working on the project, I encountered many errors caused by incompatible versions of different tools.
 During an initial attempt on my base distro CachyOS, I was unable to correctly configure the environment.
-One of the several errors I encountered concerned the compatibility between libc and gcc, which I was unable to resolve.
-A second attempt was made on Ubuntu 22.04. This one is said to be compatible with all the tools, yet when using the A7SK board, it did not respond.
+One of the several errors I encountered was related to the compatibility between libc and gcc, which I was unable to resolve.
+A second attempt was made on Ubuntu 22.04.
+A distribution said to be compatible with all the tools, yet when using the A7SK board, it did not respond.
 This was likely due to an error related to a poorly configured kernel.
-Finally, the configuration I used is very close to the one recommended by OFS for oneAPI on Agilex 7 series F FPGAs.
-Here is a summary table:
+Finally, the configuration I used was very close to the one recommended by OFS for oneAPI on Agilex 7 series F FPGAs.
+The table below summarizes the configurations :
 
 #figure(
   caption: [Versions of components and tools used for FPGA development],

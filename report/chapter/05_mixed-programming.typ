@@ -63,10 +63,10 @@ The typical workflow for FPGA development involves going through all the differe
 
 To compile both CPU and FPGA, it was necessary to separate the code in two different files.
 One reason for this is the incompatibility between the compilation flags required for the CPU and those needed for the FPGA.
-Another reason is efficiency: if the FPGA kernel does not change (which is often the case most), it is not necessary to recompile it with the rest of the code.
+Another reason is efficiency: if the FPGA kernel does not change (which is most often the case), it is not necessary to recompile it with the rest of the code.
 
-In this compilation flow, the devices kernel are build first, after which the host source code is compiled and linked with the device kernel (provided as a library).
-Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are build separately before being linked together.
+In this compilation flow, the device kernels are built first, after which the host source code is compiled and linked with the device kernels (provided as a library).
+Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are built separately before being linked together.
 This type of compilation was used for compiling the OneJoin implementation, but not for the DNA Tag Matcher, since it only uses a single queue.
 
 // https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
@@ -78,7 +78,7 @@ This type of compilation was used for compiling the OneJoin implementation, but 
 
 // https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(
-  caption: [Commands Lines of the Compilation Flow],
+  caption: [Command Lines of the Compilation Flow],
 
 ```bash
 #(1) Generate kernel-cpu.o (object file)

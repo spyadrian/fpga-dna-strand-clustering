@@ -82,7 +82,7 @@ This synergy between embedding and LSH makes large-scale sequence analysis manag
 )
 
 The figure above shows how the LSH algorithm works.
-An embedded DNA strand hashed multiple times (AND) giving subsequence of the strand.
+An embedded DNA strand hashed multiple times (AND) giving subsequences of the strand.
 These subsequences are then compared to those from other strands, and if some of them are equal (OR), the algorithm identifies a match and places them in the same bucket.
 
 === EmbedJoin
@@ -204,7 +204,7 @@ make update PARAMS="-DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_N
 )
 
 #emph[Note] : It is worth mentioning that some tests were also performed on larger datasets.
-However, even using the original #emph[oneoligo] code, these attempts systematically resulted in one of the following outcomes, suggesting that the work should be limited to the `dna-little-processed` dataset for the moment :
+However, when using the original #emph[oneoligo] code, these attempts systematically resulted in one of the following outcomes, suggesting that the work should be limited to the `dna-little-processed` dataset at this stage :
 - Extremely low coverage
 - No buckets generated
 - System crash, potentially due to an out-of-memory condition

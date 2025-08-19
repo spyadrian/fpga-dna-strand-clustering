@@ -26,7 +26,7 @@ The diagram below lists the stages together with their respective dataflow:
 In this dataflow, the data arrives in a compressed form using the encoding described in @chap_imp-myers-algorithm and is stored sequentially in a one-dimensional array.
 
 The first stage performs two tasks: decoding the references and computing their corresponding Peq matrices.
-- Decoding consists in extracting and isolating the references from the one-dimensional array.
+- Decoding is the process of extracting and isolating the references from the one-dimensional array.
 - Precomputing the $"Peq"$ matrices makes the subsequent stages more efficient. In Myers’ algorithm, the first string is reused in every iteration of the main loop, but this is not the case for the second string,in our case, the references. Instead, the references are only required during the creation of the $"Peq"$ table, which can therefore be precompiled before the main loop begins.
 
 In our implementation, all references are sent once in order to compute their $"Peq"$ matrices.
@@ -107,15 +107,15 @@ DNABitVector128 operator|(const DNABitVector128& other) const {
 === Levenshtein Distance Consideration <chap_imp-levenshtein-dist>
 
 During the comparisons between input tags and reference tags, an early-stopping mechanism was implemented.
-When a comparison return a Levenshtein distance lower than the threshold defined by the constant `MIN_LEVENSHTEIN_DISTANCE`, the tag is considered to have found its corresponding reference.
-At this point, the algorithm stops comparing this tag against the remaining references and moves on to the next tag.
+When a comparison returns a Levenshtein distance lower than the threshold defined by the constant `MIN_LEVENSHTEIN_DISTANCE`, the tag is considered to have found its corresponding reference.
+At this point, the algorithm stops checking the remaining references for that tag and proceeds to the next one.
 This slightly speeds up the execution.
 
 On the other hand, `MAX_LEVENSHTEIN_DISTANCE` is a constant that defines whether a Levenshtein distance is small enough to be considered valid.
 In other words, if a tag is too distant (greater than `MAX_LEVENSHTEIN_DISTANCE`) from all references, it will not be assigned any reference.
 As a consequence, the algorithm may drop tags that have undergone too many mutations.
 
-It can also happen that a tag is equidistant from several references.
+A tag may sometimes be equidistant from several references.
 In such cases, all these references are taken into account, creating multiple tag–reference pairs.
 This ensures that the correct tag–reference pair is generated.
 However, it also produces additional false pairs, which increases the number of wrong output pairs and thereby slightly decreases the precision of the algorithm.
@@ -140,10 +140,11 @@ Those are listed in @chap_res-dna-tag-usage.
 === oneoligo-a7sk
 
 The OneJoin algorithm is available on GitHub under the repository name #emph[oneoligo], with two contributors: #emph[Eug9] and #emph[raja-appuswamy], who are respectively the authors of the paper, #emph[Eugenio Marinelli] and #emph[Raja Appuswamy].
-This implementation was the one used as the basis for our project.
-However, some modifications were required.
+This implementation served as the basis for our project.
+However, some modifications were necessary.
 
-Since running on an FPGA requires ahead-of-time (AOT) compilation, certain parts of the code had to be adapted, for instance, the device selectors used for the queues, or the Makefile in order to properly target the chosen device during compilation.
+Since running on an FPGA requires ahead-of-time (AOT) compilation, certain parts of the code needed to be adapted.
+For example, the device selectors used for the queues or the Makefile had to be adjusted to properly target the chosen device during compilation.
 At first, this was handled with a simple patch that could be applied directly to the existing code.
 
 #figure(

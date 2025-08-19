@@ -292,8 +292,8 @@ void func(m, n, o) {
 
 In @fig_img_pipeline-schema, (A) shows the execution timeline of the `func` function without the pipeline pragma where three clock cycles separate each loop (`II=3`).
 Using the pragma, (B) shows that the clock cycles are now reduce to one (`II=1`).
-To tell the oneAPI DPC++/C++ Compiler to compile the design trying to pipeline loop, the flag `-Xsauto-pipeline` need to be add at the compilation.
-Another way to do it, is by using the `[[intel::initiation_interval(n)]]` attribute to direct the compiler to attempt to set the initiation interval to `n`.
+To instruct the oneAPI DPC++/C++ Compiler to attempt loop pipelining, the flag `-Xsauto-pipeline` must be added at the compilation.
+Another way to do it, is by using the `[[intel::initiation_interval(n)]]` attribute to instruct the compiler to attempt to set the initiation interval to `n`.
 
 The dataflow pragma implements task-level pipelining by enabling functions and loops to execute concurrently.
 Thereby increasing the parallelism in the RTL implementation and boosting overall design throughput.

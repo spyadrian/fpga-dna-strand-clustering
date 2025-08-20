@@ -5,7 +5,7 @@
 
 == Tag Matcher
 
-=== Dataflow and Parallelisation
+=== Dataflow and Parallelization
 
 The Tag Matcher algorithm is divided into four stages: decoding references (intact tags) and computing $P\eq$, decoding queries, computing Myers' algorithm, and collecting results.
 These stages are organized to achieve the most optimal dataflow possible and to minimize data transfers between the device and the host.
@@ -18,7 +18,7 @@ Nevertheless, this does not affect the logic of the code itself, which is why it
 @fig_img_dna-matcher-dataflow lists the stages together with their respective dataflow:
 
 #figure(
-  caption: [Tag Matcher Dataflow],
+  caption: [Tag Matcher algorithm dataflow],
 
   image("../figure/dna-matcher-dataflow.png", width: 100%),
 ) <fig_img_dna-matcher-dataflow>
@@ -27,7 +27,7 @@ In this dataflow, the data arrives in a compressed form using the encoding descr
 
 The first stage performs two tasks: decoding the references and computing their corresponding Peq matrices.
 - Decoding is the process of extracting and isolating the references from the one-dimensional array.
-- Precomputing the $"Peq"$ matrices makes the subsequent stages more efficient. In Myers’ algorithm, the first string is reused in every iteration of the main loop, but this is not the case for the second string,in our case, the references. Instead, the references are only required during the creation of the $"Peq"$ table, which can therefore be precompiled before the main loop begins.
+- Precomputing the $"Peq"$ matrices makes the subsequent stages more efficient. In Myers’ algorithm, the first string is reused in every iteration of the main loop, but this is not the case for the second string, in our case, the references. Instead, the references are only required during the creation of the $"Peq"$ table, which can therefore be precompiled before the main loop begins.
 
 In our implementation, all references are sent once in order to compute their $"Peq"$ matrices.
 These matrices are then reused in the following stages, such as during the comparison step.
@@ -86,10 +86,10 @@ In this case, the encoding leads to an overflow of the `uint64_t` variable.
 To address this issue, the `DNABitVector128` class was implemented.
 This class relies on an array of two `uint64_t` values in order to store an entire tag in case of overflow.
 To make the Myers algorithm compatible with this class, all the operations required by the algorithm had to be reimplemented.
-Below is an example showing the overwritten bitwise OR operator:
+@fig_overwritten-or shows an example of the overwritten bitwise OR operator.
 
 #figure(
-  caption: [Binary encoding of nucleotides for device processing],
+  caption: [Function bitwise OR overwritten with an unroll function],
 
   ```cpp
 DNABitVector128 operator|(const DNABitVector128& other) const {
@@ -105,7 +105,7 @@ DNABitVector128 operator|(const DNABitVector128& other) const {
   ```
 ) <fig_overwritten-or>
 
-=== Levenshtein Distance Consideration <chap_imp-levenshtein-dist>
+=== Levenshtein Distance Considerations <chap_imp-levenshtein-dist>
 
 During the comparisons between input tags and reference tags, an early-stopping mechanism was implemented.
 When a comparison returns a Levenshtein distance lower than the threshold defined by the constant `MIN_LEVENSHTEIN_DISTANCE`, the tag is considered to have found its corresponding reference.
@@ -124,8 +124,8 @@ This is not problematic, since these false pairs are removed in the subsequent p
 
 === FPGA Optimization
 
-During the implementation of Tag Matcher, several optimizations were introduced for a FPGA device.
-The two most important optimizations are the use of pragmas, to fully exploit the high parallelism offered by FPGAs.
+During the implementation of Tag Matcher, several optimizations were introduced for an FPGA device.
+The two most important optimizations are the use of pragmas to fully exploit the high parallelism offered by FPGAs.
 
 In addition to the previously discussed dataflow, two pragmas were added in this implementation: unroll and pipeline.
 The unroll pragma was applied to expand loops, such as those used in the DNAEncoding class.
@@ -171,10 +171,9 @@ This fork enabled the development of a hybrid CPU–FPGA architecture, and is in
 
 === Parallelized Part
 
-// onejoin.pdf
 The part we decided to extract and parallelize was the kernel responsible for creating the buckets, namely the `create_buckets` function.
 The main reason this part was chosen is that, within the OneJoin pipeline, LSH bucketing constitutes one of the main bottlenecks in the filtering phase.
-Indeed, in OneJoin, the combination of the Embedding and LSH steps accounts for more than $90%$ of the total execution time, with LSH bucketing being the most computationally expensive component of the filtering process.
+Indeed, in OneJoin, the combination of the embedding and LSH steps accounts for more than $90%$ of the total execution time, with LSH bucketing being the most computationally expensive component of the filtering process @marinelli_onejoin_nodate.
 
 The `create_buckets` function iterates in parallel over each triplet (batch, string index, replication index) and each LSH hash function to transform the sampled positions of the “embedded” sequence into a bucket identifier.
 For each element, it stores the tuple (replication index, hash function index, bucket ID, string index, replication index).

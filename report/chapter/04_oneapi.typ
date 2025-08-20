@@ -22,12 +22,12 @@ By providing a single set of tools, languages, and libraries, oneAPI enables dev
 Those features are offered thanks to the use of modern C++ features and the help of SYCL to express parallelism.
 
 Within the oneAPI ecosystem, Intel provides FPGA programming support through tools like the Intel FPGA SDK for OpenCL and the Intel FPGA Add-on for the oneAPI Base Toolkit.
-These tools allow developers to program FPGAs using DPC++ (Data Parallel C++) compiler.
+These tools allow developers to program FPGAs using the DPC++ (Data Parallel C++) compiler.
 Once development is complete, the DPC++, in combination with Intel Quartus software and the relevant board support package, efficiently compiles and deploys the code onto the FPGA hardware.
 @fig_img_hld-intelofs-model illustrates some of the design layers between oneAPI and the Open FPGA Stack.
 
 #figure(
-  caption: [High Level Design Tool on OFS Platforms @noauthor_ofs_nodate],
+  caption: [High level design tool on OFS platforms @noauthor_ofs_nodate],
 
   image("../figure/HLD_IntelOFS_Model.png", width: 90%)
 ) <fig_img_hld-intelofs-model>
@@ -40,7 +40,7 @@ It provides a single-source programming model, allowing both host and device cod
 SYCL is designed to enable efficient execution on a wide range of hardware, including CPUs, GPUs, and FPGAs, without requiring platform-specific code changes.
 
 #figure(
-  caption: [SYCL Logo],
+  caption: [SYCL logo],
 
   image("../figure/sycl.png", width: 50%)
 )
@@ -56,7 +56,7 @@ It builds upon SYCL by introducing additional extensions and features aimed at o
 The DPC++/C++ Compiler is included as part of the oneAPI framework.
 
 #figure(
-  caption: [SYCL Implementations Provide Access to Diverse Processors Through Standard C++ @noauthor_sycl_2020],
+  caption: [SYCL implementations and their supported hardware backends @noauthor_sycl_2020],
 
   image("../figure/sycl-provide-access-to-diverse-processors.jpg")
 )
@@ -112,7 +112,7 @@ q.submit([&](sycl::handler& h){
 A queue has an associated device, and any commands enqueued to it will target that device.
 The SYCL runtime discovers the set of devices and their platforms that are available in the system.
 
-To simplify the process of traversing the system topology SYCL provides device selectors.
+To simplify the process of traversing the system topology, SYCL provides device selectors.
 A device selector is a callable C++ object that defines a heuristic for scoring devices.
 A device selector takes a parameter of type `const device` and assigns it a "score".
 It is used to query all devices and return the one with the highest "score".
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 ```
 ) <fig_code_sycl-queue>
 
-=== Parrallel For
+=== Parallel For
 
 A key feature of SYCL for enabling efficient parallel processing on heterogeneous hardware such as FPGA, CPU, and GPU is the `parallel_for` construct.
 This construct allows developers to express data-parallel computations in a straightforward manner, where the same kernel function is executed concurrently across a range of data elements.
@@ -150,7 +150,7 @@ Additionally, SYCL’s memory management features, such as buffers and accessors
 
 === Memory Management
 
-Memory management is essential for accelerating applications on FPGA and other heterogeneous hardware.
+Memory management is essential for accelerating applications on FPGAs and other heterogeneous hardware.
 SYCL simplifies this by providing high-level abstractions for data movement and access, allowing data to be transferred efficiently between the CPU and FPGA without requiring low-level code from the developer.
 In SYCL there are two models for managing data.
 
@@ -160,33 +160,33 @@ When a kernel is launched, the entire runtime ensures that all required data is 
 The example in @fig_img_basic-code demonstrates memory management using buffers.
 
 There are multiple ways to initialize an accessor, depending on how the data need to be accessed.
-An accessor is always associated with a command group, leading to the following connection :
+An accessor is always associated with a command group, leading to the connection shown in @fig_img_buffer-host-memory.
 
 #figure(
-  caption: [Buffer Host Memory Accessor CG @noauthor_home_nodate],
+  caption: [Schema of a buffer access memory @noauthor_home_nodate],
 
   image("../figure/buffer-hostmemory-accessor-cg.png", width: 80%)
-)
+) <fig_img_buffer-host-memory>
 
 The buffer being accessed is connected to the accessor based on how the data is used.
-The accessor is linked to the command group that uses it, and finally to the device.
+The accessor is linked to the command group that uses it and, finally, to the device.
 
 Unified shared memory (USM) provides an alternative pointer-based data management model to the accessor-buffer model.
-USM memory allocations return pointers which are consistent between the host application and kernel functions on a device.
+USM memory allocations return pointers that are consistent between the host application and kernel functions on a device.
 Its pointer-based API is more familiar to C or C++ programmers.
 
 #figure(
-  caption: [Host CPU and Co-processor Sharing a Single Address Space for USM Allocations @noauthor_home_nodate],
+  caption: [Host CPU and co-processor sharing a single address space for USM allocations @noauthor_home_nodate],
 
   image("../figure/unified_virtual_address_space.png", width: 75%)
 ) <fig_img_unified-virtual-address-space>
 
-The @fig_img_unified-virtual-address-space illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
+@fig_img_unified-virtual-address-space illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
 This allow pointers to USM allocations to reference the same memory addresses on both sides. 
 USM can be allocated in three different ways : host, device and shared.
 
 #figure(
-  caption: [USM Allocation Types],
+  caption: [USM allocation types],
 
   table(
     columns: 5,
@@ -279,13 +279,13 @@ void func(m, n, o) {
 )
 
 #figure(
-  caption: [Schema of an Example Code being Executed With and Without the Pipeline Pragma @noauthor_introduction_nodate],
+  caption: [Schema of an example code being executed with and without pipeline @noauthor_introduction_nodate],
 
   image("../figure/pipeline-schema.png", width: 90%)
 ) <fig_img_pipeline-schema>
 
-In @fig_img_pipeline-schema, (A) shows the execution timeline of the `func` function without the pipeline pragma where three clock cycles separate each loop (`II=3`).
-Using the pragma, (B) shows that the clock cycles are now reduce to one (`II=1`).
+In @fig_img_pipeline-schema, (A) shows the execution timeline of the `func` function without the pipeline, pragma where three clock cycles separate each loop (`II=3`).
+Using the pragma, (B) shows that the clock cycles are now reduced to one (`II=1`).
 To instruct the oneAPI DPC++/C++ Compiler to attempt loop pipelining, the flag `-Xsauto-pipeline` must be added at the compilation.
 Another way to do it, is by using the `[[intel::initiation_interval(n)]]` attribute to instruct the compiler to attempt to set the initiation interval to `n`.
 
@@ -307,15 +307,15 @@ void top(a, b, c, d) {
 ) <fig_code_dataflow-pragma>
 
 #figure(
-  caption: [Schema of an Example Code being Executed With and Without the dataflow Pragma @noauthor_introduction_nodate],
+  caption: [Schema of an example code being executed with and without dataflow @noauthor_introduction_nodate],
 
   image("../figure/dataflow-schema.png", width: 90%)
 ) <fig_img_dataflow-schema>
 
-The @fig_img_dataflow-schema shows the difference between the execution of @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
+@fig_img_dataflow-schema shows the difference between the execution of @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
 When the dataflow pragma is applied, the HLS tool examines the flow of data between sequential functions or loops and introduces channels (implemented with ping-pong RAMs or FIFOs).
 These channels enable consumer functions or loops to begin execution before the corresponding producer functions or loops have fully completed.
-Here it save up to three clock cycles per loop.
+Here, it saves up to three clock cycles per loop.
 It's important to note that the data dependencies between functions can limit this optimization.
 For instance, if `func_B` requires the output from `func_A`, `func_B` cannot begin execution until `func_A` has completed, introducing a two-clock-cycle delay per loop iteration.
 This mechanism creates latency between functions but ensures that functions or loops only access data after it has been properly processed.

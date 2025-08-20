@@ -3,19 +3,18 @@
 = The Edit Distance Algorithm
 
 
-== The distance of Levenshtein
-// - briefly explain what the Levenshtein distance is and why it’s necessary for DNA strand clustering
+== The Levenshtein Distance
 
 In computer science, the edit distance is a metric used to measure the difference between two strings by counting the minimum number of operations required to transform one string $a$ into another string $b$.
 This metric is commonly applied in spelling correction tools, where it helps identify and suggest the closest correct word when a misspelling is detected.
 Above all, the edit distance plays an important role in bioinformatics, where it is essential for comparing different DNA sequences.
-By doing so, it enables researchers to detect, analyze and study mutations.
+By doing so, it enables researchers to detect, analyze, and study mutations.
 
 There are several types of edit distance that can be categorized according to the operations they support and allow.
 Some of these types are shown in @fig_tab_edit_distance_types.
 
 #figure(
-  caption: [Different types of edit distance and which operations they allow @noauthor_edit_2025],
+  caption: [Different types of edit distance and the operations they allow @noauthor_edit_2025],
 
   table(
     columns: (1fr, auto, auto, auto, auto),
@@ -30,10 +29,10 @@ Some of these types are shown in @fig_tab_edit_distance_types.
   ),
 ) <fig_tab_edit_distance_types>
 
-As mentioned in the introduction, DNA is subject to three types of operations: insertion, deletion and substitution.
+As mentioned in the introduction, DNA is subject to three types of operations: insertion, deletion, and substitution.
 These are due to the variability introduced throughout the DNA processing pipeline.
 Only two of these edit distances produce the desired result, the Levenshtein distance and the Damerau-Levenshtein distance.
-These two differ by the fact that the Damerau-Levenshtein include transpositions in addition to the classical edit operations.
+These two differ by the fact that the Damerau-Levenshtein includes transpositions in addition to the classical edit operations.
 An operation that does not occur in the modifications DNA strands can undergo.
 Therefore, the Levenshtein distance is the most appropriate edit distance for our project.
 
@@ -54,25 +53,25 @@ $
   )
 $ <eq_lev_naive>
 
-Here, $n$ and $m$ are the length of the strings $a$ and $b$, respectively.
+Here, $n$ and $m$ are the lengths of the strings $a$ and $b$, respectively.
 The $op("head")$ function returns the first character of a string, while the $op("tail")$ function returns the remaining part of a string after removing the first character.
 
-As an example, let's consider the following task : switching the word "party" to form the word "park".
+As an example, let's consider the following task: switching the word "party" to form the word "park".
 The Levenshtein distance between these two words is two, meaning it takes two operations to convert one word into the other.
 In this case, we substitute the "t" in "party" with a "k" and delete the "y" in "parky".
 The @fig_img_lev-dist-example illustrates this process.
 
 #figure(
-  caption: [Calculate the Levenshtein Distance Example @agarwal_program_2022],
+  caption: [Representation of the Levenshtein Distance on two words @agarwal_program_2022],
 
   image("../figure/lev-dist-example.png", width: 50%),
 ) <fig_img_lev-dist-example>
 
 
-== The Myers' Bit-parallel Algorithm <chap_myers_algo>
+== Myers' Bit-parallel Algorithm <chap_myers_algo>
 
 Myers’ bit-parallel algorithm is an efficient method for computing the Levenshtein distance between two sequences.
-Unlike traditional dynamic programming approaches which rely on filling a two-dimensional matrix, Myers’ algorithm optimizes this process using bit-parallelism.
+Unlike traditional dynamic programming approaches, which rely on filling a two-dimensional matrix, Myers’ algorithm optimizes this process using bit-parallelism.
 Myers’ bit-parallel algorithm represents the state of the computation using bit vectors.
 Each bit vector compactly encodes whether a match, substitution, insertion, or deletion is needed at each position in the pattern.
 By leveraging bitwise operations, the algorithm efficiently simulates the dynamic programming table updates.
@@ -80,11 +79,11 @@ By leveraging bitwise operations, the algorithm efficiently simulates the dynami
 To explain Myers’ algorithm, it is helpful to start with the Wagner-Fischer algorithm.
 The Wagner-Fischer algorithm is the standard dynamic programming technique for calculating the edit distance.
 Dynamic programming works by breaking the problem into smaller sub-problems and solving them one after the other to retrieve the solution from the original problem.
-In Wagner-Fischer, a matrix is used to store every Levenshtein distance between all prefixes of the string $a$ and $b$, the last computation being the distance between the two full strings.
+In Wagner-Fischer, a matrix is used to store every Levenshtein distance between all prefixes of the strings $a$ and $b$, the last computation being the distance between the two full strings.
 
 The matrix in @fig_grid_wagner-fischer shows the result of the Wagner-Fischer algorithm applied to the words "sitting" and "kitten".
 The highlighted path shows the most optimized path for transforming one string into the other.
-If we want to correct the word "sitting" to "kitten", a diagonal movement represents substitutions (or no operation if the letters are identical), movements to the right represents insertions, and movements downward represent deletions.
+If we want to correct the word "sitting" to "kitten", a diagonal movement represent substitutions (or no operation if the letters are identical), movements to the right represents insertions, and movements downward represent deletions.
 
 #let path_color = rgb("#C6DBEF");
 #figure(
@@ -119,11 +118,11 @@ Another drawback is the memory requirement, as the algorithm needs to store a ma
 This can be optimized to $Omicron(n)$ by storing only the current and previous columns of the matrix.
 Note that the memory will, in any case, become significant when comparing a lot of data simultaneously.
 
-Now, let's look at how Myers went from computing the $n times m$ Wagner-Fischer matrix, to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$, which encodes the various operations.
+Now, let's look at how Myers went from computing the $n times m$ Wagner-Fischer matrix to computing five bit vectors in parallel: $\Eq$, $\Pv$, $\Ph$, $\Mv$, and $\Mh$, which encode the various operations.
 To do this, we need to understand several key principles derived from the traditional $n times m$ matrix.
 In the Wagner-Fischer algorithm, when optimizing memory space, we note that a column $C_j$ of the matrix can be computed using only the column $C_(j-1)$ that precedes it.
 A related observation is that the difference between adjacent entries in any row or column is either $+1$, $0$, or $-1$.
-Those two observations present a new way of approaching the problem : storing the differences between the columns instead of the values themselves.
+Those two observations present a new way of approaching the problem: storing the differences between the columns instead of the values themselves.
 This approach originates from the 4-Russians algorithm for string comparison.
 
 Formally, we have the _horizontal delta_ $Delta h[i, j]$ as $C[i, j] - C[i, j - 1]$ and the _vertical delta_ $Delta v[i, j]$ as $C[i, j] - C[i - 1, j]$ for all $(i, j) in [1, m] times [1, n]$, $C$ being the dynamic programming matrix $C[0 ... m, 0 ... n]$.
@@ -137,16 +136,16 @@ Using several theorems, Myers manages to transform the problem of calculating th
 ) <fig_img_myers_matrices>
 
 To understand the origin of the bit vectors, let's look at @fig_img_myers_matrices.
-On the left, the traditional matrix from the Wagner-Fischer algorithm, and on the right the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
-This illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$, which indicated whether a cell's value should be increased (P) or decreased (M) by $1$.
+On the left, the traditional matrix from the Wagner-Fischer algorithm, and on the right, the $Delta v$ matrix and the first and last rows of the $Delta h$ matrix.
+This illustration shows that the data in the $Delta v$ matrix are Boolean variables $M$ or $P$, which indicate whether a cell's value should be increased (P) or decreased (M) by $1$.
 They cannot both be true (be equal to $1$) at the same time.
-To represent a row, a bit vector is created resulting in the bit vectors $\Pv$, $\Ph$, $\Mv$, and $\Mh$, where $v$ and $h$ represent the axes where the operation is performed (vertical or horizontal).
+To represent a row, a bit vector is created, resulting in the bit vectors $\Pv$, $\Ph$, $\Mv$, and $\Mh$, where $v$ and $h$ represent the axes where the operation is performed (vertical or horizontal).
 To correctly calculate these bit vectors, it is necessary to know whether the current characters are similar or not.
 The bit vector $\Eq$ is responsible for this, representing equality between characters.
 While $\Eq$ can be obtained through a simple comparison, it is more efficient to precompute it in $Omicron(1)$ time for each column by storing it in a matrix $P\eq[sigma]$, where $sigma$ is the alphabet from which the two strings originate.
 
 #figure(
-  caption: [Myers' bit-parallel algorithm pseudo-code JS style @myers_fast_nodate],
+  caption: [Myers' bit-parallel algorithm pseudo-code @myers_fast_nodate],
 
 ```js
 precompute Peq
@@ -173,7 +172,6 @@ Since the algorithm only contains bitwise operations, it can be easily represent
 Below, the @fig_img_myers-circuit shows the schematic of Myers' algorithm.
 It is presented here primarily to give an idea of the components that the FPGA will recreate.
 
-// High throughout edit distance computation on FPGA-based accelerators using HLS
 #figure(
   caption: [Schematic blocks diagram of Myers' algorithm main loop],
 
@@ -181,8 +179,8 @@ It is presented here primarily to give an idea of the components that the FPGA w
 ) <fig_img_myers-circuit>
 
 Myers' bit-parallel algorithm has a very good time complexity of $Omicron(n times m/w)$, where $w$ is the length of a machine word, and a space complexity of $Omicron(n)$ @myers_fast_nodate.
-Since FPGA do not have strict limits on the length of a machine word, `w` can be set to the value of `m`, reducing the time complexity to $Omicron(n)$.
-This value is one of the reason we used this algorithm.
-Another reason is the use of binary operations which simplify the implementation on FPGA.
+Since FPGAs do not have strict limits on the length of a machine word, `w` can be set to the value of `m`, reducing the time complexity to $Omicron(n)$.
+This value is one of the reasons we used this algorithm.
+Another reason is the use of binary operations, which simplify the implementation on FPGA.
 And speed up computations, as these operations can generally be performed in a single clock cycle.
 

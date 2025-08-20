@@ -40,7 +40,7 @@ Therefore, it is more relevant to focus primarily on TPs and FPs, which can be r
 Those numbers are displayed in @fig_img_confusion-matrix.
 
 #figure(
-  caption: [Tag Matcher Dataflow],
+  caption: [Confusion matrix of the Tag Matcher algorithm],
 
   image("../figure/dna-matcher-precision-res.png", width: 90%),
 ) <fig_img_confusion-matrix>
@@ -70,7 +70,7 @@ Regarding the speed of the algorithm, three devices were tested and compared in 
 Using the same dataset, the chart in @fig_img_comparison-per-us illustrates the performance of the Tag Matcher algorithm.
 
 #figure(
-  caption: [Average time per comparison of Tag Matcher across CPU, GPU and FPGA],
+  caption: [Average time per comparison of the Tag Matcher algorithm across three devices],
 
   image("../figure/comparison-per-us.png", width: 90%),
 ) <fig_img_comparison-per-us>
@@ -83,7 +83,7 @@ The FPGA result, however, is quite surprising.
 This type of hardware, when combined with such algorithms, would normally be expected to deliver solid performance.
 This outcome highlights a critical point: the FPGA implementation and hardware optimization are not yet properly refined.
 
-=== FPGA Resources Usage <chap_res-dna-tag-usage>
+=== FPGA Resource Usage <chap_res-dna-tag-usage>
 
 The report generated during the FPGA compilation of the Tag Matcher algorithm provides various insights into the FPGA’s utilization.
 The key metrics we are interested in are :
@@ -92,7 +92,7 @@ The key metrics we are interested in are :
 3. the optimizations that may have been applied
 
 #figure(
-  caption: [Tag Matcher FPGA resources usage],
+  caption: [Tag Matcher FPGA resource usage],
 
   table(
     columns: (1fr, 2fr, 2fr, 2fr),
@@ -106,7 +106,6 @@ The key metrics we are interested in are :
   )
 ) <fig_tab_tag-matcher-fpga-ressources>
 
-// guide FPGA Optimization Guide for Intel® oneAPI Toolkits + https://arxiv.org/pdf/2208.13364
 @fig_tab_tag-matcher-fpga-ressources shows the resources utilized by the Tag Matcher algorithm on the FPGA.
 A rather surprising observation is that the available resources are never fully used.
 The design only occupies a small portion of the total resources, which suggests that the algorithm is not well optimized for FPGA and that there is still room to increase parallelism or further improve pipelining.
@@ -114,9 +113,9 @@ It can also be observed that the kernels use a single compute unit.
 This lack of parallelism may partly explain the low resource utilization rate.
 
 Unlike fixed architectures (CPU/GPU), FPGAs require specific manual optimizations that are not automatically performed by the compiler.
-Generally, manual interventions like pragmas or other attributes are needed to guide the compiler.
+Generally, manual interventions like pragmas or other attributes are needed to guide the compiler @noauthor_fpga_nodate.
 Furthermore, contextual analysis by the compiler is limited.
-It cannot always determine the best optimization strategies for a given algorithm, nor balance the trade-offs between latency, throughput, power consumption, and resource utilization.
+It cannot always determine the best optimization strategies for a given algorithm, nor balance the trade-offs between latency, throughput, power consumption, and resource utilization @liang_using_2024.
 These trade-offs also require manual tuning.
 
 It should also be noted that the Intel oneAPI DPC++ compiler tends to adopt a conservative approach.
@@ -146,7 +145,7 @@ These loops were all correctly unrolled and optimized without latency.
 Since they are too numerous, they do not appear in this version of the table.
 
 Except for the initialization loops, all the loops shown in @fig_tab_tag-matcher-loops exhibit very high latency.
-This latency is primarily explained by their dependence on the FPGA’s external Global Memory, namely, the DDR connected through the AXI controller.
+This latency is primarily explained by their dependence on the FPGA’s external global memory, namely, the DDR connected through the AXI controller.
 Each memory access (“Global Memory Load”) requires a full round trip to the DDR, including burst phases and the serialization/deserialization of data.
 This typically results in several cycles of delay.
 Moreover, given the implementation of the algorithm and the absence of explicit grouping directives, these loops generate scattered memory accesses rather than optimized bursts, further worsening the latency.
@@ -171,7 +170,7 @@ To analyze the accuracy of OneJoin, it was first necessary to evaluate the algor
 @fig_tab_summary-important-parameters summarizes the most important parameter values that were finally selected.
 
 #figure(
-  caption: [Summary most important OneJoin parameters],
+  caption: [Recall of the most important OneJoin parameters],
 
   table(
     columns: (auto, auto, auto),
@@ -200,7 +199,7 @@ However, this measure is not very relevant to the objectives of this project.
 In our case, comparing the execution speed of the parallelized part (specifically, the bucket generation) provides a more informative basis for evaluating device utilization.
 
 #figure(
-  caption: [Execution time for parallel bucket generation across CPU, GPU and FPGA],
+  caption: [Execution time for parallel bucket generation across three devices],
 
   image("../figure/time-buckets-generation.png", width: 90%),
 )
@@ -213,13 +212,13 @@ This result may seem surprising, since one would usually expect a GPU or an FPGA
 It suggests that, in our implementation and for this type of data, bucket generation leverages the CPU architecture more effectively than that of the GPU or FPGA.
 This difference may come from either the code optimization or the intrinsic architectural characteristics of the devices.
 
-=== FPGA Usage
+=== FPGA Resource Usage
 
 Similar to the Tag Matcher, this section examines FPGA resource usage, latency, and applied optimizations.
 Both sections share many common aspects, including the explanation of the results, which are therefore not repeated here.
 
 #figure(
-  caption: [Tag Matcher FPGA resources usage],
+  caption: [OneJoin FPGA resource usage],
 
   table(
     columns: (1fr, 2fr, 2fr, 2fr),
@@ -249,7 +248,7 @@ The report further indicates that the number of compute units is one.
 )
 
 The generation stage contains only one loop, in this case, it could not be optimized.
-As with Tag Matcher, the latency observed is due to inefficient memory access management, specifically at the DDR level.
+As with the Tag Matcher algorithm, the latency observed is due to inefficient memory access management, specifically at the DDR level.
 The latency of 1618 cycles occurs because there are two memory accesses of approximately 800 clock cycles each, with one depending on the other.
 
 The OneJoin code was designed with two types of devices in mind: CPUs and GPUs.
@@ -272,13 +271,18 @@ The low resource utilization and high latencies observed in the main loops indic
 This section proposes targeted optimization strategies based on Intel oneAPI best practices.
 These could not be implemented within the scope of this project due to limited availability of resources.
 
-=== Memory Access Optimizations
+=== Memory Access Optimisations
 
 The observed latencies (802–1618 cycles) are primarily caused by inefficient accesses to the external DDR memory.
 As suggested in the #emph[FPGA Optimization Guide for Intel oneAPI Toolkits], restructuring memory access patterns to favor contiguous rather than scattered accesses would reduce the design’s latency.
 Another approach would be to leverage local memory.
 Moving critical data from DDR to on-chip memory using local buffers avoids the performance penalty of slow memory transactions.
 This method can reduce access latency by several orders of magnitude.
+
+A model proposed in the paper #emph[Improving the Efficiency of OpenCL Kernels through Pipes] @zarch_improving_nodate suggests splitting the computation into two separate kernels: one dedicated to memory access and the other to computations.
+To communicate, these two kernels would use pipes.
+In the paper, this model leads to performance improvements, in some cases significant.
+This could be a solution to the memory access problems.
 
 === Improving the Initiation Interval (II)
 

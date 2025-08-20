@@ -2,7 +2,7 @@
 
 = Conclusions and Perspectives
 
-This work explores FPGA-based hardware acceleration for the implementation of Levenshtein distance, applied to the clustering of DNA strands within the DNAMIC project.
+This project explores FPGA-based hardware acceleration for the implementation of Levenshtein distance, applied to the clustering of DNA strands within the DNAMIC project.
 We emphasize the use of tools such as SYCL, which enables efficient execution across a wide range of hardware platforms, including CPUs, GPUs, and FPGAs, without requiring platform-specific code modifications.
 Two approaches were studied and implemented: OneJoin and Tag Matcher.
 
@@ -27,7 +27,7 @@ This was precisely the case encountered in this project.
 
 Several areas for improvement were identified to unlock the full potential of FPGA acceleration.
 Most critically, memory access should be optimized by grouping transfers to DDR, thereby significantly reducing off-chip access latency.
-Another key strategy is reducing the initiation interval (II) of critical loops by adding compilation directive, enabling more effective pipelining than what is achieved through compiler pragmas alone.
+Another key strategy is reducing the initiation interval (II) of critical loops by adding compilation directives, enabling more effective pipelining than what is achieved through compiler pragmas alone.
 Furthermore, replicating the compute units of the core algorithms would increase throughput by allowing multiple kernel instances to run concurrently.
 
 In conclusion, SYCL enables a unified implementation of Levenshtein distance across CPU, GPU, and FPGA, achieving a recall of 99% with OneJoin and Tag Matcher.

@@ -26,6 +26,6 @@
     These operations are the same as those that can occur in DNA mutations: substitution, addition, and deletion.
     In order to handle the largest possible amount of data, the highest possible speed is required.
     The goal of this project is to leverage the speed of FPGAs to accelerate this calculation and by using the OneJoin  and Tag Matcher algorithms.
-    Those algorithms is implemented in SYCL, a C++ framework that let the user program FPGAs device to optimized some function thanks to the High-Level Synthesis (HLS) tools.
+    Those algorithms are implemented in SYCL, a C++ framework that lets the user program FPGA devices to optimize some function thanks to the High-Level Synthesis (HLS) tools.
   ],
 )

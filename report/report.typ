@@ -6,7 +6,7 @@
   orientation: [embedded computer systems],
   teachers: [Laurent Gantel],
   client: [UNIGE, Pierre-Yves Burgi, \ Deputy Director at DiSTIC, Head of the RISe Department],
-  date: [Mars, 2025],
+  date: [August, 2025],
   illustration: image("figure/illusatration.jpg", width: 80%),
   source_illustration: link("https://www.the-scientist.com/making-dna-data-storage-a-reality-30218", "https://www.the-scientist.com/making-dna-data-storage-a-reality-30218")
 )

@@ -3,7 +3,7 @@
 = Algorithms: How to Solve this Problem
 
 
-== Original Thoughs
+== Original Thoughts
 
 The first solution considered was to compare all the DNA sequences against each other.
 To do this, Myers' algorithm would be used to obtain the Levenshtein distance.
@@ -11,11 +11,11 @@ If it was below a certain threshold, the two DNA strands being compared would be
 This would group the copies together.
 
 The problem with this approach is that, despite the speed of each comparison, it still requires performing $(n times (n-1))/2$ pairwise evaluations.
-This is not scalable, because when working with a gigabytes of data, the number of DNA strands ($32$ bytes) explode to $31$ millions, leading to approximately  $5 times 10^14$ comparisons.
+This is not scalable, because when working with a gigabyte of data, the number of DNA strands ($32$ bytes) explodes to $31$ million, leading to approximately  $5 times 10^14$ comparisons.
 
-Let's say we run at $200"Mhz"$, an average FPGA speed, and compute each comparison in $Omicron(n)$ using the Myers' algorithm.
-If one comparison takes $250$ clock cycles, then processing all pairs would require $1.25 * 10^17$ clock cycles.
-It would take : $625'000'000$ seconds, $10'416'666$ minutes, $173'611$ hours, $7'233$ days or about $20$ years.
+Let's say the algorithm runs at $200"Mhz"$, an average FPGA speed, and compute each comparison in $Omicron(n)$ using the Myers' algorithm.
+If one comparison takes $250$ clock cycles, then processing all pairs would require around $10^17$ clock cycles.
+It would take $7'233$ days or about $20$ years to compute all the comparisons.
 Even with good parallelization, it would be very difficult to achieve a reasonable time.
 
 
@@ -26,19 +26,19 @@ Unlike traditional approaches, which rely on exact calculations of the Levenshte
 OneJoin relies on advanced embeddings and Locality Sensitive Hashing (LSH) techniques to drastically reduce the number of required comparisons.
 Its goal is to find similar strands using the Hamming distance, and not the Levenshtein distance, in order to cluster them into buckets.
 These buckets then contain DNA strands that are potentially close in terms of Levenshtein distance, thereby allowing comparisons to be performed on subsets (buckets) of the dataset.
-OneJoin operates in three main stages: Embedding, LSH and the verification @marinelli_onejoin_nodate.
+OneJoin operates in three main stages: embedding, LSH, and the verification @marinelli_onejoin_nodate.
 
 === CGK Embedding
 
 The appropriate edit distance for this context is the Levenshtein distance; however, its calculation is costly.
 The Hamming distance only counts the number of substitutions, but unlike the Levenshtein distance, it is very efficient to compute.
 
-The CGK embedding, developed by Chakraborty et al., is a method that transforms strings into a different metric space.
+The CGK embedding, developed by Chakraborty et al. @chakraborty_streaming_2016, is a method that transforms strings into a different metric space.
 When applied to DNA sequence datasets, the algorithm takes as input a string of length $N$ composed of the four nucleotides $A$, $C$, $G$, and $T$.
 The output of the CGK embedding is a new string three times longer, with length $3N$, containing the original nucleotide characters along with multiple occurrences of a special padding character $P$.
 
 #figure(
-  caption: [CGK Embedding Example],
+  caption: [CGK embedding example],
 
   image("../figure/cgk-embedding-example.png", width: 75%),
 )
@@ -78,13 +78,13 @@ This approach allows scaling from $Omicron(N^2)$ to near-linear comparisons, as 
 This synergy between embedding and LSH makes large-scale sequence analysis manageable.
 
 #figure(
-  caption: [LSH example],
+  caption: [LSH example with two DNA strands],
 
   image("../figure/lsh-schema.png", width: 95%),
 ) <fig_img_lsh-schema>
 
 The @fig_img_lsh-schema shows how the LSH algorithm works.
-An embedded DNA strand hashed multiple times (AND) giving subsequences of the strand.
+An embedded DNA strand is hashed multiple times (AND) giving subsequences of the strand.
 These subsequences are then compared to those from other strands, and if some of them are equal (OR), the algorithm identifies a match and places them in the same bucket.
 
 === EmbedJoin
@@ -239,7 +239,7 @@ The final pipeline, combining the Tag Matcher and OneJoin, is illustrated in @fi
 Note that the clustering and data recovery steps are not discussed in this project.
 
 #figure(
-  caption: [Tag Matcher algorithm diagram],
+  caption: [Tag Matcher algorithm pipeline],
 
   image("../figure/algo-diagram.png", width: 50%),
 ) <fig_img_algo-diagram>

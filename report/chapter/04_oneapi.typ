@@ -11,7 +11,7 @@ Initially, the goal of this project was to implement an algorithm (e.g. The Myer
 However, maintaining and transferring this low-level code proved challenging for the client, so we decided to shift to an HLS-based approach using oneAPI, making the project more accessible and manageable for future development.
 
 
-== oneAPI Overview
+== OneAPI Overview
 
 CPUs, GPUs, and FPGAs are all essential computing engines, but each excels at different types of workloads due to architectural differences.
 As modern applications become more diverse, achieving optimal performance increasingly requires a mix of specialized architectures, including CPUs, GPUs, AI accelerators, and FPGAs.
@@ -22,16 +22,15 @@ By providing a single set of tools, languages, and libraries, oneAPI enables dev
 Those features are offered thanks to the use of modern C++ features and the help of SYCL to express parallelism.
 
 Within the oneAPI ecosystem, Intel provides FPGA programming support through tools like the Intel FPGA SDK for OpenCL and the Intel FPGA Add-on for the oneAPI Base Toolkit.
-These tools allow developers to program FPGAs using the DPC++ language.
-Once development is complete, the DPC++ (Data Parallel C++) compiler, in combination with Intel Quartus software and the relevant board support package, efficiently compiles and deploys the code onto the FPGA hardware.
-Below is a diagram illustrating some of the design layers between oneAPI and the Open FPGA Stack.
+These tools allow developers to program FPGAs using DPC++ (Data Parallel C++) compiler.
+Once development is complete, the DPC++, in combination with Intel Quartus software and the relevant board support package, efficiently compiles and deploys the code onto the FPGA hardware.
+@fig_img_hld-intelofs-model illustrates some of the design layers between oneAPI and the Open FPGA Stack.
 
-// https://ofs.github.io/ofs-2024.1-1/hw/common/user_guides/oneapi_asp/ug_oneapi_asp/#12-terminology
 #figure(
-  caption: [High Level Design Tool on OFS Platforms],
+  caption: [High Level Design Tool on OFS Platforms @noauthor_ofs_nodate],
 
   image("../figure/HLD_IntelOFS_Model.png", width: 90%)
-)
+) <fig_img_hld-intelofs-model>
 
 
 == SYCL and Data Parallel C++ (DPC++) Overview
@@ -56,9 +55,8 @@ It optimizes applications for Intel® 64 architectures on Linux and Windows, sup
 It builds upon SYCL by introducing additional extensions and features aimed at optimizing performance and increasing productivity for developers targeting Intel architectures.
 The DPC++/C++ Compiler is included as part of the oneAPI framework.
 
-// source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [from khronos.org, ref. URL05]),
 #figure(
-  caption: [SYCL Implementations Provide Access to Diverse Processors Through Standard C++],
+  caption: [SYCL Implementations Provide Access to Diverse Processors Through Standard C++ @noauthor_sycl_2020],
 
   image("../figure/sycl-provide-access-to-diverse-processors.jpg")
 )
@@ -85,11 +83,10 @@ This approach streamlines the adoption of FPGA technology and reduces developmen
 
 Since DPC++ is based on the C++ programming language, its syntax and usage are very similar to standard C++.
 The differences arise when programming for different types of devices.
-Below is a first example of SYCL code, with its various elements explained in the following sections.
+@fig_img_basic-code is a first example of SYCL code, with its various elements explained in the following sections.
 
-// source: link("https://www.khronos.org/blog/sycl-the-dawn-of-a-unified-programming-model-for-heterogeneous-modern-c-at-sc19", [ADD SOURCE]),
 #figure(
-  caption: [A first example of SYCL code explained],
+  caption: [A first example of SYCL code explained @noauthor_home_nodate],
 
   image("../figure/basic-code-explained.png", width: 92%)
 ) <fig_img_basic-code>
@@ -165,9 +162,8 @@ The example in @fig_img_basic-code demonstrates memory management using buffers.
 There are multiple ways to initialize an accessor, depending on how the data need to be accessed.
 An accessor is always associated with a command group, leading to the following connection :
 
-// source: syclacademy Lesson Materials: Managing Memory
 #figure(
-  caption: [Buffer Host Memory Accessor CG],
+  caption: [Buffer Host Memory Accessor CG @noauthor_home_nodate],
 
   image("../figure/buffer-hostmemory-accessor-cg.png", width: 80%)
 )
@@ -179,14 +175,13 @@ Unified shared memory (USM) provides an alternative pointer-based data managemen
 USM memory allocations return pointers which are consistent between the host application and kernel functions on a device.
 Its pointer-based API is more familiar to C or C++ programmers.
 
-// source: syclacademy Lesson Materials: Introduction to USM
 #figure(
-  caption: [Host CPU and Co-processor Sharing a Single Address Space for USM Allocations],
+  caption: [Host CPU and Co-processor Sharing a Single Address Space for USM Allocations @noauthor_home_nodate],
 
   image("../figure/unified_virtual_address_space.png", width: 75%)
-)
+) <fig_img_unified-virtual-address-space>
 
-The diagram above illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
+The @fig_img_unified-virtual-address-space illustrates how the host CPU and a co-processor (the SYCL device such as a GPU or FPGA) share a single unified virtual address space.
 This allow pointers to USM allocations to reference the same memory addresses on both sides. 
 USM can be allocated in three different ways : host, device and shared.
 
@@ -237,10 +232,10 @@ sycl::free(ptrR, q);
 
 === Pragma
 
-In DPC++ programming for FPGAs, pragma directives are special hints given to the compiler used to optimize the hardware implementation of your code.
+In DPC++ programming for FPGAs, pragma directives are special hints given to the compiler used to optimize the hardware implementation of the code.
 They help control how loops and other code structures are translated into FPGA hardware, allowing for better performance and more efficient use of resources.
 
-A common pragma is `#pragma unroll`, which tells the compiler to fully or partially unroll a loop.
+A common pragma is `#pragma unroll`, which tells the compiler to fully or partially unroll a loop @noauthor_intel_nodate.
 Loop unrolling can increase parallelism by generating multiple hardware operations for each loop iteration.
 For example:
 
@@ -269,9 +264,8 @@ This pragma is responsible for reducing the initiation interval (II) for a funct
 Let's say we have a function `func` doing three operations: `op_read`, `op_compute` and `op_write`.
 Below is an example of how it would be with and without the pipeline.
 
-// source: https://docs.amd.com/r/en-US/ug1399-vitis-hls (same for dataflow)
 #figure(
-  caption: [Example code for the pipeline pragma],
+  caption: [Example code for the pipeline pragma @noauthor_introduction_nodate],
 
 ```cpp
 void func(m, n, o) {
@@ -285,7 +279,7 @@ void func(m, n, o) {
 )
 
 #figure(
-  caption: [Schema of an Example Code being Executed With and Without the Pipeline Pragma],
+  caption: [Schema of an Example Code being Executed With and Without the Pipeline Pragma @noauthor_introduction_nodate],
 
   image("../figure/pipeline-schema.png", width: 90%)
 ) <fig_img_pipeline-schema>
@@ -298,9 +292,8 @@ Another way to do it, is by using the `[[intel::initiation_interval(n)]]` attrib
 The dataflow pragma implements task-level pipelining by enabling functions and loops to execute concurrently.
 Thereby increasing the parallelism in the RTL implementation and boosting overall design throughput.
 
-// source: https://docs.amd.com/r/en-US/ug1399-vitis-hls (same for pipeline)
 #figure(
-  caption: [Example code for the dataflow pragma],
+  caption: [Example code for the dataflow pragma @noauthor_introduction_nodate],
 
 ```cpp
 void top(a, b, c, d) {
@@ -314,12 +307,12 @@ void top(a, b, c, d) {
 ) <fig_code_dataflow-pragma>
 
 #figure(
-  caption: [Schema of an Example Code being Executed With and Without the dataflow Pragma],
+  caption: [Schema of an Example Code being Executed With and Without the dataflow Pragma @noauthor_introduction_nodate],
 
   image("../figure/dataflow-schema.png", width: 90%)
-)
+) <fig_img_dataflow-schema>
 
-The Figure above shows the difference between the execution of the code in @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
+The @fig_img_dataflow-schema shows the difference between the execution of @fig_code_dataflow-pragma with (B) and without (A) the dataflow pragma.
 When the dataflow pragma is applied, the HLS tool examines the flow of data between sequential functions or loops and introduces channels (implemented with ping-pong RAMs or FIFOs).
 These channels enable consumer functions or loops to begin execution before the corresponding producer functions or loops have fully completed.
 Here it save up to three clock cycles per loop.

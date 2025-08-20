@@ -1,26 +1,25 @@
 #import "../conf.typ": *
 
-= FPGA : Hardware Architecture and Programming
+= FPGA : Hardware Architecture and Programming <chap_fpga-hardware>
 
 == The Agilex 7 Starter Kits
 
 The Agilex 7 Starter Kit, abbreviated as A7SK, is a development board created by Terasic.
 It leverages the latest Intel (formerly Altera) Agilex 7 SoC FPGA F-Series device, featuring 2.7 million logic elements.
-It comes with an Hard Processor System (HPS) ARM Cortex-A53 quad-core 64 bits working up to 1,5GHz.
+It comes with an Hard Processor System (HPS) ARM Cortex-A53 quad-core 64 bits working up to 1,5GHz @technologies_terasic_nodate.
 The board offers multiple interfaces including PCI Express 4.0 x8 and up to 16GB of DDR4 memory to provide optimal acceleration.
-In top of that it provides $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory.
+In top of that it provides $259"Mb"$ of M20K and $28"Mb"$ of MLAB memory @noauthor_agilex_nodate.
 Additionally, the board includes an FMC+ expansion connector, ensuring compatibility with a variety of daughter cards for extended functionality.
 
 The Agilex 7 FPGA fabric delivers 50% higher performance and 40% lower power consumption compared to previous generation devices, making it ideal for demanding workloads.
 The board also supports Intel's oneAPI and OpenCL frameworks, allowing developers to easily customize hardware acceleration workloads.
-Below is a block diagram showing all the peripherals of the A7SK :
+@fig_img_a7sk-blockdiagram shows a block diagram of all the peripherals and connections of the A7SK :
 
-// source: link("https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=142&No=1295&PartNo=2", [Agilex 7 FPGA Starter Kit Specification]),
 #figure(
-  caption: [Block diagram of The Agilex 7 Starter Kits],
+  caption: [Block diagram of The Agilex 7 Starter Kits @technologies_terasic_nodate],
 
   image("../figure/a7sk_blockdiagram.jpg", width: 100%)
-)
+) <fig_img_a7sk-blockdiagram>
 
 
 == Open FPGA Stack (OFS)
@@ -29,9 +28,8 @@ Open FPGA Stack (OFS) is a fully open-source hardware and software infrastructur
 It consists of multiple components that enable rapid FPGA development and is available through their Git repositories.
 OFS is utilized by Intel (formerly Altera) as well as by several third-party platforms, supporting Intel FPGA families such as Stratix® 10, Agilex™ FPGA, and future devices.
 
-// source: link("https://ofs.github.io/ofs-2024.3-1/", [Open FPGA Stack Overview]),
 #figure(
-  caption: [Base FPGA Interface Manager (FIMs)],
+  caption: [Base FPGA Interface Manager (FIMs) @noauthor_ofs_nodate],
 
   image("../figure/base-fim.png", width: 100%)
 )
@@ -39,7 +37,7 @@ OFS is utilized by Intel (formerly Altera) as well as by several third-party pla
 === Infrastructure Hardware
 
 The FPGA Interface Manager (FIM) acts as the foundational "shell" that provides platform management, functionality, clocks, resets, and standard interfaces to both the host system and the Accelerator Functional Unit (AFU).
-Think of the FIM as the operating system for the FPGA, it handles all the low-level communication protocols and platform-specific details so that developers can focus on their actual application logic.
+Think of the FIM as the operating system for the FPGA, it handles all the low-level communication protocols and platform-specific details so that developers can focus on their actual application logic @noauthor_ofs_nodate.
 These reference FIMs are provided as working examples to help users develop their own custom platforms.
 
 The Accelerator Functional Unit (AFU) is the dedicated region where custom workload implementations are deployed.
@@ -62,7 +60,7 @@ The ASP provides the necessary abstraction layer between the SYCL code and the u
 The open-source kernel drivers provide a layer that decomposes the implemented functionality into sets of individual device features.
 These drivers handle the low-level communication between the host system and the FPGA hardware.
 The DFL kernel drivers represent a specialized layer of the Linux kernel.
-They define a structured list of feature headers within the device's MMIO (Memory-Mapped Input/Output) space, creating an extensible way of adding and discovering FPGA features.
+They define a structured list of feature headers within the device's MMIO (Memory-Mapped Input/Output) space, creating an extensible way of adding and discovering FPGA features @noauthor_ofs_nodate.
 
 The Open Programmable Acceleration Engine (OPAE) libraries and APIs are lightweight, user-space libraries that provide abstraction for FPGA resources.
 OPAE installs tools to expedite development, providing useful functions such as displaying FPGA information, implementing secure firmware updates, enabling virtualization, downloading new images to the board, and more.
@@ -77,8 +75,8 @@ One of the several errors I encountered was related to the compatibility between
 A second attempt was made on Ubuntu 22.04.
 A distribution said to be compatible with all the tools, yet when using the A7SK board, it did not respond.
 This was likely due to an error related to a poorly configured kernel.
-Finally, the configuration I used was very close to the one recommended by OFS for oneAPI on Agilex 7 series F FPGAs.
-The table below summarizes the configurations :
+Finally, the configuration I used was very close to the one recommended by OFS for oneAPI on Agilex 7 series F FPGAs @noauthor_ofs_nodate.
+@fig_tab_version-setup summarizes the configurations :
 
 #figure(
   caption: [Versions of components and tools used for FPGA development],
@@ -97,7 +95,7 @@ The table below summarizes the configurations :
     [Intel® oneAPI Base Toolkit], [2025.0.1],
     [FPGA Support Package], [2025.0.1]
   )
-)
+) <fig_tab_version-setup>
 
 These versions were specifically chosen to be compatible with FPGA.
 Notably, the oneAPI Base Toolkit is at version 2025.2.0 but no longer includes FPGA support since version 2025.1.0.

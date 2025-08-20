@@ -8,13 +8,14 @@
   client: [UNIGE, Pierre-Yves Burgi, \ Deputy Director at DiSTIC, Head of the RISe Department],
   date: [Mars, 2025],
   illustration: image("figure/illusatration.jpg", width: 80%),
-  source_illustration: link("https://www.the-scientist.com/making-dna-data-storage-a-reality-30218", "from the-scientist.com, ref. URL01"))
+  source_illustration: link("https://www.the-scientist.com/making-dna-data-storage-a-reality-30218", "https://www.the-scientist.com/making-dna-data-storage-a-reality-30218")
+)
 
 #show: introduction
 
 #include "chapter/A_list-of-contents.typ"
 
-#include "chapter/B_dedication.typ"
+// #include "chapter/B_dedication.typ"
 
 #include "chapter/C_acknowledgements.typ"
 
@@ -52,7 +53,7 @@
 
 #show: appendix
 
-// #include "appendix/05_name.typ"
+#include "appendix/01_link.typ"
 
 #show: bibli
 

@@ -3,11 +3,11 @@
 = Implementation Details
 
 
-== DNA Tag Matcher
+== Tag Matcher
 
 === Dataflow and Parallelisation
 
-The DNA Tag Matcher algorithm is divided into four stages: decoding references and computing $P\eq$, decoding queries, computing Myers' algorithm, and collecting results.
+The Tag Matcher algorithm is divided into four stages: decoding references (intact tags) and computing $P\eq$, decoding queries, computing Myers' algorithm, and collecting results.
 These stages are organized to achieve the most optimal dataflow possible and to minimize data transfers between the device and the host.
 
 In general, dataflow refers to a pragma that can be requested from the compiler.
@@ -15,13 +15,13 @@ For example, on AMD platforms this is achieved with `#pragma HLS dataflow`, plac
 In DPC++, however, this is not the case: memory accesses via buffers and accessors automatically handle this optimization.
 Nevertheless, this does not affect the logic of the code itself, which is why it is necessary to design the implementation with the goal of achieving the most efficient dataflow possible.
 
-The diagram below lists the stages together with their respective dataflow:
+@fig_img_dna-matcher-dataflow lists the stages together with their respective dataflow:
 
 #figure(
-  caption: [DNA Matcher Dataflow],
+  caption: [Tag Matcher Dataflow],
 
   image("../figure/dna-matcher-dataflow.png", width: 100%),
-)
+) <fig_img_dna-matcher-dataflow>
 
 In this dataflow, the data arrives in a compressed form using the encoding described in @chap_imp-myers-algorithm and is stored sequentially in a one-dimensional array.
 
@@ -53,6 +53,7 @@ During the semester project, a C++ implementation of Myers’ algorithm was used
 This implementation was developed by Fujimoto Seiji, author of #emph[Polyleven], a Python library designed to compute the Levenshtein distance.
 In his 2020 study, Fujimoto implemented both the Myers and Wagner–Fischer algorithms in order to compare them.
 We reused his open-source implementation and adapted it to make it compatible with DPC++.
+Please note that the website is currently down.
 
 The DNA alphabet, and therefore the tags, is composed of the nucleotides $A$, $C$, $G$, and $T$.
 To transfer this alphabet efficiently to the target device, it was preferable to create a dedicated encoding instead of directly passing characters of type `char`.
@@ -123,7 +124,7 @@ This is not problematic, since these false pairs are removed in the subsequent p
 
 === FPGA Optimization
 
-During the implementation of DNA Tag Matcher, several optimizations were introduced for a FPGA device.
+During the implementation of Tag Matcher, several optimizations were introduced for a FPGA device.
 The two most important optimizations are the use of pragmas, to fully exploit the high parallelism offered by FPGAs.
 
 In addition to the previously discussed dataflow, two pragmas were added in this implementation: unroll and pipeline.
@@ -139,7 +140,7 @@ Those are listed in @chap_res-dna-tag-usage.
 
 === oneoligo-a7sk
 
-The OneJoin algorithm is available on GitHub under the repository name #emph[oneoligo], with two contributors: #emph[Eug9] and #emph[raja-appuswamy], who are respectively the authors of the paper, #emph[Eugenio Marinelli] and #emph[Raja Appuswamy].
+The OneJoin algorithm is available on GitHub under the repository name #emph[oneoligo], with two contributors: #emph[Eug9] and #emph[raja-appuswamy], who are respectively the authors of the paper, #emph[Eugenio Marinelli] and #emph[Raja Appuswamy] @marinelli_eug9oneoligo_2025.
 This implementation served as the basis for our project.
 However, some modifications were necessary.
 
@@ -168,11 +169,15 @@ This allowed it to be compiled with FPGA-specific flags instead of CPU compilati
 Along with other FPGA related adaptations, this represented a significant enough change to justify creating a dedicated fork of #emph[oneoligo], named #emph[oneoligo-a7sk].
 This fork enabled the development of a hybrid CPU–FPGA architecture, and is included as a sub-module within the GitLab repository of this project.
 
-=== Part Parralelisé
+=== Parallelized Part
 
-#todo[TODO]
+// onejoin.pdf
+The part we decided to extract and parallelize was the kernel responsible for creating the buckets, namely the `create_buckets` function.
+The main reason this part was chosen is that, within the OneJoin pipeline, LSH bucketing constitutes one of the main bottlenecks in the filtering phase.
+Indeed, in OneJoin, the combination of the Embedding and LSH steps accounts for more than $90%$ of the total execution time, with LSH bucketing being the most computationally expensive component of the filtering process.
 
-- quelle partie
-- pourquoi
-- montrer tableau ?
+The `create_buckets` function iterates in parallel over each triplet (batch, string index, replication index) and each LSH hash function to transform the sampled positions of the “embedded” sequence into a bucket identifier.
+For each element, it stores the tuple (replication index, hash function index, bucket ID, string index, replication index).
+Each kernel instance performs exactly the same operations, without any dependencies between them.
+It is therefore an ideal function to measure and demonstrate the impact of parallelism.
 

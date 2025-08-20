@@ -8,9 +8,8 @@
 When you create a program with offload, the compiler must generate code for both the host and the device.
 This requires two compilation passes; one for the host code and one for the device code.
 
-// source: link("https://www.intel.com/content/www/us/en/docs/oneapi/programming-guide/2024-2/compilation-flow-overview.html", [Compilation Flow Overview]),
 #figure(
-  caption: [Basic compilation flow],
+  caption: [Basic compilation flow @noauthor_home_nodate],
 
   image("../figure/sycl-compiling.png", width: 75%)
 )
@@ -34,16 +33,17 @@ In the AOT compilation flow, the device code is translated to SPIR-V and then pr
 In this process, the target device must be specified at compilation time, which provides less flexibility than the just-in-time (JIT) compilation used for CPUs and GPUs.
 This trade-off between compilation time and deployment flexibility is a fundamental characteristic of FPGA development workflows, where the lengthy synthesis process makes runtime compilation impractical for most applications.
 
-// source: link("https://www.intel.com/content/www/us/en/docs/oneapi/programming-guide/2024-2/compilation-flow-overview.html", [Compilation Flow Overview]),
 #figure(
-  caption: [AOT Compilation Flow],
+  caption: [AOT compilation flow @noauthor_intel_nodate-1],
 
   image("../figure/aot-compilation.png", width: 100%)
 )
 
-There are four types of compilation for FPGAs, which are summarized in the table below :
+There are four types of compilation for FPGAs, which are summarized in @fig_tab_compilation-fpga-targets.
 
 #figure(
+  caption: [Compilation targets and their characteristics @noauthor_home_nodate],
+
   table(
     columns: (1fr, 1.75fr, 3.25fr),
     align: (left, left, left),
@@ -52,10 +52,8 @@ There are four types of compilation for FPGAs, which are summarized in the table
     [Optimization Report], [RTL + FPGA reports (minutes)], [Compiles the FPGA device code to RTL and generates an optimization report that describes the structures generated on the FPGA, identifies performance bottlenecks, and estimates resource utilization. This report will include the interfaces defined in your selected Board Support Package.],
     [Simulator], [RTL + FPGA reports + x86-64 binary (minutes)], [Compiles the FPGA device code to RTL and generates a simulation test bench. Use the Questa\*-Intel® FPGA Edition simulator to verify your design.],
     [FPGA Hardware], [Quartus Place & Route + FPGA reports + x86-64 host binary (Multiple Hours)], [Compiles the FPGA device code to RTL and compiles the generated RTL using Intel®]
-  ),
-
-  caption: [Compilation targets and their characteristics]
-)
+  )
+) <fig_tab_compilation-fpga-targets>
 
 The typical workflow for FPGA development involves going through all the different compilation types, and optimizing or correcting the code at each stage as needed.
 
@@ -66,19 +64,17 @@ One reason for this is the incompatibility between the compilation flags require
 Another reason is efficiency: if the FPGA kernel does not change (which is most often the case), it is not necessary to recompile it with the rest of the code.
 
 In this compilation flow, the device kernels are built first, after which the host source code is compiled and linked with the device kernels (provided as a library).
-Below is an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are built separately before being linked together.
-This type of compilation was used for compiling the OneJoin implementation, but not for the DNA Tag Matcher, since it only uses a single queue.
+@fig_img_compilation-flow shows an example of separate compilation using `vector-add` example, where two kernels, one CPU and one FPGA, are built separately before being linked together.
+This type of compilation was used for compiling the OneJoin implementation, but not for the Tag Matcher, since it only uses a single queue.
 
-// https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(
-  caption: [Schematic of the Compilation Flow],
+  caption: [Schematic of the compilation flow @liang_using_2024],
 
   image("../figure/compile-flow.png", width: 80%)
-)
+) <fig_img_compilation-flow>
 
-// https://dl.acm.org/doi/fullHtml/10.1145/3636480.3637220
 #figure(
-  caption: [Command Lines of the Compilation Flow],
+  caption: [Command lines of the compilation flow @liang_using_2024],
 
 ```bash
 #(1) Generate kernel-cpu.o (object file)

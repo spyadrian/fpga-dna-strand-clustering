@@ -129,7 +129,7 @@
 
   {
     set page(numbering: none, header: none)
-    set par(leading: 0.5em)
+    set par(leading: 0.5em, spacing: 2em)
     set align(center)
 
     // logos
@@ -152,11 +152,11 @@
     text(size: 14pt, [Bachelor project presented by])
     v(0em)
     text(size: 16pt, weight: "bold", authors)
-    v(1.5em)
+    v(1em)
     text(size: 14pt, weight: "bold", [Computer science and communication systems with orientation in #orientation])
     v(0em)
     text(size: 14pt, weight: "bold", date)
-    v(1.5em)
+    v(1em)
 
     // teachers and client
     grid(
@@ -169,7 +169,7 @@
 
     set align(left)
     v(1fr)
-    text("Caption and source of cover illustration :\n")
+    text("Source of cover illustration :\n")
     text(style: "italic", source_illustration)
   }
 

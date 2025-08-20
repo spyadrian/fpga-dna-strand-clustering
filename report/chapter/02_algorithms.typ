@@ -1,6 +1,6 @@
 #import "../conf.typ": *
 
-= Algorithms: How to solve this Problem
+= Algorithms: How to Solve this Problem
 
 
 == Original Thoughs
@@ -11,12 +11,12 @@ If it was below a certain threshold, the two DNA strands being compared would be
 This would group the copies together.
 
 The problem with this approach is that, despite the speed of each comparison, it still requires performing $(n times (n-1))/2$ pairwise evaluations.
-This is not scalable, because when working with a gigabytes of data, the number of evaluations would explode becoming approximately $5 times 10^14$.
+This is not scalable, because when working with a gigabytes of data, the number of DNA strands ($32$ bytes) explode to $31$ millions, leading to approximately  $5 times 10^14$ comparisons.
 
 Let's say we run at $200"Mhz"$, an average FPGA speed, and compute each comparison in $Omicron(n)$ using the Myers' algorithm.
 If one comparison takes $250$ clock cycles, then processing all pairs would require $1.25 * 10^17$ clock cycles.
 It would take : $625'000'000$ seconds, $10'416'666$ minutes, $173'611$ hours, $7'233$ days or about $20$ years.
-Even by parallelizing this with a factor of $5$, we would still have to wait $4$ years, which is far too long.
+Even with good parallelization, it would be very difficult to achieve a reasonable time.
 
 
 == OneJoin <cha_algo-onejoin>
@@ -24,7 +24,9 @@ Even by parallelizing this with a factor of $5$, we would still have to wait $4$
 OneJoin is an edit similarity join algorithm designed to efficiently handle very large sets of sequences, such as DNA-encoded data.
 Unlike traditional approaches, which rely on exact calculations of the Levenshtein distance between all pairs of sequences.
 OneJoin relies on advanced embeddings and Locality Sensitive Hashing (LSH) techniques to drastically reduce the number of required comparisons.
-OneJoin operates in three main stages: Embedding, LSH and the verification.
+Its goal is to find similar strands using the Hamming distance, and not the Levenshtein distance, in order to cluster them into buckets.
+These buckets then contain DNA strands that are potentially close in terms of Levenshtein distance, thereby allowing comparisons to be performed on subsets (buckets) of the dataset.
+OneJoin operates in three main stages: Embedding, LSH and the verification @marinelli_onejoin_nodate.
 
 === CGK Embedding
 
@@ -48,7 +50,7 @@ Using random walk theory, Chakraborty et al. demonstrated that the CGK embedding
 
 === Locality Sensitive Hashing (LSH)
 
-An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), well defined for Hamming, can now be used to identify similar strings without doing an exhaustive pairwise search.
+An important benefit of edit-to-Hamming embedding is that algorithmic tools, like Locality Sensitive Hashing (LSH), well defined for Hamming, can now be used to identify similar strings without doing an exhaustive pairwise search @noauthor_locality_nodate.
 
 Locality-Sensitive Hashing (LSH) for Hamming distance is a technique that efficiently groups similar strings by mapping them to the same “buckets”.
 The technique relies on bit-sampling: specific bit positions are selected from each string to generate hash values.
@@ -79,9 +81,9 @@ This synergy between embedding and LSH makes large-scale sequence analysis manag
   caption: [LSH example],
 
   image("../figure/lsh-schema.png", width: 95%),
-)
+) <fig_img_lsh-schema>
 
-The figure above shows how the LSH algorithm works.
+The @fig_img_lsh-schema shows how the LSH algorithm works.
 An embedded DNA strand hashed multiple times (AND) giving subsequences of the strand.
 These subsequences are then compared to those from other strands, and if some of them are equal (OR), the algorithm identifies a match and places them in the same bucket.
 
@@ -109,14 +111,14 @@ The verification phase then computes the exact edit distance for each candidate 
 This step is much less computationally demanding than filtering, as the number of candidate pairs is typically only a small fraction of all possible pairs due to the effectiveness of the embedding and LSH-based filtering.
 
 For each candidate pair, EmbedJoin employs a standard dynamic programming algorithm to compute the distance of Levenshtein.
-If the computed distance is below the user-defined threshold, the pair is included in the final output set.
+If the computed distance is below the user-defined threshold, the pair is included in the final output buckets.
 The verification phase is executed in a straightforward, sequential manner, with each thread or process handling a subset of the candidate list.
 
 
 === Parameters
 
 OneJoin effectiveness depends heavily on several configurable parameters that influence key tradeoffs between performance, accuracy, and coverage.
-The table below summarizes these parameters, their effects on critical metrics, and their default values from the OneJoin paper.
+@fig_tab_description-onejoin-parameters summarizes these parameters, their effects on critical metrics, and their default values from the OneJoin paper.
 
 #figure(
   caption: [Description of the OneJoin algorithm parameters],
@@ -136,9 +138,9 @@ The table below summarizes these parameters, their effects on critical metrics, 
     [countfilter], [$c$], [min occurrences of the same candidate pair before verification],
     [batch\_size], [$B$], [reads processed together; limited by GPU / RAM]
   )
-)
+) <fig_tab_description-onejoin-parameters>
 
-The next table show their effects on critical metrics.
+@fig_tab_impacts-onejoin-parameters shows their effects on critical metrics.
 It serves as a reference for tailoring OneJoin to specific datasets, balancing speed and reliability according to application needs (e.g., large-scale DNA storage).
 
 #figure(
@@ -158,11 +160,11 @@ It serves as a reference for tailoring OneJoin to specific datasets, balancing s
     [samplingrange], [↑], [↑], [↔], [↔], [↑],
     [countfilter], [↓], [↓], [↑], [↓], [↓],
     [batch\_size], [↑ or ↓], [↔], [↔], [↔], [↔])
-)
+) <fig_tab_impacts-onejoin-parameters>
 
 The choice of parameters depends largely on the dataset. In this project, the dataset-generator script was used to create multiple datasets containing mutated DNA strands.
-The dataset used for algorithm testing was a relatively small set of 7,500 DNA strands.
-The details of this dataset are presented in the table below.
+The dataset used for algorithm testing was a relatively small set of $7'500$ DNA strands.
+The details of this dataset are presented in @fig_tab_dataset-params.
 
 #figure(
   caption: [Sequencing parameters for `dna-little-processed.txt`],
@@ -174,14 +176,14 @@ The details of this dataset are presented in the table below.
 
     [Clusters (-n)],             [250],
     [Strands / cluster (-c)],    [30],
-    [*Total strands*],           [7,500],
+    [*Total strands*],           [$7'500$],
     [Length strands],            [207],
     [*Avg. error %*],            [10.32],
     [Substitution %],            [4.63],
     [Deletion %],                [4.22],
     [Insertion %],               [1.47],
   )
-) <fig_tab-dataset-param>
+) <fig_tab_dataset-params>
 
 According to the parameters of this dataset, several parameters of the algorithm were defined, such as NUM_CHAR and $K$.
 The choice of $K$ is critical:
@@ -192,54 +194,28 @@ On average, the edit distance between two reads is therefore about $42$.
 Adding a small margin of 6 led us to choose $K = 48$, which provided good results in practice.
 
 The remaining parameters were determined empirically, through trial-and-error, based on their impact on the final results after several tests.
-The compilation command used for the experiments is given below.
+The compilation command used for the experiments is given in @fig_cod_compilation-line-params.
 
 #figure(
-  caption: [Compilation Line with good parameters for the `dna-little-processed.txt` dataset],
+  caption: [Compilation line with good parameters for the `dna-little-processed.txt` dataset],
 
   ```bash
 make update PARAMS="-DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_NUM_CHAR=4 -DDEF_K_INPUT=48 -DDEF_SHIFT=16"
 ./onejoin -r test/dna-little-processed.txt -a 2 -d 1 -s 300 -c 1 -b 30
   ```
-)
+) <fig_cod_compilation-line-params>
 
 #emph[Note] : It is worth mentioning that some tests were also performed on larger datasets.
 However, when using the original #emph[oneoligo] code, these attempts systematically resulted in one of the following outcomes, suggesting that the work should be limited to the `dna-little-processed` dataset at this stage :
 - Extremely low coverage
 - No buckets generated
 - System crash, potentially due to an out-of-memory condition
-
-/*
-=== Times per steps
-
-présenter steps concret; tableau; partie que j'ai reprise sur FPGA que j'ai juger importante;
-
-#figure(
-  caption: [Breakdown of computation steps of OneJoin],
-
-  table(
-    columns: 4,
-    align: (center, left, left, center),
-    table.header([*\#*], [*Step name*], [*What it does*], [*total time*]),
-    [1], [Initialization], [Parses CLI-params, builds LSH tables, allocates host/device buffers and seeds RNGs], [*≈ 3 %*],
-    [2], [Embedding], [CGK-embeds every read (many replicas) in parallel on all available SYCL queues], [*≈ 12 %*],
-    [3], [Bucket creation], [Hashes each embedded vector, materialises and sorts (randStr, hashFn, hashID) tuples to form LSH buckets], [*≈ 20 %*],
-    [4], [Init for candidate generation], [Scans the bucket array once to pre-size the candidate vector and record bucket boundaries], [*≈ 5 %*],
-    [5], [Candidate generation], [Enumerates every unique pair inside each bucket in a GPU/CPU kernel and writes compact candidate tuples], [*≈ 20 %*],
-    [6], [Candidate processing], [Filters impossible pairs, parallel-sorts & de-duplicates the list, preparing it for verification], [*≈ 15 %*],
-    [7], [Counting frequencies], [Counts how many times each unique pair appears so low-support pairs can be pruned], [*≈ 10 %*],
-    [8], [Edit distance verification], [Multi-threaded Levenshtein verification emits the finally similar read pairs], [*≈ 15 %*],
-  )
-)
-
-The time was generated by chatGPT and is therefore indicative ("Percentages sum to ~100 % and come from the profiling numbers in the GEN-470 KS experiment").
-From paper in reality
-*/
+This is a known issue, and the authors have been contacted.
 
 == Tag Matcher
 
 Despite the acceleration provided by OneJoin, it was observed during the project that it is not fast enough when it comes to clustering large volumes of data.
-An idea emerged during discussions with the DNAMIC team at UNIGE: namely, to add a large pre-filtering step to the data, in order to divide it into several groups, each containing up to $65,000$ distinct strands.
+An idea emerged during discussions with the DNAMIC team at UNIGE: namely, to add a large pre-filtering step to the data, in order to divide it into several groups, each containing up to $65'280$ distinct strands.
 These groups would generally contain data originating from the same file, archived in DNA format.
 
 To achieve this pre-division, the technique involves adding tags at the beginning of the DNA strands.
@@ -259,12 +235,12 @@ To avoid losing information in such cases, all equidistant reference tags are co
 Several pairs are thus created and forwarded to the next processing stage.
 Incorrect pairs are generally filtered out later by the OneJoin algorithm.
 
-The final pipeline, combining the Tag Matcher and OneJoin, is illustrated in the diagram below.
+The final pipeline, combining the Tag Matcher and OneJoin, is illustrated in @fig_img_algo-diagram.
 Note that the clustering and data recovery steps are not discussed in this project.
 
 #figure(
-  caption: [Overall Algorithm Diagram],
+  caption: [Tag Matcher algorithm diagram],
 
   image("../figure/algo-diagram.png", width: 50%),
-)
+) <fig_img_algo-diagram>
 

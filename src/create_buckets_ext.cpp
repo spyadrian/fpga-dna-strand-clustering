@@ -4,9 +4,9 @@ using namespace cl::sycl;
 using namespace oneapi::dpl::execution;
 using namespace std;
 
-Time timer_fpga(false);
+Time timer_ext(false);
 
-void inititalize_dictory_fpga(uint8_t *dictory) {
+void inititalize_dictory_ext(uint8_t *dictory) {
 
   if (NUM_CHAR == 4) {
     dictory[static_cast<uint8_t>('A')] = 0;
@@ -98,7 +98,7 @@ void create_buckets_usm(queue &device_queue, char *usm_embdata,
   });
 }
 
-void create_buckets_wrapper_fpga(queue &q, char **embdata,
+void create_buckets_wrapper_ext(queue &q, char **embdata,
                                 vector<buckets_t> &buckets, size_t n_batches,
                                 vector<batch_hdr> &batch_hdrs, vector<int> &a,
                                 vector<int> &lshnumber, size_t len_output) {
@@ -108,7 +108,7 @@ void create_buckets_wrapper_fpga(queue &q, char **embdata,
 
   {
     uint8_t dictory[256] = {0};
-    inititalize_dictory_fpga(dictory);
+    inititalize_dictory_ext(dictory);
 
     size_t max_batch_size = batch_hdrs[0].size; // all values are equals, except for the last one
 
@@ -130,7 +130,7 @@ void create_buckets_wrapper_fpga(queue &q, char **embdata,
     *usm_batch_size = max_batch_size;
     *usm_len_output = len_output;
 
-    timer_fpga.start_time(buckets::compute); // Start computing directly
+    timer_ext.start_time(buckets::compute); // Start computing directly
 
     BOOST_LOG_TRIVIAL(info) << "\tStart computing on single device..." << std::endl;
 
@@ -191,5 +191,5 @@ void create_buckets_wrapper_fpga(queue &q, char **embdata,
 
   } // End of scope
 
-  timer_fpga.end_time(buckets::compute);
+  timer_ext.end_time(buckets::compute);
 }

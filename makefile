@@ -1,64 +1,56 @@
-.PHONY: build cpu gpu fpga_emu report fpga_sim fpga_hw clean
-PARAMS=-DDEF_NUM_STR=5 -DDEF_NUM_HASH=7 -DDEF_NUM_BITS=12 -DDEF_NUM_CHAR=4 -DDEF_K_INPUT=6 -DDEF_SHIFT=6
+CXX = dpcpp
+BASE_FLAGS = -fsycl -std=c++17 -O3 -Wno-enum-constexpr-conversion -fsycl -fsycl-unnamed-lambda -w $(PARAMS)
+LDFLAGS = -lsycl -ltbb -lpthread -lboost_program_options -lboost_thread -lboost_system -lboost_log -lboost_log_setup
+PARAMS = -DDEF_NUM_STR=24 -DDEF_NUM_HASH=28 -DDEF_NUM_BITS=11 -DDEF_NUM_CHAR=4 -DDEF_K_INPUT=48 -DDEF_SHIFT=16
 
-DPCPP=dpcpp
-COMMON_FLAGS= -O3 -std=c++17 -Wno-enum-constexpr-conversion -fsycl -fsycl-unnamed-lambda -w $(PARAMS)
+SRC_DIR = src
+BUILD_DIR = build
+CPU_SRC = main.cpp verification.cpp Time.cpp utils.cpp DBSCAN.cpp constants.cpp
+EXT_SRC = create_buckets_ext.cpp
 
-LDFLAGS= -lsycl -ltbb -lpthread -lboost_program_options -lboost_thread -lboost_system -lboost_log -lboost_log_setup
-EXE_NAME=onejoin
+CPU_OBJ = $(addprefix $(BUILD_DIR)/, $(CPU_SRC:.cpp=.cpu.o))
+EXT_OBJ_GPU = $(BUILD_DIR)/create_buckets_ext.gpu.o
+EXT_OBJ_FPGA = $(BUILD_DIR)/create_buckets_ext.fpga.a
 
-SRC=src
-BUILD=build
-
-DEVICE ?= cpu# cpu | gpu | fpga_emu | report | fpga_sim | fpga_hw
-BOARD ?= a7sk_usm
-
-ifeq ($(DEVICE),cpu)
-  DEVICE_FLAGS = -fsycl-targets=spir64_x86_64
-  EXE_SUFFIX   = .cpu
-else ifeq ($(DEVICE),gpu)
-  DEVICE_FLAGS = -fsycl-targets=nvptx64-nvidia-cuda
-  EXE_SUFFIX   = .gpu
-else ifeq ($(DEVICE),fpga_emu)
-  DEVICE_FLAGS = -DFPGA_EMULATOR -fsycl-targets=spir64_x86_64,spir64_fpga
-  EXE_SUFFIX   = .femu
-else ifeq ($(DEVICE),report)
-  DEVICE_FLAGS = -DFPGA_HARDWARE -fsycl-targets=spir64_fpga -fsycl-link=early -Xshardware -Xstarget=$(BOARD)
-  EXE_SUFFIX   = .report
-else ifeq ($(DEVICE),fpga_sim)
-  DEVICE_FLAGS = -DFPGA_SIMULATOR -fsycl-targets=spir64_x86_64,spir64_fpga -Xsghdl -Xssimulation -Xstarget=$(BOARD)
-  EXE_SUFFIX   = .fsim
-else ifeq ($(DEVICE),fpga_hw)
-  DEVICE_FLAGS = -DFPGA_HARDWARE -fsycl-targets=spir64_x86_64,spir64_fpga -Xshardware -Xstarget=$(BOARD)
-  EXE_SUFFIX   = .fpga
-else
-  $(error DEVICE=$(DEVICE) not recognized)
-endif
-
-DPCPP_FLAGS = $(COMMON_FLAGS) $(DEVICE_FLAGS)
-
-build: $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(BUILD)/create_buckets_fpga.o
-	$(DPCPP) $(DPCPP_FLAGS) $(BUILD)/main.o $(BUILD)/onejoin_dpcpp.o $(BUILD)/verification.o $(BUILD)/Time.o $(BUILD)/utils.o $(BUILD)/DBSCAN.o $(BUILD)/constants.o $(BUILD)/create_buckets_fpga.o $(LDFLAGS) -o $(EXE_NAME)$(EXE_SUFFIX)
-
-cpu gpu fpga_emu report fpga_sim fpga_hw:
-	$(MAKE) build DEVICE=$@
-
-update:
-	rm $(BUILD)/constants.o && make build
-
-$(BUILD)/constants.o: $(SRC)/constants.cpp
-	$(DPCPP) $(DPCPP_FLAGS) $< -c -o $@
-
-$(BUILD)/%.o: $(SRC)/%.cpp makefile
-	$(DPCPP) $(DPCPP_FLAGS)  $< -c -o $@
+BOARD = a7sk
+DEVICE_CST ?= -DCPU
+EXE_NAME = onejoin
 
 
-test-join:
-	./$(EXE_NAME)$(EXE_SUFFIX) -a 1 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500
+$(BUILD_DIR)/%.cpu.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(BASE_FLAGS) $(DEVICE_CST) -fPIC -fsycl-targets=spir64_x86_64 -c $< -o $@
 
-test-cluster:
-	./$(EXE_NAME)$(EXE_SUFFIX) -a 2 -r test/dummy_dataset.txt -d 2 -s 91 -c 0 --batch_size 500 --min_pts 3
+$(BUILD_DIR)/onejoin_dpcpp.cpu.o $(BUILD_DIR)/onejoin_dpcpp.gpu.o $(BUILD_DIR)/onejoin_dpcpp.fpga.o: $(SRC_DIR)/onejoin_dpcpp.cpp
+	$(CXX) $(BASE_FLAGS) $(DEVICE_CST) -fPIC -fsycl-targets=spir64_x86_64 -c $< -o $@
+
+
+$(BUILD_DIR)/create_buckets_ext.gpu.o: $(SRC_DIR)/create_buckets_ext.cpp
+	$(CXX) $(BASE_FLAGS) $(DEVICE_CST) -fsycl-targets=nvptx64-nvidia-cuda -c $< -o $@
+
+$(BUILD_DIR)/create_buckets_ext.fpga.a: $(SRC_DIR)/create_buckets_ext.cpp
+	$(CXX) $(BASE_FLAGS) $(DEVICE_CST) -fintelfpga -Xshardware -Xstarget=$(BOARD) -c $< -o $@
+
+
+cpu: DEVICE_CST=-DCPU
+cpu: $(CPU_OBJ) $(BUILD_DIR)/onejoin_dpcpp.cpu.o
+	$(CXX) $(BASE_FLAGS) $(LDFLAGS) -fsycl-targets=spir64_x86_64 $^ -o $(EXE_NAME).cpu
+
+gpu: DEVICE_CST=-DGPU
+gpu: $(CPU_OBJ) $(BUILD_DIR)/onejoin_dpcpp.gpu.o $(EXT_OBJ_GPU)
+	$(CXX) $(BASE_FLAGS) $(LDFLAGS) -fsycl-targets=spir64_x86_64,nvptx64-nvidia-cuda $^ -o $(EXE_NAME).gpu
+
+fpga: DEVICE_CST=-DFPGA_HARDWARE
+fpga: $(CPU_OBJ) $(BUILD_DIR)/onejoin_dpcpp.fpga.o $(EXT_OBJ_FPGA)
+	$(CXX) $(BASE_FLAGS) $(LDFLAGS) -fintelfpga $^ -o $(EXE_NAME).fpga
 
 
 clean:
-	rm -rf $(BUILD)/* $(EXE_NAME).* report--*.csv consensus_results_chunk*
+	rm -rf $(BUILD_DIR)/* $(EXE_NAME).cpu $(EXE_NAME).gpu $(EXE_NAME).fpga
+
+help:
+	@echo "make cpu     # Compile et lie pour CPU"
+	@echo "make gpu     # Compile pour GPU (create_buckets_ext en GPU)"
+	@echo "make fpga    # Compile pour FPGA (create_buckets_ext en FPGA)"
+	@echo "make clean   # Supprime binaires et objets"
+
+.PHONY: cpu gpu fpga clean help

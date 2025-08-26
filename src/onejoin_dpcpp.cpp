@@ -31,7 +31,7 @@ Time timer(false);
 
 #endif
 
-void create_buckets_wrapper_fpga(queue &q, char **embdata,
+void create_buckets_wrapper_ext(queue &q, char **embdata,
                                 vector<buckets_t> &buckets, size_t n_batches,
                                 vector<batch_hdr> &batch_hdrs, vector<int> &a,
                                 vector<int> &lshnumber, size_t len_output);
@@ -1307,6 +1307,17 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
     sycl::queue queue_fpga = make_fpga_queue(asyncHandler);
 
     device = cpu; // fallback value so the rest of the code treats it as 1 device
+  
+  #elif defined(GPU)
+
+    // add only CPU's queue
+    queues.push_back(queue(cpu_selector{}, asyncHandler, property::queue::in_order()));
+
+    // create a queue for gpu
+    sycl::queue queue_gpu = queue(gpu_selector{}, asyncHandler, property::queue::in_order());
+
+    device = cpu; // fallback value so the rest of the code treats it as 1 device
+
   #else
     if (device == cpu || device == both) { // Selected CPU or both
       queues.push_back(
@@ -1398,10 +1409,17 @@ vector<idpair> onejoin(vector<string> &input_data, size_t max_batch_size,
 
   #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR) || defined(FPGA_HARDWARE)
 
-    create_buckets_wrapper_fpga(queue_fpga, set_embdata_dev, buckets, n_batches,
+    create_buckets_wrapper_ext(queue_fpga, set_embdata_dev, buckets, n_batches,
                                 batch_hdrs, a, lshnumber, len_output);
 
     queue_fpga.wait();
+
+  #elif defined(GPU)
+
+    create_buckets_wrapper_ext(queue_gpu, set_embdata_dev, buckets, n_batches,
+                                batch_hdrs, a, lshnumber, len_output);
+
+    queue_gpu.wait();
 
   #else
 

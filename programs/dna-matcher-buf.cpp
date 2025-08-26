@@ -303,28 +303,6 @@ namespace DNAEncoding {
     }
 
     /**
-     * @brief Extracts a single base from packed format with caching optimization
-     * @param packed Pointer to packed DNA sequence data
-     * @param pos Position of base to extract
-     * @param cache Cache structure for 4-base prefetching optimization
-     * @return 2-bit encoded base value
-     * Uses word-aligned caching to minimize memory accesses on FPGA
-     */
-    inline uint8_t get_base_cached(const uint8_t* packed, int pos, PackedCache& cache) {
-        int word_start = (pos >> 2) << 2;  // align to 4-base boundary
-        
-        if (!cache.cache_valid || cache.cache_start_pos != word_start) {
-
-            cache.cached_word = packed[pos >> 2];
-            cache.cache_start_pos = word_start;
-            cache.cache_valid = true;
-        }
-        
-        int bit_pos = (pos & 3) << 1;  // (pos % 4) * 2
-        return (cache.cached_word >> bit_pos) & 0b11;
-    }
-
-    /**
      * @brief Vectorized unpacking of 4 bases from a single byte
      * @param packed_byte Single byte containing 4 packed DNA bases
      * @param bases Output array of 4 unpacked base values
@@ -597,7 +575,7 @@ event myers_find_nearest_with_dataflow(
     using namespace DNAEncoding;
     using namespace DNAPipeline;
 
-    // Préparation des buffers hosts
+    // Préparation des buffers hosts (char to array uint8_t)
     std::vector<uint8_t> host_query_buffer(num_queries * MAX_PACKED_LENGTH);
     std::vector<uint8_t> host_ref_buffer(num_references * MAX_PACKED_LENGTH);
     std::vector<int32_t> host_query_lengths(num_queries);
@@ -638,7 +616,7 @@ event myers_find_nearest_with_dataflow(
         });
     });
 
-    // Étape 2-5: Pipeline principal pour chaque query
+    // Étape 2-4: Pipeline principal pour chaque query
     auto pipeline_event = q.submit([&](handler& h) {
         h.depends_on(precompute_event);
         
@@ -1046,11 +1024,11 @@ int main(int argc, char* argv[]) {
         std::cout << "Average time per comparison: " << std::fixed << std::setprecision(3) << avg_time_per_comparison << " µs" << std::endl;
 
         std::cout << "\n=== Displaying Results ===" << std::endl;
-        // std::cout << "Do you want to display all query-reference pairs? (y/n):";
-        // std::string user_input;
-        // std::getline(std::cin, user_input);
+        std::cout << "Do you want to display all query-reference pairs? (y/n):";
+        std::string user_input;
+        std::getline(std::cin, user_input);
 
-        // if (user_input == "y" || user_input == "Y") {            
+        if (user_input == "y" || user_input == "Y") {            
             int displayed_count = 0;
             
             for (size_t i = 0; i < bucket_ids.size(); i++) {
@@ -1067,7 +1045,7 @@ int main(int argc, char* argv[]) {
             }
             
             std::cout << "Total pairs displayed: " << displayed_count << std::endl;
-        // }
+        }
 
         return 0;
         

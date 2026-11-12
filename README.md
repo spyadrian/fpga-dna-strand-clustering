@@ -1,4 +1,7 @@
 # Oneoligo Project
+
+> Fork of [OneOligo](https://github.com/raja-appuswamy/oneoligo) (Eugenio Marinelli, Raja Appuswamy et al.), adapted by Adrian Spycher for his Bachelor thesis [FPGA Acceleration of DNA Strand Clustering](https://github.com/spyadrian/fpga-dna-strand-clustering) (FPGA / oneAPI targets).
+
 Edit Similarity Join implementation using DPC++ and Intel oneAPI toolkit
 
 ### Usage: 

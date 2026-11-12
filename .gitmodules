@@ -3,4 +3,4 @@
 	url = https://gitlab.unige.ch/Michael.ElKharroubi/dataset-generator
 [submodule "external/oneoligo-a7sk"]
 	path = external/oneoligo-a7sk
-	url = https://gitedu.hesge.ch/adrian.spycher/oneoligo-a7sk.git
+	url = https://github.com/spyadrian/oneoligo-a7sk.git

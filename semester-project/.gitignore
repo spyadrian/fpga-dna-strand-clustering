@@ -1,7 +1,3 @@
-# --- typst ---
-docs/weekly_logs.pdf
-docs/essay.pdf
-
 # --- programs ---
 programs/benchmark
 programs/testbench

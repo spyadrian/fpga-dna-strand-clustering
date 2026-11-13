@@ -1,6 +1,13 @@
 # Oneoligo Project
 
-> Fork of [OneOligo](https://github.com/raja-appuswamy/oneoligo) (Eugenio Marinelli, Raja Appuswamy et al.), adapted by Adrian Spycher for his Bachelor thesis [FPGA Acceleration of DNA Strand Clustering](https://github.com/spyadrian/fpga-dna-strand-clustering) (FPGA / oneAPI targets).
+> Based on [OneOligo](https://github.com/raja-appuswamy/oneoligo) by Eugenio Marinelli, Raja Appuswamy et al. (MIT license), adapted by Adrian Spycher for the bachelor thesis in this repository.
+>
+> Changes from upstream:
+> - fixes so that the code compiles for Intel FPGA targets (emulator, simulator, hardware) with oneAPI
+> - bucket generation moved into a dedicated FPGA kernel (`src/create_buckets_ext.cpp`), FPGA-only features disabled on the CPU path
+> - makefile reorganised for the CPU / GPU / FPGA targets
+>
+> The original README follows.
 
 Edit Similarity Join implementation using DPC++ and Intel oneAPI toolkit
 

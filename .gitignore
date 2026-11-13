@@ -1,8 +1,5 @@
 .vscode
 
-# -- report --
-report/report.pdf
-
 # -- programs --
 *.o
 *.a
